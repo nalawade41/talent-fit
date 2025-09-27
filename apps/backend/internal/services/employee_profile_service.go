@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/talent-fit/backend/internal/domain"
+	"github.com/talent-fit/backend/internal/models"
 )
 
 // EmployeeProfileService implements the domain.EmployeeProfileService interface
@@ -19,35 +20,52 @@ func NewEmployeeProfileService(profileRepo domain.EmployeeProfileRepository) dom
 }
 
 // GetAllProfiles retrieves all employee profiles
-func (s *EmployeeProfileService) GetAllProfiles(ctx context.Context) error {
+func (s *EmployeeProfileService) GetAllProfiles(ctx context.Context) ([]*models.EmployeeProfileModel, error) {
 	// TODO: Implement business logic for getting all profiles
-	return s.profileRepo.GetAll(ctx)
+	// TODO: entities, err := s.profileRepo.GetAll(ctx)
+	// TODO: if err != nil { return nil, err }
+	// TODO: Convert entities to models and return
+	return nil, nil
 }
 
 // GetProfileByID retrieves an employee profile by ID
-func (s *EmployeeProfileService) GetProfileByID(ctx context.Context, id string) error {
+func (s *EmployeeProfileService) GetProfileByID(ctx context.Context, id string) (*models.EmployeeProfileModel, error) {
 	// TODO: Implement business logic for getting profile by ID
-	return s.profileRepo.GetByID(ctx, id)
+	// TODO: entity, err := s.profileRepo.GetByID(ctx, id)
+	// TODO: if err != nil { return nil, err }
+	// TODO: Convert entity to model and return
+	return nil, nil
 }
 
 // GetProfileByUserID retrieves an employee profile by user ID
-func (s *EmployeeProfileService) GetProfileByUserID(ctx context.Context, userID string) error {
+func (s *EmployeeProfileService) GetProfileByUserID(ctx context.Context, userID string) (*models.EmployeeProfileModel, error) {
 	// TODO: Implement business logic for getting profile by user ID
-	return s.profileRepo.GetByUserID(ctx, userID)
+	// TODO: entity, err := s.profileRepo.GetByUserID(ctx, userID)
+	// TODO: if err != nil { return nil, err }
+	// TODO: Convert entity to model and return
+	return nil, nil
 }
 
 // CreateProfile creates a new employee profile
-func (s *EmployeeProfileService) CreateProfile(ctx context.Context) error {
+func (s *EmployeeProfileService) CreateProfile(ctx context.Context, profile *models.EmployeeProfileModel) (*models.EmployeeProfileModel, error) {
 	// TODO: Implement business logic for creating profile
 	// TODO: Validate input, check if user exists, etc.
-	return s.profileRepo.Create(ctx)
+	// TODO: Convert model to entity
+	// TODO: entity, err := s.profileRepo.Create(ctx, entityProfile)
+	// TODO: if err != nil { return nil, err }
+	// TODO: Convert entity back to model and return
+	return nil, nil
 }
 
 // UpdateProfile updates an employee profile
-func (s *EmployeeProfileService) UpdateProfile(ctx context.Context, userID string) error {
+func (s *EmployeeProfileService) UpdateProfile(ctx context.Context, userID string, profile *models.EmployeeProfileModel) (*models.EmployeeProfileModel, error) {
 	// TODO: Implement business logic for updating profile
 	// TODO: Validate input, check permissions, etc.
-	return s.profileRepo.Update(ctx, userID)
+	// TODO: Convert model to entity
+	// TODO: entity, err := s.profileRepo.Update(ctx, userID, entityProfile)
+	// TODO: if err != nil { return nil, err }
+	// TODO: Convert entity back to model and return
+	return nil, nil
 }
 
 // DeleteProfile deletes an employee profile
@@ -57,28 +75,38 @@ func (s *EmployeeProfileService) DeleteProfile(ctx context.Context, userID strin
 }
 
 // GetAvailableEmployees retrieves available employees
-func (s *EmployeeProfileService) GetAvailableEmployees(ctx context.Context) error {
+func (s *EmployeeProfileService) GetAvailableEmployees(ctx context.Context) ([]*models.EmployeeProfileModel, error) {
 	// TODO: Implement business logic for getting available employees
 	// TODO: Filter by availability flag, end date, etc.
-	return s.profileRepo.GetAvailableEmployees(ctx)
+	// TODO: entities, err := s.profileRepo.GetAvailableEmployees(ctx)
+	// TODO: if err != nil { return nil, err }
+	// TODO: Convert entities to models and return
+	return nil, nil
 }
 
 // SearchEmployeesBySkills searches employees by skills
-func (s *EmployeeProfileService) SearchEmployeesBySkills(ctx context.Context, skills []string) error {
+func (s *EmployeeProfileService) SearchEmployeesBySkills(ctx context.Context, skills []string) ([]*models.EmployeeProfileModel, error) {
 	// TODO: Implement business logic for searching by skills
 	// TODO: Validate skills, implement fuzzy matching, etc.
-	return s.profileRepo.GetEmployeesBySkills(ctx, skills)
+	// TODO: entities, err := s.profileRepo.GetEmployeesBySkills(ctx, skills)
+	// TODO: if err != nil { return nil, err }
+	// TODO: Convert entities to models and return
+	return nil, nil
 }
 
 // SearchEmployeesByGeo searches employees by geo location
-func (s *EmployeeProfileService) SearchEmployeesByGeo(ctx context.Context, geo string) error {
+func (s *EmployeeProfileService) SearchEmployeesByGeo(ctx context.Context, geo string) ([]*models.EmployeeProfileModel, error) {
 	// TODO: Implement business logic for searching by geo
-	return s.profileRepo.GetEmployeesByGeo(ctx, geo)
+	// TODO: entities, err := s.profileRepo.GetEmployeesByGeo(ctx, geo)
+	// TODO: if err != nil { return nil, err }
+	// TODO: Convert entities to models and return
+	return nil, nil
 }
 
 // UpdateAvailabilityFlag updates the availability flag for an employee
-func (s *EmployeeProfileService) UpdateAvailabilityFlag(ctx context.Context, userID string, available bool) error {
+func (s *EmployeeProfileService) UpdateAvailabilityFlag(ctx context.Context, userID string, available bool) (*models.EmployeeProfileModel, error) {
 	// TODO: Implement business logic for updating availability flag
 	// TODO: Validate permissions, update flag, send notifications if needed
-	return s.profileRepo.Update(ctx, userID)
+	// TODO: Get current profile, update availability flag, save and return
+	return nil, nil
 }

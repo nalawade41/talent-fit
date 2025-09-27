@@ -66,3 +66,4 @@ coverage.html
 .air.toml.local
 api.exe
 ./api
+api

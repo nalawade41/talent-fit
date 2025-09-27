@@ -5,6 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/talent-fit/backend/internal/domain"
+	"github.com/talent-fit/backend/internal/models"
 )
 
 // ProjectAllocationHandler handles HTTP requests for project allocations
@@ -34,15 +35,46 @@ func (h *ProjectAllocationHandler) GetAllocationByID(c *gin.Context) {
 
 // CreateAllocation handles POST /allocations
 func (h *ProjectAllocationHandler) CreateAllocation(c *gin.Context) {
-	// TODO: Implement handler logic
-	c.JSON(http.StatusCreated, gin.H{"message": "Create allocation - TODO"})
+	ctx := c.Request.Context()
+
+	var allocation []*models.ProjectAllocationModel
+	if err := c.ShouldBindJSON(&allocation); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	createdAllocation, err := h.allocationService.CreateAllocation(ctx, allocation)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusCreated, createdAllocation)
 }
 
 // UpdateAllocation handles PUT /allocations/:id
 func (h *ProjectAllocationHandler) UpdateAllocation(c *gin.Context) {
-	// TODO: Implement handler logic
+	ctx := c.Request.Context()
+
 	id := c.Param("id")
-	c.JSON(http.StatusOK, gin.H{"message": "Update allocation: " + id + " - TODO"})
+	if id == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Allocation ID is required"})
+		return
+	}
+
+	var allocation []*models.ProjectAllocationModel
+	if err := c.ShouldBindJSON(&allocation); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	updatedAllocation, err := h.allocationService.UpdateAllocation(ctx, id, allocation)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, updatedAllocation)
 }
 
 // DeleteAllocation handles DELETE /allocations/:id
@@ -61,14 +93,38 @@ func (h *ProjectAllocationHandler) ReleaseEmployee(c *gin.Context) {
 
 // GetAllocationsByProject handles GET /project/:id/allocation
 func (h *ProjectAllocationHandler) GetAllocationsByProject(c *gin.Context) {
-	// TODO: Implement handler logic for getting allocations by project
+	ctx := c.Request.Context()
+
 	projectID := c.Param("id")
-	c.JSON(http.StatusOK, gin.H{"message": "Get allocations for project: " + projectID + " - TODO"})
+	if projectID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Project ID is required"})
+		return
+	}
+
+	allocations, err := h.allocationService.GetAllocationsByProject(ctx, projectID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, allocations)
 }
 
 // GetAllocationsByEmployee handles GET /employee/:id/projects
 func (h *ProjectAllocationHandler) GetAllocationsByEmployee(c *gin.Context) {
-	// TODO: Implement handler logic for getting allocations by employee
+	ctx := c.Request.Context()
+
 	employeeID := c.Param("id")
-	c.JSON(http.StatusOK, gin.H{"message": "Get projects for employee: " + employeeID + " - TODO"})
+	if employeeID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Employee ID is required"})
+		return
+	}
+
+	allocations, err := h.allocationService.GetAllocationsByEmployee(ctx, employeeID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, allocations)
 }
