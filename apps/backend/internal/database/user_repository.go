@@ -71,6 +71,7 @@ func (r *UserRepository) GetByEmail(ctx context.Context, email string) error {
 
 // CreateWithEntity creates a user from entity
 func (r *UserRepository) CreateWithEntity(ctx context.Context, user *entities.User) error {
-    result := r.db.WithContext(ctx).Create(user)
+    // Use Session to ensure no prepared statement caching for Supabase pooler
+    result := r.db.WithContext(ctx).Session(&gorm.Session{PrepareStmt: false}).Create(user)
     return result.Error
 }

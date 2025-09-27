@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"path/filepath"
+	"time"
 
 	"github.com/talent-fit/backend/internal/config"
 	"github.com/talent-fit/backend/internal/entities"
@@ -32,9 +33,13 @@ func NewDatabase(cfg *config.Config) (*Database, error) {
 		gormLogger = logger.Default.LogMode(logger.Silent)
 	}
 
-	// Connect to database
+	// Configure for Supabase Transaction Pooler (shared pooler)
+	// Disable prepared statements and optimize for stateless connections
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
-		Logger: gormLogger,
+		Logger:                                   gormLogger,
+		PrepareStmt:                              false, // CRITICAL: Must be false for Supabase pooler
+		DisableForeignKeyConstraintWhenMigrating: true,  // Helps with pooled connections
+		SkipDefaultTransaction:                   true,  // Skip transactions for better pooler compatibilit
 	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to database: %w", err)
@@ -46,9 +51,12 @@ func NewDatabase(cfg *config.Config) (*Database, error) {
 		return nil, fmt.Errorf("failed to get underlying sql.DB: %w", err)
 	}
 
-	// Configure connection pool
-	sqlDB.SetMaxIdleConns(10)
-	sqlDB.SetMaxOpenConns(100)
+	// Configure connection pool for Supabase Transaction Pooler
+	// Transaction pooler works best with minimal connection pooling
+	sqlDB.SetMaxIdleConns(0)                  // No idle connections for stateless pooler
+	sqlDB.SetMaxOpenConns(10)                 // Low max connections for pooler
+	sqlDB.SetConnMaxLifetime(time.Minute * 5) // Short connection lifetime for pooler
+	sqlDB.SetConnMaxIdleTime(time.Minute * 1) // Very short idle timeout
 
 	log.Printf("Database connected successfully")
 
@@ -89,10 +97,10 @@ func (d *Database) AutoMigrate() error {
 func (d *Database) RunSQLMigrations() error {
 	// Get the migrations directory path
 	migrationsDir := filepath.Join("migrations")
-	
+
 	// Create migration runner
 	runner := NewMigrationRunner(d.DB, migrationsDir)
-	
+
 	// Execute migrations
 	return runner.RunMigrations()
 }

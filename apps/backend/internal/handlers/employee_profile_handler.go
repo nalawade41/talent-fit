@@ -64,7 +64,7 @@ func (h *EmployeeProfileHandler) GetAllProfiles(c *gin.Context) {
 // GetProfileByUserID handles GET /profiles/user/:userId
 func (h *EmployeeProfileHandler) GetProfileByUserID(c *gin.Context) {
 	ctx := c.Request.Context()
-	userID := c.Param("userId")
+	userID := c.Param("id")
 	if userID == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "User ID is required"})
 		return
@@ -100,7 +100,7 @@ func (h *EmployeeProfileHandler) CreateProfile(c *gin.Context) {
 // UpdateProfile handles PUT /profiles/user/:userId
 func (h *EmployeeProfileHandler) UpdateProfile(c *gin.Context) {
 	ctx := c.Request.Context()
-	userID := c.Param("userId")
+	userID := c.Param("id")
 	if userID == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "User ID is required"})
 		return

@@ -45,7 +45,7 @@ func (h *ProjectAllocationHandler) UpdateAllocation(c *gin.Context) {
 
 	id := c.Param("id")
 	if id == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Allocation ID is required"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Project ID is required"})
 		return
 	}
 

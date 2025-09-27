@@ -74,4 +74,5 @@ func (ep *EmployeeProfileModel) FromEntity(entity *entities.EmployeeProfile) {
 	ep.CreatedAt = entity.CreatedAt
 	ep.UpdatedAt = entity.UpdatedAt
 	ep.Type = UserType(entity.Type)
+	ep.User.FromEntity(&entity.User)
 }

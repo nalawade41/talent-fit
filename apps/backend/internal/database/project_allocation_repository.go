@@ -23,7 +23,7 @@ func NewProjectAllocationRepository(db *gorm.DB) domain.ProjectAllocationReposit
 // GetByProjectID retrieves project allocations by project ID from database
 func (r *ProjectAllocationRepository) GetByProjectID(ctx context.Context, projectID string) ([]*entities.ProjectAllocation, error) {
 	var allocations []*entities.ProjectAllocation
-	result := r.db.WithContext(ctx).Where("project_id = ?", projectID).Find(&allocations)
+	result := r.db.WithContext(ctx).Preload("Project").Preload("Employee").Where("project_id = ?", projectID).Find(&allocations)
 	if result.Error != nil {
 		return nil, result.Error
 	}
@@ -46,7 +46,17 @@ func (r *ProjectAllocationRepository) Create(ctx context.Context, allocation *en
 	if result.Error != nil {
 		return nil, result.Error
 	}
-	return allocation, nil
+
+	// Now reload with preloads
+	var loaded entities.ProjectAllocation
+	if err := r.db.WithContext(ctx).
+		Preload("Project").
+		Preload("Employee").
+		First(&loaded, allocation.ID).Error; err != nil {
+		return nil, err
+	}
+
+	return &loaded, nil
 }
 
 // Update updates a project allocation in database
@@ -59,7 +69,7 @@ func (r *ProjectAllocationRepository) Update(ctx context.Context, id string, all
 }
 
 // Delete deletes a project allocation from database
-func (r *ProjectAllocationRepository) Delete(ctx context.Context, id string) error {
+func (r *ProjectAllocationRepository) Delete(ctx context.Context, id int64) error {
 	result := r.db.WithContext(ctx).Delete(&entities.ProjectAllocation{}, "id = ?", id)
 	if result.Error != nil {
 		return result.Error

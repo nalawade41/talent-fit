@@ -65,7 +65,7 @@ func (r *EmployeeProfileRepository) GetFiltered(ctx context.Context, skills []st
 // GetByUserID retrieves an employee profile by user ID from database
 func (r *EmployeeProfileRepository) GetByUserID(ctx context.Context, userID string) (*entities.EmployeeProfile, error) {
 	var profile entities.EmployeeProfile
-	result := r.db.WithContext(ctx).First(&profile, "user_id = ?", userID)
+	result := r.db.WithContext(ctx).Preload("User").First(&profile, "user_id = ?", userID)
 	if result.Error != nil {
 		return nil, result.Error
 	}

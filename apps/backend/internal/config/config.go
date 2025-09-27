@@ -123,10 +123,12 @@ func (c *Config) Validate() error {
 // GetDatabaseConnectionString returns the database connection string
 func (c *Config) GetDatabaseConnectionString() string {
 	if c.Database.URL != "" {
+		// For Supabase pooler, ensure proper parameters are set
 		return c.Database.URL
 	}
 
-	return fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
+	// Build connection string with Supabase pooler-friendly parameters
+	return fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s statement_timeout=30s lock_timeout=30s idle_in_transaction_session_timeout=30s",
 		c.Database.Host,
 		c.Database.Port,
 		c.Database.User,
