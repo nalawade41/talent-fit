@@ -132,24 +132,24 @@ END;
 $$ language 'plpgsql';
 
 -- Create triggers for updated_at on all tables
-CREATE TRIGGER update_users_updated_at 
-    BEFORE UPDATE ON users 
+CREATE TRIGGER update_users_updated_at
+    BEFORE UPDATE ON users
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
-CREATE TRIGGER update_employee_profiles_updated_at 
-    BEFORE UPDATE ON employee_profiles 
+CREATE TRIGGER update_employee_profiles_updated_at
+    BEFORE UPDATE ON employee_profiles
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
-CREATE TRIGGER update_projects_updated_at 
-    BEFORE UPDATE ON projects 
+CREATE TRIGGER update_projects_updated_at
+    BEFORE UPDATE ON projects
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
-CREATE TRIGGER update_project_allocations_updated_at 
-    BEFORE UPDATE ON project_allocations 
+CREATE TRIGGER update_project_allocations_updated_at
+    BEFORE UPDATE ON project_allocations
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
-CREATE TRIGGER update_notifications_updated_at 
-    BEFORE UPDATE ON notifications 
+CREATE TRIGGER update_notifications_updated_at
+    BEFORE UPDATE ON notifications
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 -- Insert some sample data for testing (optional)
@@ -157,21 +157,41 @@ CREATE TRIGGER update_notifications_updated_at
 
 /*
 -- Sample users
-INSERT INTO users (first_name, last_name, email, role) VALUES 
+INSERT INTO users (first_name, last_name, email, role) VALUES
 ('John', 'Doe', 'john.doe@company.com', 'Employee'),
 ('Jane', 'Smith', 'jane.smith@company.com', 'Manager'),
 ('Bob', 'Johnson', 'bob.johnson@company.com', 'Employee');
 
 -- Sample employee profiles
-INSERT INTO employee_profiles (user_id, geo, type, skills, years_of_experience, industry, availability_flag) VALUES 
+INSERT INTO employee_profiles (user_id, geo, type, skills, years_of_experience, industry, availability_flag) VALUES
 (1, 'US-West', 'Frontend Dev', '["React", "TypeScript", "CSS"]', 5, 'Technology', true),
 (3, 'US-East', 'Backend Dev', '["Go", "PostgreSQL", "Docker"]', 3, 'Technology', false);
 
 -- Sample project
-INSERT INTO projects (name, description, required_seats, seats_by_type, start_date, end_date, status) VALUES 
+INSERT INTO projects (name, description, required_seats, seats_by_type, start_date, end_date, status) VALUES
 ('Talent Matching Platform', 'AI-powered talent matching system', 3, '{"Frontend Dev": 1, "Backend Dev": 1, "UI": 1}', NOW(), NOW() + INTERVAL '6 months', 'Open');
 
 -- Sample notification
-INSERT INTO notifications (type, message, user_id) VALUES 
+INSERT INTO notifications (type, message, user_id) VALUES
 ('Roll-off Alert', 'Employee John Doe is rolling off project in 2 weeks', 2);
 */
+alter table projects
+add column embedding vector(1536);
+
+alter table employee_profiles
+    add column embedding vector(1536);
+
+
+create index if not exists employee_profiles_embedding_idx
+    on public.employee_profiles
+        using ivfflat (embedding vector_cosine_ops)
+    with (lists = 100);
+
+create index if not exists projects_embedding_idx
+    on public.projects
+        using ivfflat (embedding vector_cosine_ops)
+    with (lists = 100);
+
+
+analyze employee_profiles;
+analyze projects;

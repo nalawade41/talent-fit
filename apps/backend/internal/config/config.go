@@ -46,6 +46,7 @@ type AuthConfig struct {
 // AIConfig holds AI service configuration
 type AIConfig struct {
 	OpenAIAPIKey string
+	OpenAIEmbeddingModel string
 	AIModel      string
 }
 
@@ -58,10 +59,8 @@ type LoggingConfig struct {
 // Load loads configuration from environment variables
 func Load() (*Config, error) {
 	// Load .env file if it exists (for local development)
-	err := godotenv.Load()
-	if err != nil {
-		return nil, fmt.Errorf("failed to load environment variables: %w", err)
-	}
+	_ = godotenv.Load()
+	
 
 	config := &Config{
 		Server: ServerConfig{
@@ -87,6 +86,7 @@ func Load() (*Config, error) {
 		},
 		AI: AIConfig{
 			OpenAIAPIKey: getEnv("OPENAI_API_KEY", ""),
+			OpenAIEmbeddingModel: getEnv("OPENAI_API_EMBEDDING_MODEL", "text-embedding-3-small"),
 			AIModel:      getEnv("AI_MODEL", "gpt-4"),
 		},
 		Logging: LoggingConfig{
