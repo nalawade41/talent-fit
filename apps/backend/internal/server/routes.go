@@ -33,12 +33,10 @@ func (s *Server) healthCheck(c *gin.Context) {
 func (s *Server) setupAuthRoutes() {
 	auth := s.router.Group("/auth")
 	{
-		auth.POST("/generate-token", func(c *gin.Context) {
-			c.JSON(http.StatusOK, gin.H{
-				"message": "Generate token endpoint",
-				"token":   "dummy-jwt-token",
-			})
-		})
+		auth.POST("/generate-token", s.container.TokenHandler.GenerateToken)
+		auth.POST("/validate-token", s.container.TokenHandler.ValidateToken)
+		auth.POST("/refresh-token", s.container.TokenHandler.RefreshToken)
+		auth.POST("/revoke-token", s.container.TokenHandler.RevokeToken)
 	}
 }
 
@@ -82,12 +80,16 @@ func (s *Server) setupUserRoutes(api *gin.RouterGroup) {
 func (s *Server) setupProfileRoutes(api *gin.RouterGroup) {
 	profiles := api.Group("/profiles")
 	{
-		profiles.GET("/:userId", func(c *gin.Context) {
-			c.JSON(http.StatusOK, gin.H{"message": "Get employee profile: " + c.Param("userId")})
-		})
-		profiles.PUT("/:userId", func(c *gin.Context) {
-			c.JSON(http.StatusOK, gin.H{"message": "Update employee profile: " + c.Param("userId")})
-		})
+		profiles.GET("", s.container.EmployeeProfileHandler.GetAllProfiles)
+		profiles.GET("/:id", s.container.EmployeeProfileHandler.GetProfileByID)
+		profiles.GET("/user/:userId", s.container.EmployeeProfileHandler.GetProfileByUserID)
+		profiles.POST("", s.container.EmployeeProfileHandler.CreateProfile)
+		profiles.PUT("/user/:userId", s.container.EmployeeProfileHandler.UpdateProfile)
+		profiles.DELETE("/user/:userId", s.container.EmployeeProfileHandler.DeleteProfile)
+		profiles.GET("/available", s.container.EmployeeProfileHandler.GetAvailableEmployees)
+		profiles.GET("/search/skills", s.container.EmployeeProfileHandler.SearchBySkills)
+		profiles.GET("/search/geo", s.container.EmployeeProfileHandler.SearchByGeo)
+		profiles.PUT("/user/:userId/availability", s.container.EmployeeProfileHandler.UpdateAvailabilityFlag)
 	}
 }
 
@@ -95,29 +97,11 @@ func (s *Server) setupProfileRoutes(api *gin.RouterGroup) {
 func (s *Server) setupProjectRoutes(api *gin.RouterGroup) {
 	projects := api.Group("/projects")
 	{
-		// TODO: Replace with actual handlers when ProjectHandler is added to container
-		// projects.GET("", s.container.ProjectHandler.GetAllProjects)
-		// projects.POST("", s.container.ProjectHandler.CreateProject)
-		// projects.GET("/:id", s.container.ProjectHandler.GetProjectByID)
-		// projects.PUT("/:id", s.container.ProjectHandler.UpdateProject)
-		// projects.DELETE("/:id", s.container.ProjectHandler.DeleteProject)
-
-		// Temporary anonymous handlers
-		projects.GET("", func(c *gin.Context) {
-			c.JSON(http.StatusOK, gin.H{"message": "Get all projects"})
-		})
-		projects.POST("", func(c *gin.Context) {
-			c.JSON(http.StatusCreated, gin.H{"message": "Create new project"})
-		})
-		projects.GET("/:id", func(c *gin.Context) {
-			c.JSON(http.StatusOK, gin.H{"message": "Get project by ID: " + c.Param("id")})
-		})
-		projects.PUT("/:id", func(c *gin.Context) {
-			c.JSON(http.StatusOK, gin.H{"message": "Update project: " + c.Param("id")})
-		})
-		projects.DELETE("/:id", func(c *gin.Context) {
-			c.JSON(http.StatusOK, gin.H{"message": "Delete project: " + c.Param("id")})
-		})
+		projects.GET("", s.container.ProjectHandler.GetAllProjects)
+		projects.POST("", s.container.ProjectHandler.CreateProject)
+		projects.GET("/:id", s.container.ProjectHandler.GetProjectByID)
+		projects.PUT("/:id", s.container.ProjectHandler.UpdateProject)
+		projects.DELETE("/:id", s.container.ProjectHandler.DeleteProject)
 	}
 }
 
@@ -125,15 +109,12 @@ func (s *Server) setupProjectRoutes(api *gin.RouterGroup) {
 func (s *Server) setupAllocationRoutes(api *gin.RouterGroup) {
 	allocations := api.Group("/allocations")
 	{
-		allocations.GET("", func(c *gin.Context) {
-			c.JSON(http.StatusOK, gin.H{"message": "Get all allocations"})
-		})
-		allocations.POST("", func(c *gin.Context) {
-			c.JSON(http.StatusCreated, gin.H{"message": "Create new allocation"})
-		})
-		allocations.DELETE("/:id", func(c *gin.Context) {
-			c.JSON(http.StatusOK, gin.H{"message": "Release allocation: " + c.Param("id")})
-		})
+		allocations.GET("", s.container.ProjectAllocationHandler.GetAllAllocations)
+		allocations.GET("/:id", s.container.ProjectAllocationHandler.GetAllocationByID)
+		allocations.POST("", s.container.ProjectAllocationHandler.CreateAllocation)
+		allocations.PUT("/:id", s.container.ProjectAllocationHandler.UpdateAllocation)
+		allocations.DELETE("/:id", s.container.ProjectAllocationHandler.DeleteAllocation)
+		allocations.POST("/:id/release", s.container.ProjectAllocationHandler.ReleaseEmployee)
 	}
 }
 
@@ -141,9 +122,11 @@ func (s *Server) setupAllocationRoutes(api *gin.RouterGroup) {
 func (s *Server) setupMatchRoutes(api *gin.RouterGroup) {
 	matches := api.Group("/matches")
 	{
-		matches.POST("/generate", func(c *gin.Context) {
-			c.JSON(http.StatusOK, gin.H{"message": "Generate AI matches for project"})
-		})
+		matches.GET("/projects/:id", s.container.MatchHandler.GetProjectMatches)
+		matches.GET("/employees/:id", s.container.MatchHandler.GetEmployeeMatches)
+		matches.POST("/projects/:id/suggestions", s.container.MatchHandler.GenerateMatchSuggestions)
+		matches.GET("/projects/:projectId/employees/:employeeId/explanation", s.container.MatchHandler.GetMatchExplanation)
+		matches.GET("/insights", s.container.MatchHandler.GetProactiveInsights)
 	}
 }
 
@@ -151,11 +134,19 @@ func (s *Server) setupMatchRoutes(api *gin.RouterGroup) {
 func (s *Server) setupNotificationRoutes(api *gin.RouterGroup) {
 	notifications := api.Group("/notifications")
 	{
-		notifications.GET("", func(c *gin.Context) {
-			c.JSON(http.StatusOK, gin.H{"message": "Get user notifications"})
-		})
-		notifications.PUT("/:id/read", func(c *gin.Context) {
-			c.JSON(http.StatusOK, gin.H{"message": "Mark notification as read: " + c.Param("id")})
-		})
+		notifications.GET("", s.container.NotificationHandler.GetAllNotifications)
+		notifications.GET("/:id", s.container.NotificationHandler.GetNotificationByID)
+		notifications.POST("", s.container.NotificationHandler.CreateNotification)
+		notifications.PUT("/:id", s.container.NotificationHandler.UpdateNotification)
+		notifications.DELETE("/:id", s.container.NotificationHandler.DeleteNotification)
+		notifications.POST("/:id/read", s.container.NotificationHandler.MarkAsRead)
+	}
+
+	// User-specific notification routes
+	users := api.Group("/users")
+	{
+		users.GET("/:userId/notifications", s.container.NotificationHandler.GetUserNotifications)
+		users.GET("/:userId/notifications/unread", s.container.NotificationHandler.GetUnreadNotifications)
+		users.POST("/:userId/notifications/read", s.container.NotificationHandler.MarkAllAsRead)
 	}
 }

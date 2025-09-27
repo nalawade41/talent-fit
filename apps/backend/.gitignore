@@ -64,3 +64,4 @@ coverage.html
 
 # Air live reload
 .air.toml.local
+api

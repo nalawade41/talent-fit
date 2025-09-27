@@ -15,12 +15,13 @@ type Container struct {
 	DB *database.Database
 
 	// Handlers
-	UserHandler *handlers.UserHandler
-	// TODO: Add other handlers as needed
-	// ProjectHandler *handlers.ProjectHandler
-	// AllocationHandler *handlers.AllocationHandler
-	// MatchHandler *handlers.MatchHandler
-	// NotificationHandler *handlers.NotificationHandler
+	UserHandler              *handlers.UserHandler
+	ProjectHandler           *handlers.ProjectHandler
+	ProjectAllocationHandler *handlers.ProjectAllocationHandler
+	MatchHandler             *handlers.MatchHandler
+	NotificationHandler      *handlers.NotificationHandler
+	EmployeeProfileHandler   *handlers.EmployeeProfileHandler
+	TokenHandler             *handlers.TokenHandler
 }
 
 // NewContainer creates and initializes all application dependencies
@@ -38,35 +39,38 @@ func NewContainer(cfg *config.Config) (*Container, error) {
 
 	// Initialize repositories
 	userRepo := database.NewUserRepository(db.DB)
-	// TODO: Add other repositories as needed
-	// projectRepo := database.NewProjectRepository(db.DB)
-	// allocationRepo := database.NewAllocationRepository(db.DB)
-	// notificationRepo := database.NewNotificationRepository(db.DB)
+	projectRepo := database.NewProjectRepository(db.DB)
+	allocationRepo := database.NewProjectAllocationRepository(db.DB)
+	notificationRepo := database.NewNotificationRepository(db.DB)
+	profileRepo := database.NewEmployeeProfileRepository(db.DB)
 
 	// Initialize services
 	userService := services.NewUserService(userRepo)
-	// TODO: Add other services as needed
-	// projectService := services.NewProjectService(projectRepo)
-	// allocationService := services.NewAllocationService(allocationRepo)
-	// matchService := services.NewMatchService(userRepo, projectRepo, allocationRepo)
-	// notificationService := services.NewNotificationService(notificationRepo)
+	projectService := services.NewProjectService(projectRepo)
+	allocationService := services.NewProjectAllocationService(allocationRepo)
+	matchService := services.NewMatchService(userRepo, projectRepo, allocationRepo, profileRepo)
+	notificationService := services.NewNotificationService(notificationRepo)
+	profileService := services.NewEmployeeProfileService(profileRepo)
+	googleAuthService := services.NewGoogleAuthService(userRepo)
 
 	// Initialize handlers
 	userHandler := handlers.NewUserHandler(userService)
-	// TODO: Add other handlers as needed
-	// projectHandler := handlers.NewProjectHandler(projectService)
-	// allocationHandler := handlers.NewAllocationHandler(allocationService)
-	// matchHandler := handlers.NewMatchHandler(matchService)
-	// notificationHandler := handlers.NewNotificationHandler(notificationService)
+	projectHandler := handlers.NewProjectHandler(projectService)
+	allocationHandler := handlers.NewProjectAllocationHandler(allocationService)
+	matchHandler := handlers.NewMatchHandler(matchService)
+	notificationHandler := handlers.NewNotificationHandler(notificationService)
+	profileHandler := handlers.NewEmployeeProfileHandler(profileService)
+	tokenHandler := handlers.NewTokenHandler(googleAuthService)
 
 	return &Container{
-		DB:          db,
-		UserHandler: userHandler,
-		// TODO: Add other handlers as needed
-		// ProjectHandler: projectHandler,
-		// AllocationHandler: allocationHandler,
-		// MatchHandler: matchHandler,
-		// NotificationHandler: notificationHandler,
+		DB:                       db,
+		UserHandler:              userHandler,
+		ProjectHandler:           projectHandler,
+		ProjectAllocationHandler: allocationHandler,
+		MatchHandler:             matchHandler,
+		NotificationHandler:      notificationHandler,
+		EmployeeProfileHandler:   profileHandler,
+		TokenHandler:             tokenHandler,
 	}, nil
 }
 
