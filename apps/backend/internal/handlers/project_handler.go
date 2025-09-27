@@ -92,11 +92,3 @@ func (h *ProjectHandler) UpdateProject(c *gin.Context) {
 
 	c.JSON(http.StatusOK, updatedProject)
 }
-
-// DeleteProject handles DELETE /projects/:id
-func (h *ProjectHandler) DeleteProject(c *gin.Context) {
-	// TODO: Implement handler logic
-	// TODO: Get ID from params, call service, return JSON response
-	id := c.Param("id")
-	c.JSON(http.StatusOK, gin.H{"message": "Delete project: " + id + " - TODO"})
-}
