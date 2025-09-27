@@ -156,8 +156,8 @@ export const employeesData: Employee[] = [
     user: {
       id: 4,
       first_name: "Sarah",
-      last_name: "Chen",
-      email: "sarah.chen@company.com",
+      last_name: "Johnson",
+      email: "sarah@company.com",
       role: "Employee",
       created_at: "2020-05-25T10:00:00Z",
       updated_at: "2020-05-25T10:00:00Z"
