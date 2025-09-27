@@ -58,3 +58,17 @@ func (h *ProjectAllocationHandler) ReleaseEmployee(c *gin.Context) {
 	id := c.Param("id")
 	c.JSON(http.StatusOK, gin.H{"message": "Release employee from allocation: " + id + " - TODO"})
 }
+
+// GetAllocationsByProject handles GET /project/:id/allocation
+func (h *ProjectAllocationHandler) GetAllocationsByProject(c *gin.Context) {
+	// TODO: Implement handler logic for getting allocations by project
+	projectID := c.Param("id")
+	c.JSON(http.StatusOK, gin.H{"message": "Get allocations for project: " + projectID + " - TODO"})
+}
+
+// GetAllocationsByEmployee handles GET /employee/:id/projects
+func (h *ProjectAllocationHandler) GetAllocationsByEmployee(c *gin.Context) {
+	// TODO: Implement handler logic for getting allocations by employee
+	employeeID := c.Param("id")
+	c.JSON(http.StatusOK, gin.H{"message": "Get projects for employee: " + employeeID + " - TODO"})
+}

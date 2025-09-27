@@ -45,89 +45,47 @@ func (s *Server) setupProtectedRoutes() {
 	api := s.router.Group("/api/v1")
 	api.Use(middleware.AuthMiddleware()) // Apply auth middleware to all API routes
 
-	// User routes
-	s.setupUserRoutes(api)
+	// Employee routes (personal and professional details)
+	s.setupEmployeeRoutes(api)
 
-	// Employee profile routes
-	s.setupProfileRoutes(api)
-
-	// Project routes
-	s.setupProjectRoutes(api)
-
-	// Project allocation routes
-	s.setupAllocationRoutes(api)
-
-	// AI matching routes
-	s.setupMatchRoutes(api)
+	// Manager routes (employee management and projects)
+	s.setupManagerRoutes(api)
 
 	// Notification routes
 	s.setupNotificationRoutes(api)
 }
 
-// setupUserRoutes sets up user management routes
-func (s *Server) setupUserRoutes(api *gin.RouterGroup) {
-	users := api.Group("/users")
-	{
-		users.GET("", s.container.UserHandler.GetAllUsers)
-		users.POST("", s.container.UserHandler.CreateUser)
-		users.GET("/:id", s.container.UserHandler.GetUserByID)
-		users.PUT("/:id", s.container.UserHandler.UpdateUser)
-		users.DELETE("/:id", s.container.UserHandler.DeleteUser)
-	}
+// setupEmployeeRoutes sets up employee-specific routes (personal and professional details)
+func (s *Server) setupEmployeeRoutes(api *gin.RouterGroup) {
+	// Employee details for both personal and professional
+	api.GET("/employee/:id", s.container.EmployeeProfileHandler.GetProfileByUserID)
+	api.POST("/employee/:id", s.container.EmployeeProfileHandler.CreateProfile)
+	api.PATCH("/employee/:id", s.container.EmployeeProfileHandler.UpdateProfile)
+
+	// Projects for employee
+	api.GET("/employee/:id/projects", s.container.ProjectAllocationHandler.GetAllocationsByEmployee)
+	// GET /employee/:id/projects/:id (specific project detail for employee - not implemented yet)
 }
 
-// setupProfileRoutes sets up employee profile routes
-func (s *Server) setupProfileRoutes(api *gin.RouterGroup) {
-	profiles := api.Group("/profiles")
-	{
-		profiles.GET("", s.container.EmployeeProfileHandler.GetAllProfiles)
-		profiles.GET("/:id", s.container.EmployeeProfileHandler.GetProfileByID)
-		profiles.GET("/user/:userId", s.container.EmployeeProfileHandler.GetProfileByUserID)
-		profiles.POST("", s.container.EmployeeProfileHandler.CreateProfile)
-		profiles.PUT("/user/:userId", s.container.EmployeeProfileHandler.UpdateProfile)
-		profiles.DELETE("/user/:userId", s.container.EmployeeProfileHandler.DeleteProfile)
-		profiles.GET("/available", s.container.EmployeeProfileHandler.GetAvailableEmployees)
-		profiles.GET("/search/skills", s.container.EmployeeProfileHandler.SearchBySkills)
-		profiles.GET("/search/geo", s.container.EmployeeProfileHandler.SearchByGeo)
-		profiles.PUT("/user/:userId/availability", s.container.EmployeeProfileHandler.UpdateAvailabilityFlag)
-	}
-}
+// setupManagerRoutes sets up manager-specific routes (employee management and projects)
+func (s *Server) setupManagerRoutes(api *gin.RouterGroup) {
+	// Employee management for managers (with query parameters for filtering)
+	// GET /employees?skills=<>&geo=<>&availability=<>
+	api.GET("/employees", s.container.EmployeeProfileHandler.GetAllProfiles) // Will handle query params
 
-// setupProjectRoutes sets up project management routes
-func (s *Server) setupProjectRoutes(api *gin.RouterGroup) {
-	projects := api.Group("/projects")
-	{
-		projects.GET("", s.container.ProjectHandler.GetAllProjects)
-		projects.POST("", s.container.ProjectHandler.CreateProject)
-		projects.GET("/:id", s.container.ProjectHandler.GetProjectByID)
-		projects.PUT("/:id", s.container.ProjectHandler.UpdateProject)
-		projects.DELETE("/:id", s.container.ProjectHandler.DeleteProject)
-	}
-}
+	// Project management
+	api.GET("/projects", s.container.ProjectHandler.GetAllProjects)
+	api.POST("/projects", s.container.ProjectHandler.CreateProject) // Create new project (no ID needed)
+	api.GET("/project/:id", s.container.ProjectHandler.GetProjectByID)
+	api.PATCH("/project/:id", s.container.ProjectHandler.UpdateProject)
 
-// setupAllocationRoutes sets up project allocation routes
-func (s *Server) setupAllocationRoutes(api *gin.RouterGroup) {
-	allocations := api.Group("/allocations")
-	{
-		allocations.GET("", s.container.ProjectAllocationHandler.GetAllAllocations)
-		allocations.GET("/:id", s.container.ProjectAllocationHandler.GetAllocationByID)
-		allocations.POST("", s.container.ProjectAllocationHandler.CreateAllocation)
-		allocations.PUT("/:id", s.container.ProjectAllocationHandler.UpdateAllocation)
-		allocations.DELETE("/:id", s.container.ProjectAllocationHandler.DeleteAllocation)
-		allocations.POST("/:id/release", s.container.ProjectAllocationHandler.ReleaseEmployee)
-	}
-}
+	// Employee suggestions (AI matching)
+	api.GET("/employee/suggestions", s.container.MatchHandler.GetProactiveInsights)
 
-// setupMatchRoutes sets up AI matching routes
-func (s *Server) setupMatchRoutes(api *gin.RouterGroup) {
-	matches := api.Group("/matches")
-	{
-		matches.GET("/projects/:id", s.container.MatchHandler.GetProjectMatches)
-		matches.GET("/employees/:id", s.container.MatchHandler.GetEmployeeMatches)
-		matches.POST("/projects/:id/suggestions", s.container.MatchHandler.GenerateMatchSuggestions)
-		matches.GET("/projects/:projectId/employees/:employeeId/explanation", s.container.MatchHandler.GetMatchExplanation)
-		matches.GET("/insights", s.container.MatchHandler.GetProactiveInsights)
-	}
+	// Project allocations
+	api.GET("/project/:id/allocation", s.container.ProjectAllocationHandler.GetAllocationsByProject)
+	api.PATCH("/project/:id/allocation", s.container.ProjectAllocationHandler.UpdateAllocation)
+	api.POST("/project/:id/allocation", s.container.ProjectAllocationHandler.CreateAllocation)
 }
 
 // setupNotificationRoutes sets up notification routes
