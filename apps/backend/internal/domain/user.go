@@ -1,6 +1,10 @@
 package domain
 
-import "context"
+import (
+	"context"
+
+	"github.com/talent-fit/backend/internal/entities"
+)
 
 // UserService defines the interface for user business logic
 type UserService interface {
@@ -36,4 +40,10 @@ type UserRepository interface {
 
 	// Delete deletes a user from database
 	Delete(ctx context.Context, id string) error
+
+	// GetByEmail checks user existence by email
+	GetByEmail(ctx context.Context, email string) error
+
+	// CreateWithEntity creates a user from entity
+    CreateWithEntity(ctx context.Context, user *entities.User) error
 }

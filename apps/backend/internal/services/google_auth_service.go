@@ -2,57 +2,71 @@ package services
 
 import (
 	"context"
+	"errors"
 
+	"github.com/coreos/go-oidc/v3/oidc"
+	"github.com/talent-fit/backend/internal/config"
 	"github.com/talent-fit/backend/internal/domain"
+	"github.com/talent-fit/backend/internal/entities"
+	"github.com/talent-fit/backend/internal/models"
+	"github.com/talent-fit/backend/pkg/middleware"
 )
 
 // GoogleAuthService implements the domain.GoogleAuthService interface
 type GoogleAuthService struct {
 	userRepo domain.UserRepository
+    cfg      *config.Config
 }
 
 // NewGoogleAuthService creates a new Google auth service
-func NewGoogleAuthService(userRepo domain.UserRepository) domain.GoogleAuthService {
+func NewGoogleAuthService(userRepo domain.UserRepository, cfg *config.Config) domain.GoogleAuthService {
 	return &GoogleAuthService{
 		userRepo: userRepo,
+        cfg:      cfg,
 	}
 }
 
-// GenerateToken generates a JWT token for authenticated user
-func (s *GoogleAuthService) GenerateToken(ctx context.Context) error {
-	// TODO: Implement Google OAuth flow
-	// TODO: 1. Validate Google OAuth token
-	// TODO: 2. Extract user info from Google
-	// TODO: 3. Check if user exists in database using userRepo
-	// TODO: 4. Create user if doesn't exist
-	// TODO: 5. Generate JWT token
-	// TODO: 6. Return token with user info
-	return nil
+// AuthenticateWithGoogle validates Google ID token, ensures user, and returns app JWT
+func (s *GoogleAuthService) AuthenticateWithGoogle(ctx context.Context, credential string) (*domain.AuthResponse, error) {
+    provider, err := oidc.NewProvider(ctx, "https://accounts.google.com")
+    if err != nil {
+        return nil, errors.New("oidc provider init failed")
+    }
+    verifier := provider.Verifier(&oidc.Config{ClientID: s.cfg.Auth.GoogleClientID})
+    idToken, err := verifier.Verify(ctx, credential)
+    if err != nil {
+        return nil, errors.New("invalid id token")
+    }
+    var claims struct {
+        Email string `json:"email"`
+        Name  string `json:"name"`
+    }
+    if err := idToken.Claims(&claims); err != nil {
+        return nil, errors.New("invalid claims")
+    }
+    if claims.Email == "" {
+        return nil, errors.New("email not present in token")
+    }
+
+    // Ensure user exists; if not, create minimal Employee user
+    if err := s.userRepo.GetByEmail(ctx, claims.Email); err != nil {
+        // Create a new user with Employee role
+        user := &entities.User{
+            FirstName: models.UserModel{FirstName: claims.Name}.FirstName,
+            LastName:  "",
+            Email:     claims.Email,
+            Role:      string(models.RoleEmployee),
+        }
+        if err := s.userRepo.CreateWithEntity(ctx, user); err != nil {
+            return nil, errors.New("failed to create user")
+        }
+    }
+
+    // Issue app JWT
+    token, err := middleware.GenerateJWTToken(s.cfg, claims.Email)
+    if err != nil {
+        return nil, errors.New("failed to generate jwt")
+    }
+    return &domain.AuthResponse{Token: token, Name: claims.Name, Email: claims.Email}, nil
 }
 
-// ValidateToken validates a JWT token
-func (s *GoogleAuthService) ValidateToken(ctx context.Context, token string) error {
-	// TODO: Implement JWT token validation
-	// TODO: 1. Parse and validate JWT token
-	// TODO: 2. Extract user ID from token
-	// TODO: 3. Verify user exists using userRepo
-	// TODO: 4. Return user info if valid
-	return nil
-}
-
-// RefreshToken refreshes an expired JWT token
-func (s *GoogleAuthService) RefreshToken(ctx context.Context, refreshToken string) error {
-	// TODO: Implement token refresh logic
-	// TODO: 1. Validate refresh token
-	// TODO: 2. Generate new access token
-	// TODO: 3. Return new token pair
-	return nil
-}
-
-// RevokeToken revokes a JWT token
-func (s *GoogleAuthService) RevokeToken(ctx context.Context, token string) error {
-	// TODO: Implement token revocation logic
-	// TODO: 1. Add token to blacklist
-	// TODO: 2. Invalidate user session
-	return nil
-}

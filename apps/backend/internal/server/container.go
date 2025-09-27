@@ -22,6 +22,7 @@ type Container struct {
 	NotificationHandler      *handlers.NotificationHandler
 	EmployeeProfileHandler   *handlers.EmployeeProfileHandler
 	TokenHandler             *handlers.TokenHandler
+    GoogleAuthHandler        *handlers.GoogleAuthHandler
 }
 
 // NewContainer creates and initializes all application dependencies
@@ -51,7 +52,7 @@ func NewContainer(cfg *config.Config) (*Container, error) {
 	matchService := services.NewMatchService(userRepo, projectRepo, allocationRepo, profileRepo)
 	notificationService := services.NewNotificationService(notificationRepo)
 	profileService := services.NewEmployeeProfileService(profileRepo)
-	googleAuthService := services.NewGoogleAuthService(userRepo)
+    googleAuthService := services.NewGoogleAuthService(userRepo, cfg)
 
 	// Initialize handlers
 	userHandler := handlers.NewUserHandler(userService)
@@ -60,7 +61,8 @@ func NewContainer(cfg *config.Config) (*Container, error) {
 	matchHandler := handlers.NewMatchHandler(matchService)
 	notificationHandler := handlers.NewNotificationHandler(notificationService)
 	profileHandler := handlers.NewEmployeeProfileHandler(profileService)
-	tokenHandler := handlers.NewTokenHandler(googleAuthService)
+    tokenHandler := handlers.NewTokenHandler(googleAuthService)
+    googleAuthHandler := handlers.NewGoogleAuthHandler(googleAuthService)
 
 	return &Container{
 		DB:                       db,
@@ -70,7 +72,8 @@ func NewContainer(cfg *config.Config) (*Container, error) {
 		MatchHandler:             matchHandler,
 		NotificationHandler:      notificationHandler,
 		EmployeeProfileHandler:   profileHandler,
-		TokenHandler:             tokenHandler,
+        TokenHandler:             tokenHandler,
+        GoogleAuthHandler:        googleAuthHandler,
 	}, nil
 }
 

@@ -33,17 +33,15 @@ func (s *Server) healthCheck(c *gin.Context) {
 func (s *Server) setupAuthRoutes() {
 	auth := s.router.Group("/auth")
 	{
-		auth.POST("/generate-token", s.container.TokenHandler.GenerateToken)
-		auth.POST("/validate-token", s.container.TokenHandler.ValidateToken)
-		auth.POST("/refresh-token", s.container.TokenHandler.RefreshToken)
-		auth.POST("/revoke-token", s.container.TokenHandler.RevokeToken)
+    auth.POST("/google/login", s.container.GoogleAuthHandler.Login)
+		auth.POST("/logout", s.container.GoogleAuthHandler.Logout)
 	}
 }
 
 // setupProtectedRoutes sets up all protected API routes
 func (s *Server) setupProtectedRoutes() {
-	api := s.router.Group("/api/v1")
-	api.Use(middleware.AuthMiddleware()) // Apply auth middleware to all API routes
+    api := s.router.Group("/api/v1")
+    api.Use(middleware.AuthMiddlewareWithConfig(s.config)) // Apply auth middleware to all API routes
 
 	// Employee routes (personal and professional details)
 	s.setupEmployeeRoutes(api)
