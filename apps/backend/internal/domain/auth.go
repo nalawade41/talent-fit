@@ -6,8 +6,12 @@ import (
 
 // GoogleAuthService defines the interface for Google authentication business logic
 type GoogleAuthService interface {
-	GenerateToken(ctx context.Context) error
-	ValidateToken(ctx context.Context, token string) error
-	RefreshToken(ctx context.Context, refreshToken string) error
-	RevokeToken(ctx context.Context, token string) error
+    AuthenticateWithGoogle(ctx context.Context, credential string) (*AuthResponse, error)
+}
+
+// AuthResponse represents the result of authentication
+type AuthResponse struct {
+    Token string
+    Name  string
+    Email string
 }

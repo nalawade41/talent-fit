@@ -3,8 +3,9 @@ package database
 import (
 	"context"
 
-	"gorm.io/gorm"
 	"github.com/talent-fit/backend/internal/domain"
+	"github.com/talent-fit/backend/internal/entities"
+	"gorm.io/gorm"
 )
 
 // UserRepository implements the domain.UserRepository interface
@@ -59,4 +60,17 @@ func (r *UserRepository) Delete(ctx context.Context, id string) error {
 	// TODO: result := r.db.WithContext(ctx).Delete(&models.User{}, "id = ?", id)
 	// TODO: return result.Error
 	return nil
+}
+
+// GetByEmail checks user existence by email
+func (r *UserRepository) GetByEmail(ctx context.Context, email string) error {
+    var user entities.User
+    result := r.db.WithContext(ctx).Where("email = ?", email).First(&user)
+    return result.Error
+}
+
+// CreateWithEntity creates a user from entity
+func (r *UserRepository) CreateWithEntity(ctx context.Context, user *entities.User) error {
+    result := r.db.WithContext(ctx).Create(user)
+    return result.Error
 }
