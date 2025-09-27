@@ -58,10 +58,8 @@ type LoggingConfig struct {
 // Load loads configuration from environment variables
 func Load() (*Config, error) {
 	// Load .env file if it exists (for local development)
-	err := godotenv.Load()
-	if err != nil {
-		return nil, fmt.Errorf("failed to load environment variables: %w", err)
-	}
+	_ = godotenv.Load()
+	
 
 	config := &Config{
 		Server: ServerConfig{
