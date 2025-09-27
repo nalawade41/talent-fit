@@ -2,20 +2,26 @@ package services
 
 import (
 	"context"
+	"log"
 
 	"github.com/talent-fit/backend/internal/domain"
 	"github.com/talent-fit/backend/internal/models"
+	"github.com/talent-fit/backend/internal/utils"
 )
 
 // ProjectService implements the domain.ProjectService interface
 type ProjectService struct {
-	projectRepo domain.ProjectRepository
+	projectRepo      domain.ProjectRepository
+	embeddingService domain.EmbeddingService
+	embeddingUtils   *utils.EmbeddingEntityUtils
 }
 
 // NewProjectService creates a new project service
-func NewProjectService(projectRepo domain.ProjectRepository) domain.ProjectService {
+func NewProjectService(projectRepo domain.ProjectRepository, embeddingService domain.EmbeddingService) domain.ProjectService {
 	return &ProjectService{
-		projectRepo: projectRepo,
+		projectRepo:      projectRepo,
+		embeddingService: embeddingService,
+		embeddingUtils:   utils.NewEmbeddingEntityUtils(embeddingService),
 	}
 }
 
@@ -48,6 +54,14 @@ func (s *ProjectService) GetProjectByID(ctx context.Context, id string) (*models
 // CreateProject creates a new project
 func (s *ProjectService) CreateProject(ctx context.Context, project *models.ProjectModel) (*models.ProjectModel, error) {
 	entity := project.ToEntity()
+	
+	// Generate embedding before creating
+	err := s.embeddingUtils.GenerateProjectEmbedding(ctx, entity)
+	if err != nil {
+		// Log the error but don't fail the creation - embedding generation is optional
+		log.Printf("Warning: Failed to generate embedding for project: %v", err)
+	}
+	
 	createdEntity, err := s.projectRepo.Create(ctx, entity)
 	if err != nil {
 		return nil, err
@@ -60,6 +74,13 @@ func (s *ProjectService) CreateProject(ctx context.Context, project *models.Proj
 // UpdateProject updates a project
 func (s *ProjectService) UpdateProject(ctx context.Context, id string, project *models.ProjectModel) (*models.ProjectModel, error) {
 	entity := project.ToEntity()
+	
+	// Generate embedding before updating (force update to reflect changes)
+	err := s.embeddingUtils.UpdateProjectEmbedding(ctx, entity, true)
+	if err != nil {
+		log.Printf("Warning: Failed to generate embedding for project update: %v", err)
+	}
+	
 	updatedEntity, err := s.projectRepo.Update(ctx, id, entity)
 	if err != nil {
 		return nil, err

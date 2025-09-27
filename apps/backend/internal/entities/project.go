@@ -47,6 +47,7 @@ type Project struct {
 	StartDate     time.Time   `gorm:"not null"`
 	EndDate       time.Time   `gorm:"not null"`
 	Status        string      `gorm:"not null;default:'Open'"`
+	Embedding     []float32   `gorm:"type:vector(1536)"`
 	CreatedAt     time.Time
 	UpdatedAt     time.Time
 	DeletedAt     gorm.DeletedAt `gorm:"index"`

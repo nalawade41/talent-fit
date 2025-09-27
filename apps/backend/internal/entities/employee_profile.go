@@ -49,6 +49,7 @@ type EmployeeProfile struct {
 	YearsOfExperience int
 	Industry          string
 	AvailabilityFlag  bool `gorm:"default:false"`
+	Embedding         []float32 `gorm:"type:vector(1536)"`
 	CreatedAt         time.Time
 	UpdatedAt         time.Time
 	DeletedAt         gorm.DeletedAt `gorm:"index"`

@@ -46,12 +46,13 @@ func NewContainer(cfg *config.Config) (*Container, error) {
 	profileRepo := database.NewEmployeeProfileRepository(db.DB)
 
 	// Initialize services
+	embeddingService := services.NewOpenAIEmbeddingService(cfg)
 	userService := services.NewUserService(userRepo)
-	projectService := services.NewProjectService(projectRepo)
+	projectService := services.NewProjectService(projectRepo, embeddingService)
 	allocationService := services.NewProjectAllocationService(allocationRepo)
 	matchService := services.NewMatchService(userRepo, projectRepo, allocationRepo, profileRepo)
 	notificationService := services.NewNotificationService(notificationRepo)
-	profileService := services.NewEmployeeProfileService(profileRepo)
+	profileService := services.NewEmployeeProfileService(profileRepo, embeddingService)
 	googleAuthService := services.NewGoogleAuthService(userRepo, cfg)
 
 	// Initialize handlers

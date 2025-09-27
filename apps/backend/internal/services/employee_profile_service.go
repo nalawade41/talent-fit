@@ -2,20 +2,26 @@ package services
 
 import (
 	"context"
+	"log"
 
 	"github.com/talent-fit/backend/internal/domain"
 	"github.com/talent-fit/backend/internal/models"
+	"github.com/talent-fit/backend/internal/utils"
 )
 
 // EmployeeProfileService implements the domain.EmployeeProfileService interface
 type EmployeeProfileService struct {
-	profileRepo domain.EmployeeProfileRepository
+	profileRepo      domain.EmployeeProfileRepository
+	embeddingService domain.EmbeddingService
+	embeddingUtils   *utils.EmbeddingEntityUtils
 }
 
 // NewEmployeeProfileService creates a new employee profile service
-func NewEmployeeProfileService(profileRepo domain.EmployeeProfileRepository) domain.EmployeeProfileService {
+func NewEmployeeProfileService(profileRepo domain.EmployeeProfileRepository, embeddingService domain.EmbeddingService) domain.EmployeeProfileService {
 	return &EmployeeProfileService{
-		profileRepo: profileRepo,
+		profileRepo:      profileRepo,
+		embeddingService: embeddingService,
+		embeddingUtils:   utils.NewEmbeddingEntityUtils(embeddingService),
 	}
 }
 
@@ -57,6 +63,14 @@ func (s *EmployeeProfileService) GetProfileByUserID(ctx context.Context, userID 
 // CreateProfile creates a new employee profile
 func (s *EmployeeProfileService) CreateProfile(ctx context.Context, profile *models.EmployeeProfileModel) (*models.EmployeeProfileModel, error) {
 	entityProfile := profile.ToEntity()
+	
+	// Generate embedding before creating
+	err := s.embeddingUtils.GenerateEmployeeProfileEmbedding(ctx, entityProfile)
+	if err != nil {
+		// Log the error but don't fail the creation - embedding generation is optional
+		log.Printf("Warning: Failed to generate embedding for profile: %v", err)
+	}
+	
 	entity, err := s.profileRepo.Create(ctx, entityProfile)
 	if err != nil {
 		return nil, err
@@ -69,6 +83,14 @@ func (s *EmployeeProfileService) CreateProfile(ctx context.Context, profile *mod
 // UpdateProfile updates an employee profile
 func (s *EmployeeProfileService) UpdateProfile(ctx context.Context, userID string, profile *models.EmployeeProfileModel) (*models.EmployeeProfileModel, error) {
 	entityProfile := profile.ToEntity()
+	
+	// Generate embedding before updating (force update to reflect changes)
+	err := s.embeddingUtils.UpdateEmployeeProfileEmbedding(ctx, entityProfile, true)
+	if err != nil {
+		// Log the error but don't fail the update - embedding generation is optional
+		log.Printf("Warning: Failed to generate embedding for profile update: %v", err)
+	}
+	
 	entity, err := s.profileRepo.Update(ctx, userID, entityProfile)
 	if err != nil {
 		return nil, err
