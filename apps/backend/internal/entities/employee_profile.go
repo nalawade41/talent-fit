@@ -44,6 +44,7 @@ type EmployeeProfile struct {
 	DateOfJoining     *time.Time
 	EndDate           *time.Time
 	NoticeDate        *time.Time
+	Type              string `gorm:"not null"`
 	Skills            Skills `gorm:"type:jsonb"`
 	YearsOfExperience int
 	Industry          string

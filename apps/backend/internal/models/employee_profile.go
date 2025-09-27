@@ -6,6 +6,22 @@ import (
 	"github.com/talent-fit/backend/internal/entities"
 )
 
+// UserType represents the type/specialization of a user
+type UserType string
+
+const (
+	TypeFrontendDev  UserType = "Frontend Dev"
+	TypeBackendDev   UserType = "Backend Dev"
+	TypeFullstackDev UserType = "Fullstack Dev"
+	TypeAI           UserType = "AI"
+	TypeUI           UserType = "UI"
+	TypeUX           UserType = "UX"
+	TypeTester       UserType = "Tester"
+	TypeManager      UserType = "Manager"
+	TypeArchitect    UserType = "Architect"
+	TypeScrumMaster  UserType = "Scrum Master"
+)
+
 // EmployeeProfileModel represents the employee profile business model
 type EmployeeProfileModel struct {
 	UserID            uint       `json:"user_id"`
@@ -19,6 +35,7 @@ type EmployeeProfileModel struct {
 	AvailabilityFlag  bool       `json:"availability_flag"`
 	CreatedAt         time.Time  `json:"created_at"`
 	UpdatedAt         time.Time  `json:"updated_at"`
+	Type              UserType   `json:"type"`
 
 	// Relationships
 	User UserModel `json:"user,omitempty"`
@@ -38,6 +55,7 @@ func (ep *EmployeeProfileModel) ToEntity() *entities.EmployeeProfile {
 		AvailabilityFlag:  ep.AvailabilityFlag,
 		CreatedAt:         ep.CreatedAt,
 		UpdatedAt:         ep.UpdatedAt,
+		Type:              string(ep.Type),
 	}
 	return entity
 }
@@ -55,4 +73,5 @@ func (ep *EmployeeProfileModel) FromEntity(entity *entities.EmployeeProfile) {
 	ep.AvailabilityFlag = entity.AvailabilityFlag
 	ep.CreatedAt = entity.CreatedAt
 	ep.UpdatedAt = entity.UpdatedAt
+	ep.Type = UserType(entity.Type)
 }

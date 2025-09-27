@@ -9,10 +9,10 @@ import (
 // User entity for database operations
 type User struct {
 	ID        uint   `gorm:"primaryKey"`
-	Name      string `gorm:"not null"`
+	FirstName string `gorm:"not null"`
+	LastName  string `gorm:"not null"`
 	Email     string `gorm:"uniqueIndex;not null"`
 	Role      string `gorm:"not null"`
-	Type      string `gorm:"not null"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
 	DeletedAt gorm.DeletedAt `gorm:"index"`

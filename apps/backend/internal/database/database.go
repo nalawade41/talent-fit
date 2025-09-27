@@ -3,6 +3,7 @@ package database
 import (
 	"fmt"
 	"log"
+	"path/filepath"
 
 	"github.com/talent-fit/backend/internal/config"
 	"github.com/talent-fit/backend/internal/entities"
@@ -69,11 +70,29 @@ func (d *Database) Close() error {
 func (d *Database) AutoMigrate() error {
 	log.Printf("Running database migrations...")
 
+	// First run SQL migrations
+	if err := d.RunSQLMigrations(); err != nil {
+		return fmt.Errorf("failed to run SQL migrations: %w", err)
+	}
+
+	// Then run GORM auto-migrate as fallback/sync
 	err := entities.AutoMigrate(d.DB)
 	if err != nil {
-		return fmt.Errorf("failed to migrate database: %w", err)
+		return fmt.Errorf("failed to run GORM auto-migrate: %w", err)
 	}
 
 	log.Printf("Database migrations completed")
 	return nil
+}
+
+// RunSQLMigrations runs SQL migration files
+func (d *Database) RunSQLMigrations() error {
+	// Get the migrations directory path
+	migrationsDir := filepath.Join("migrations")
+	
+	// Create migration runner
+	runner := NewMigrationRunner(d.DB, migrationsDir)
+	
+	// Execute migrations
+	return runner.RunMigrations()
 }

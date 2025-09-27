@@ -14,29 +14,13 @@ const (
 	RoleManager  UserRole = "Manager"
 )
 
-// UserType represents the type/specialization of a user
-type UserType string
-
-const (
-	TypeFrontendDev  UserType = "Frontend Dev"
-	TypeBackendDev   UserType = "Backend Dev"
-	TypeFullstackDev UserType = "Fullstack Dev"
-	TypeAI           UserType = "AI"
-	TypeUI           UserType = "UI"
-	TypeUX           UserType = "UX"
-	TypeTester       UserType = "Tester"
-	TypeManager      UserType = "Manager"
-	TypeArchitect    UserType = "Architect"
-	TypeScrumMaster  UserType = "Scrum Master"
-)
-
 // UserModel represents the user business model
 type UserModel struct {
 	ID        uint      `json:"id"`
-	Name      string    `json:"name"`
+	FirstName string    `json:"first_name"`
+	LastName  string    `json:"last_name"`
 	Email     string    `json:"email"`
 	Role      UserRole  `json:"role"`
-	Type      UserType  `json:"type"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 
@@ -50,10 +34,10 @@ type UserModel struct {
 func (u *UserModel) ToEntity() *entities.User {
 	entity := &entities.User{
 		ID:        u.ID,
-		Name:      u.Name,
+		FirstName: u.FirstName,
+		LastName:  u.LastName,
 		Email:     u.Email,
 		Role:      string(u.Role),
-		Type:      string(u.Type),
 		CreatedAt: u.CreatedAt,
 		UpdatedAt: u.UpdatedAt,
 	}
@@ -63,10 +47,15 @@ func (u *UserModel) ToEntity() *entities.User {
 // FromEntity converts entity to UserModel
 func (u *UserModel) FromEntity(entity *entities.User) {
 	u.ID = entity.ID
-	u.Name = entity.Name
+	u.FirstName = entity.FirstName
+	u.LastName = entity.LastName
 	u.Email = entity.Email
 	u.Role = UserRole(entity.Role)
-	u.Type = UserType(entity.Type)
 	u.CreatedAt = entity.CreatedAt
 	u.UpdatedAt = entity.UpdatedAt
+}
+
+// GetFullName returns the full name (first name + last name)
+func (u *UserModel) GetFullName() string {
+	return u.FirstName + " " + u.LastName
 }
