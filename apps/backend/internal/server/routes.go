@@ -56,12 +56,12 @@ func (s *Server) setupProtectedRoutes() {
 // setupEmployeeRoutes sets up employee-specific routes (personal and professional details)
 func (s *Server) setupEmployeeRoutes(api *gin.RouterGroup) {
 	// Employee details for both personal and professional
-	api.GET("/employee/:id", s.container.EmployeeProfileHandler.GetProfileByUserID) // Done
-	api.POST("/employee/:id", s.container.EmployeeProfileHandler.CreateProfile)     // Done
-	api.PATCH("/employee/:id", s.container.EmployeeProfileHandler.UpdateProfile)    // Done
+	api.GET("/employee/:id", s.container.EmployeeProfileHandler.GetProfileByUserID) 
+	api.POST("/employee/:id", s.container.EmployeeProfileHandler.CreateProfile)     
+	api.PATCH("/employee/:id", s.container.EmployeeProfileHandler.UpdateProfile)    
 
 	// Projects for employee
-	api.GET("/employee/:id/projects", s.container.ProjectAllocationHandler.GetAllocationsByEmployee) // Done
+	api.GET("/employee/:id/projects", s.container.ProjectAllocationHandler.GetAllocationsByEmployee) 
 	// GET /employee/:id/projects/:id (specific project detail for employee - not implemented yet)
 }
 
@@ -72,18 +72,18 @@ func (s *Server) setupManagerRoutes(api *gin.RouterGroup) {
 	api.GET("/employees", s.container.EmployeeProfileHandler.GetAllProfiles) // Will handle query params
 
 	// Project management
-	api.GET("/projects", s.container.ProjectHandler.GetAllProjects)     // Done
-	api.POST("/projects", s.container.ProjectHandler.CreateProject)     // Done
-	api.GET("/project/:id", s.container.ProjectHandler.GetProjectByID)  // Done
-	api.PATCH("/project/:id", s.container.ProjectHandler.UpdateProject) // Done
+	api.GET("/projects", s.container.ProjectHandler.GetAllProjects)     
+	api.POST("/projects", s.container.ProjectHandler.CreateProject)     
+	api.GET("/project/:id", s.container.ProjectHandler.GetProjectByID)  
+	api.PATCH("/project/:id", s.container.ProjectHandler.UpdateProject) 
 
 	// Employee suggestions (AI matching)
 	api.GET("/employee/suggestions", s.container.MatchHandler.GetProactiveInsights)
 
 	// Project allocations
-	api.GET("/project/:id/allocation", s.container.ProjectAllocationHandler.GetAllocationsByProject) // Done
-	api.PATCH("/project/:id/allocation", s.container.ProjectAllocationHandler.UpdateAllocation)      // Done
-	api.POST("/project/:id/allocation", s.container.ProjectAllocationHandler.CreateAllocation)       // Done
+	api.GET("/project/:id/allocation", s.container.ProjectAllocationHandler.GetAllocationsByProject) 
+	api.PATCH("/project/:id/allocation", s.container.ProjectAllocationHandler.UpdateAllocation)      
+	api.POST("/project/:id/allocation", s.container.ProjectAllocationHandler.CreateAllocation)      
 }
 
 // setupNotificationRoutes sets up notification routes
