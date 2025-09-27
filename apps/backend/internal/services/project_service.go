@@ -21,48 +21,50 @@ func NewProjectService(projectRepo domain.ProjectRepository) domain.ProjectServi
 
 // GetAllProjects retrieves all projects
 func (s *ProjectService) GetAllProjects(ctx context.Context) ([]*models.ProjectModel, error) {
-	// TODO: Implement business logic for getting all projects
-	// TODO: entities, err := s.projectRepo.GetAll(ctx)
-	// TODO: if err != nil { return nil, err }
-	// TODO: Convert entities to models and return
-	return nil, nil
+	entities, err := s.projectRepo.GetAll(ctx)
+	if err != nil {
+		return nil, err
+	}
+	var result []*models.ProjectModel
+	for _, entity := range entities {
+		model := &models.ProjectModel{}
+		model.FromEntity(entity)
+		result = append(result, model)
+	}
+	return result, nil
 }
 
 // GetProjectByID retrieves a project by ID
 func (s *ProjectService) GetProjectByID(ctx context.Context, id string) (*models.ProjectModel, error) {
-	// TODO: Implement business logic for getting project by ID
-	// TODO: Validate ID, call repository, convert entity to model
-	// TODO: entity, err := s.projectRepo.GetByID(ctx, id)
-	// TODO: if err != nil { return nil, err }
-	// TODO: Convert entity to model and return
-	return nil, nil
+	entity, err := s.projectRepo.GetByID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	model := &models.ProjectModel{}
+	model.FromEntity(entity)
+	return model, nil
 }
 
 // CreateProject creates a new project
 func (s *ProjectService) CreateProject(ctx context.Context, project *models.ProjectModel) (*models.ProjectModel, error) {
-	// TODO: Implement business logic for creating project
-	// TODO: Validate input, convert model to entity, call repository
-	// TODO: entity := project.ToEntity()
-	// TODO: createdEntity, err := s.projectRepo.Create(ctx, entity)
-	// TODO: if err != nil { return nil, err }
-	// TODO: Convert entity back to model and return
-	return nil, nil
+	entity := project.ToEntity()
+	createdEntity, err := s.projectRepo.Create(ctx, entity)
+	if err != nil {
+		return nil, err
+	}
+	model := &models.ProjectModel{}
+	model.FromEntity(createdEntity)
+	return model, nil
 }
 
 // UpdateProject updates a project
 func (s *ProjectService) UpdateProject(ctx context.Context, id string, project *models.ProjectModel) (*models.ProjectModel, error) {
-	// TODO: Implement business logic for updating project
-	// TODO: Validate input, convert model to entity, call repository
-	// TODO: entity := project.ToEntity()
-	// TODO: updatedEntity, err := s.projectRepo.Update(ctx, id, entity)
-	// TODO: if err != nil { return nil, err }
-	// TODO: Convert entity back to model and return
-	return nil, nil
-}
-
-// DeleteProject deletes a project
-func (s *ProjectService) DeleteProject(ctx context.Context, id string) error {
-	// TODO: Implement business logic for deleting project
-	// TODO: Validate ID, check dependencies (allocations), call repository
-	return s.projectRepo.Delete(ctx, id)
+	entity := project.ToEntity()
+	updatedEntity, err := s.projectRepo.Update(ctx, id, entity)
+	if err != nil {
+		return nil, err
+	}
+	model := &models.ProjectModel{}
+	model.FromEntity(updatedEntity)
+	return model, nil
 }
