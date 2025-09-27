@@ -1,5 +1,45 @@
 # Add files here to ignore them from prettier formatting
+
+# Build outputs
 /dist
+/build
+/.next
+/out
 /coverage
+
+# Nx cache
 /.nx/cache
 /.nx/workspace-data
+
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Logs
+*.log
+logs/
+error.log
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+
+# Temporary files
+*.tmp
+*.temp
+
+# Go specific (don't format go.mod/go.sum)
+go.mod
+go.sum
+
+# Package files
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Generated files
+*.generated.*

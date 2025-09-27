@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/talent-fit/backend/internal/domain"
+	"github.com/talent-fit/backend/internal/models"
 )
 
 // ProjectAllocationService implements the domain.ProjectAllocationService interface
@@ -19,40 +20,60 @@ func NewProjectAllocationService(allocationRepo domain.ProjectAllocationReposito
 }
 
 // GetAllAllocations retrieves all project allocations
-func (s *ProjectAllocationService) GetAllAllocations(ctx context.Context) error {
+func (s *ProjectAllocationService) GetAllAllocations(ctx context.Context) ([]*models.ProjectAllocationModel, error) {
 	// TODO: Implement business logic for getting all allocations
-	return s.allocationRepo.GetAll(ctx)
+	// TODO: entities, err := s.allocationRepo.GetAll(ctx)
+	// TODO: if err != nil { return nil, err }
+	// TODO: Convert entities to models and return
+	return nil, nil
 }
 
 // GetAllocationByID retrieves a project allocation by ID
-func (s *ProjectAllocationService) GetAllocationByID(ctx context.Context, id string) error {
+func (s *ProjectAllocationService) GetAllocationByID(ctx context.Context, id string) (*models.ProjectAllocationModel, error) {
 	// TODO: Implement business logic for getting allocation by ID
-	return s.allocationRepo.GetByID(ctx, id)
+	// TODO: entity, err := s.allocationRepo.GetByID(ctx, id)
+	// TODO: if err != nil { return nil, err }
+	// TODO: Convert entity to model and return
+	return nil, nil
 }
 
 // GetAllocationsByProject retrieves allocations by project ID
-func (s *ProjectAllocationService) GetAllocationsByProject(ctx context.Context, projectID string) error {
+func (s *ProjectAllocationService) GetAllocationsByProject(ctx context.Context, projectID string) ([]*models.ProjectAllocationModel, error) {
 	// TODO: Implement business logic for getting allocations by project
-	return s.allocationRepo.GetByProjectID(ctx, projectID)
+	// TODO: entities, err := s.allocationRepo.GetByProjectID(ctx, projectID)
+	// TODO: if err != nil { return nil, err }
+	// TODO: Convert entities to models and return
+	return nil, nil
 }
 
 // GetAllocationsByEmployee retrieves allocations by employee ID
-func (s *ProjectAllocationService) GetAllocationsByEmployee(ctx context.Context, employeeID string) error {
+func (s *ProjectAllocationService) GetAllocationsByEmployee(ctx context.Context, employeeID string) ([]*models.ProjectAllocationModel, error) {
 	// TODO: Implement business logic for getting allocations by employee
-	return s.allocationRepo.GetByEmployeeID(ctx, employeeID)
+	// TODO: entities, err := s.allocationRepo.GetByEmployeeID(ctx, employeeID)
+	// TODO: if err != nil { return nil, err }
+	// TODO: Convert entities to models and return
+	return nil, nil
 }
 
 // CreateAllocation creates a new project allocation
-func (s *ProjectAllocationService) CreateAllocation(ctx context.Context) error {
+func (s *ProjectAllocationService) CreateAllocation(ctx context.Context, allocation []*models.ProjectAllocationModel) (*models.ProjectAllocationModel, error) {
 	// TODO: Implement business logic for creating allocation
 	// TODO: Validate employee availability, project capacity, etc.
-	return s.allocationRepo.Create(ctx)
+	// TODO: Convert model to entity
+	// TODO: entity, err := s.allocationRepo.Create(ctx, entityAllocation)
+	// TODO: if err != nil { return nil, err }
+	// TODO: Convert entity back to model and return
+	return nil, nil
 }
 
 // UpdateAllocation updates a project allocation
-func (s *ProjectAllocationService) UpdateAllocation(ctx context.Context, id string) error {
+func (s *ProjectAllocationService) UpdateAllocation(ctx context.Context, id string, allocation []*models.ProjectAllocationModel) (*models.ProjectAllocationModel, error) {
 	// TODO: Implement business logic for updating allocation
-	return s.allocationRepo.Update(ctx, id)
+	// TODO: Convert model to entity
+	// TODO: entity, err := s.allocationRepo.Update(ctx, id, entityAllocation)
+	// TODO: if err != nil { return nil, err }
+	// TODO: Convert entity back to model and return
+	return nil, nil
 }
 
 // DeleteAllocation deletes a project allocation
@@ -62,8 +83,9 @@ func (s *ProjectAllocationService) DeleteAllocation(ctx context.Context, id stri
 }
 
 // ReleaseEmployeeFromProject releases an employee from a project
-func (s *ProjectAllocationService) ReleaseEmployeeFromProject(ctx context.Context, allocationID string) error {
+func (s *ProjectAllocationService) ReleaseEmployeeFromProject(ctx context.Context, allocationID string) (*models.ProjectAllocationModel, error) {
 	// TODO: Implement business logic for releasing employee
 	// TODO: Update end date, send notifications, etc.
-	return s.allocationRepo.Update(ctx, allocationID)
+	// TODO: Get allocation, set end date to now, update and return
+	return nil, nil
 }

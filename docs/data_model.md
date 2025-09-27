@@ -1,13 +1,16 @@
 # Data Model (data_model.md)
 
 ## User
+
 - id (PK)
 - name
 - email
 - role (Employee, Manager)
-- type (Frontend Dev, Backend Dev, Fullstack Dev, AI, UI, UX, Tester, Manager, Architect, Scrum Master)
+- type (Frontend Dev, Backend Dev, Fullstack Dev, AI, UI, UX, Tester, Manager, Architect, Scrum
+  Master)
 
 ## EmployeeProfile
+
 - userId (FK: User.id)
 - geo
 - dateOfJoining
@@ -19,6 +22,7 @@
 - availabilityFlag (boolean)
 
 ## Project
+
 - id (PK)
 - name
 - description
@@ -29,6 +33,7 @@
 - status (Open, Closed)
 
 ## ProjectAllocation
+
 - id (PK)
 - projectId (FK: Project.id)
 - employeeId (FK: User.id)
@@ -37,6 +42,7 @@
 - endDate (nullable)
 
 ## Notifications
+
 - id (PK)
 - type (Roll-off Alert, Project Gap, Allocation Suggestion)
 - message
