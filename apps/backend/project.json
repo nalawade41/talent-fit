@@ -1,0 +1,48 @@
+{
+  "name": "backend",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "sourceRoot": "apps/backend",
+  "targets": {
+    "serve": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "go run ./cmd/api",
+        "cwd": "apps/backend"
+      }
+    },
+    "build": {
+      "executor": "@naxodev/gonx:build",
+      "options": {
+        "command": "go build -o dist/api ./cmd/api",
+        "outputPath": "dist/apps/backend"
+      }
+    },
+    "build-lambda": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -ldflags='-s -w' -o dist/bootstrap ./cmd/lambda",
+        "cwd": "apps/backend"
+      }
+    },
+    "test": {
+      "executor": "@naxodev/gonx:test",
+      "options": {
+        "command": "go test ./..."
+      }
+    },
+    "lint": {
+      "executor": "@naxodev/gonx:lint",
+      "options": {
+        "command": "golangci-lint run"
+      }
+    },
+    "tidy": {
+      "executor": "@naxodev/gonx:tidy",
+      "options": {
+        "command": "go mod tidy"
+      }
+    }
+  },
+  "tags": ["type:app", "platform:server"]
+}

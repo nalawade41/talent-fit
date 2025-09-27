@@ -7,10 +7,7 @@
       "!{projectRoot}/.eslintrc.json",
       "!{projectRoot}/eslint.config.mjs"
     ],
-    "sharedGlobals": [
-      "{workspaceRoot}/.github/workflows/ci.yml",
-      "{workspaceRoot}/go.work"
-    ]
+    "sharedGlobals": ["{workspaceRoot}/.github/workflows/ci.yml"]
   },
   "nxCloudId": "68d746d353176e13147afd89",
   "plugins": [
@@ -31,7 +28,16 @@
         "targetName": "lint"
       }
     },
-    "@nx-go/nx-go"
+    {
+      "plugin": "@naxodev/gonx",
+      "options": {
+        "buildTargetName": "build",
+        "serveTargetName": "serve",
+        "testTargetName": "test",
+        "lintTargetName": "lint",
+        "tidyTargetName": "tidy"
+      }
+    }
   ],
   "generators": {
     "@nx/next": {
