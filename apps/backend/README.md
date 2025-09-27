@@ -10,9 +10,12 @@ backend/
 ├── internal/             # Private application code
 │   ├── models/          # Database models (User, Project, etc.)
 │   ├── handlers/        # HTTP handlers for API endpoints
+│   ├── server/          # HTTP server and routing
+│   │   ├── server.go    # Server setup and lifecycle
+│   │   └── routes.go    # Route definitions and handlers
 │   ├── services/        # Business logic services
 │   ├── database/        # Database connection and setup
-|   ├── domain/          # Domain interfaces
+│   ├── domain/          # Domain interfaces
 │   ├── auth/            # Google SSO authentication
 │   └── config/          # Configuration management
 ├── pkg/                 # Reusable packages
