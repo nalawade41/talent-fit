@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/talent-fit/backend/internal/domain"
@@ -22,8 +23,42 @@ func NewEmployeeProfileHandler(profileService domain.EmployeeProfileService) *Em
 
 // GetAllProfiles handles GET /profiles
 func (h *EmployeeProfileHandler) GetAllProfiles(c *gin.Context) {
-	// TODO: Implement handler logic
-	c.JSON(http.StatusOK, gin.H{"message": "Get all employee profiles - TODO"})
+	ctx := c.Request.Context()
+
+	// Parse query params
+	skillsParam := strings.TrimSpace(c.Query("skills"))     // comma-separated
+	geosParam := strings.TrimSpace(c.Query("geo"))          // comma-separated
+	availableOnly := strings.EqualFold(c.Query("available"), "true")
+
+	var skills []string
+	if skillsParam != "" {
+		parts := strings.Split(skillsParam, ",")
+		for _, p := range parts {
+			v := strings.TrimSpace(p)
+			if v != "" {
+				skills = append(skills, v)
+			}
+		}
+	}
+
+	var geos []string
+	if geosParam != "" {
+		parts := strings.Split(geosParam, ",")
+		for _, p := range parts {
+			v := strings.TrimSpace(p)
+			if v != "" {
+				geos = append(geos, v)
+			}
+		}
+	}
+
+	profiles, err := h.profileService.SearchProfiles(ctx, skills, geos, availableOnly)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, profiles)
 }
 
 // GetProfileByUserID handles GET /profiles/user/:userId

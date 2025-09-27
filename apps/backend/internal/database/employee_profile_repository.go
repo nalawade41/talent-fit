@@ -2,6 +2,7 @@ package database
 
 import (
 	"context"
+	"strings"
 
 	"github.com/talent-fit/backend/internal/domain"
 	"github.com/talent-fit/backend/internal/entities"
@@ -27,6 +28,38 @@ func (r *EmployeeProfileRepository) GetAll(ctx context.Context) ([]*entities.Emp
 	// TODO: result := r.db.WithContext(ctx).Find(&profiles)
 	// TODO: return profiles, result.Error
 	return nil, nil
+}
+
+// GetFiltered retrieves employee profiles filtered by skills, geos and availability
+func (r *EmployeeProfileRepository) GetFiltered(ctx context.Context, skills []string, geos []string, availableOnly bool) ([]*entities.EmployeeProfile, error) {
+    dbq := r.db.WithContext(ctx).Model(&entities.EmployeeProfile{})
+
+    if len(geos) > 0 {
+        dbq = dbq.Where("geo IN ?", geos)
+    }
+
+    if availableOnly {
+        dbq = dbq.Where("availability_flag = ?", true)
+    }
+
+    if len(skills) > 0 {
+        // Skills is stored as JSON array; use JSON containment operator for Postgres
+        // Convert to lower-case for case-insensitive match
+        lowers := make([]string, 0, len(skills))
+        for _, s := range skills {
+            lowers = append(lowers, strings.ToLower(strings.TrimSpace(s)))
+        }
+        // WHERE skills ?& ARRAY['react','node'] equivalent: use @> with any
+        // Build a JSON array string like '["react","node"]'
+        jsonArray := "[\"" + strings.Join(lowers, "\",\"") + "\"]"
+        dbq = dbq.Where("LOWER(skills::text)::jsonb @> ?::jsonb", jsonArray)
+    }
+
+    var profiles []*entities.EmployeeProfile
+    if err := dbq.Find(&profiles).Error; err != nil {
+        return nil, err
+    }
+    return profiles, nil
 }
 
 // GetByUserID retrieves an employee profile by user ID from database

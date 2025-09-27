@@ -28,6 +28,21 @@ func (s *EmployeeProfileService) GetAllProfiles(ctx context.Context) ([]*models.
 	return nil, nil
 }
 
+// SearchProfiles retrieves profiles by filters
+func (s *EmployeeProfileService) SearchProfiles(ctx context.Context, skills []string, geos []string, availableOnly bool) ([]*models.EmployeeProfileModel, error) {
+    entities, err := s.profileRepo.GetFiltered(ctx, skills, geos, availableOnly)
+    if err != nil {
+        return nil, err
+    }
+    modelsOut := make([]*models.EmployeeProfileModel, 0, len(entities))
+    for _, e := range entities {
+        var m models.EmployeeProfileModel
+        m.FromEntity(e)
+        modelsOut = append(modelsOut, &m)
+    }
+    return modelsOut, nil
+}
+
 // GetProfileByUserID retrieves an employee profile by user ID
 func (s *EmployeeProfileService) GetProfileByUserID(ctx context.Context, userID string) (*models.EmployeeProfileModel, error) {
 	entity, err := s.profileRepo.GetByUserID(ctx, userID)
