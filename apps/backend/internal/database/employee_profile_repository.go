@@ -24,11 +24,12 @@ func NewEmployeeProfileRepository(db *gorm.DB) domain.EmployeeProfileRepository 
 
 // GetAll retrieves all employee profiles from database
 func (r *EmployeeProfileRepository) GetAll(ctx context.Context) ([]*entities.EmployeeProfile, error) {
-	// TODO: Implement database query to get all employee profiles
-	// TODO: var profiles []*entities.EmployeeProfile
-	// TODO: result := r.db.WithContext(ctx).Find(&profiles)
-	// TODO: return profiles, result.Error
-	return nil, nil
+    var profiles []*entities.EmployeeProfile
+    result := r.db.WithContext(ctx).Preload("User").Find(&profiles)
+    if result.Error != nil {
+        return nil, result.Error
+    }
+    return profiles, nil
 }
 
 // GetFiltered retrieves employee profiles filtered by skills, geos and availability

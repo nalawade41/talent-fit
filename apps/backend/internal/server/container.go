@@ -5,6 +5,7 @@ import (
 
 	"github.com/talent-fit/backend/internal/config"
 	"github.com/talent-fit/backend/internal/database"
+	"github.com/talent-fit/backend/internal/domain"
 	"github.com/talent-fit/backend/internal/handlers"
 	"github.com/talent-fit/backend/internal/services"
 	n "github.com/talent-fit/backend/internal/services/notifiers"
@@ -26,6 +27,7 @@ type Container struct {
 	GoogleAuthHandler        *handlers.GoogleAuthHandler
     DevHandler               *handlers.DevHandler
     Orchestrator             *services.Orchestrator
+    DashboardHandler         *handlers.DashboardHandler
 }
 
 // NewContainer creates and initializes all application dependencies
@@ -63,6 +65,9 @@ func NewContainer(cfg *config.Config) (*Container, error) {
     notificationService := services.NewNotificationService(notificationRepo)
     profileService := services.NewEmployeeProfileService(profileRepo, embeddingService, orchestrator, userRepo)
     googleAuthService := services.NewGoogleAuthService(userRepo, cfg)
+    // Dashboard service depends on repos directly to compute metrics
+    var _ domain.DashboardService
+    dashboardService := services.NewDashboardService(projectRepo, allocationRepo, profileRepo)
 
 	// Initialize handlers
     userHandler := handlers.NewUserHandler(userService)
@@ -74,6 +79,7 @@ func NewContainer(cfg *config.Config) (*Container, error) {
 	tokenHandler := handlers.NewTokenHandler(googleAuthService)
     googleAuthHandler := handlers.NewGoogleAuthHandler(googleAuthService)
     devHandler := handlers.NewDevHandler(orchestrator, cfg)
+    dashboardHandler := handlers.NewDashboardHandler(dashboardService)
 
 	return &Container{
 		DB:                       db,
@@ -86,6 +92,7 @@ func NewContainer(cfg *config.Config) (*Container, error) {
 		TokenHandler:             tokenHandler,
         GoogleAuthHandler:        googleAuthHandler,
         DevHandler:               devHandler,
+        DashboardHandler:         dashboardHandler,
 	}, nil
 }
 

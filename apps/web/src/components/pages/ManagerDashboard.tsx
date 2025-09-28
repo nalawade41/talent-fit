@@ -1,26 +1,51 @@
-import { useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { AlertTriangle, Briefcase, Download, TrendingUp, Users } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
 import toast from 'react-hot-toast';
-import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
+import { useNavigate } from 'react-router-dom';
+import { Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import { projectAllocationsData } from '../../data/allocations';
+import { employeesData } from '../../data/employees';
+import { projectsData } from '../../data/projects';
+import ManagerService, { ManagerDashboardMetrics } from '../../services/managerService';
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
-import { Briefcase, AlertTriangle, Download, Users, TrendingUp } from 'lucide-react';
-import { employeesData, getAvailableEmployees, getRollingOffEmployees, getAllocatedEmployees, getBenchEmployees } from '../../data/employees';
-import { projectsData } from '../../data/projects';
-import { projectAllocationsData } from '../../data/allocations';
+import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 
 export function ManagerDashboard() {
   const navigate = useNavigate();
-  
-  // Calculate metrics
-  const availableEngineers = getAvailableEmployees().length;
-  const rollingOffEngineers = getRollingOffEmployees().length;
-  const allocatedEngineers = getAllocatedEmployees().length;
-  const benchEngineers = getBenchEmployees().length;
-  const activeProjects = projectsData.filter(p => p.status === 'Open').length;
+  const [metrics, setMetrics] = useState<ManagerDashboardMetrics | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
 
-  // Chart data
+  useEffect(() => {
+    let isMounted = true;
+    setLoading(true);
+    ManagerService.getDashboardMetrics()
+      .then((data) => {
+        if (isMounted) {
+          setMetrics(data);
+          setError(null);
+        }
+      })
+      .catch(() => {
+        if (isMounted) setError('Failed to load dashboard metrics');
+      })
+      .finally(() => {
+        if (isMounted) setLoading(false);
+      });
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  // Calculate metrics
+  const availableEngineers = metrics?.availableEngineers ?? 0;
+  const rollingOffEngineers = metrics?.rollingOffSoon ?? 0;
+  const allocatedEngineers = metrics?.allocatedEngineers ?? 0;
+  const benchEngineers = metrics?.benchResources ?? 0;
+  const activeProjects = metrics?.activeProjects ?? 0;
+
+  // Chart data - use API metrics (fallback to zeros handled above)
   const utilizationData = [
     { name: 'Available', value: availableEngineers, color: '#00C49F' },
     { name: 'Allocated', value: allocatedEngineers, color: '#0088FE' },
@@ -43,7 +68,6 @@ export function ManagerDashboard() {
 
   // Attention items data
   const attentionItems = useMemo(() => {
-    const items = [];
 
     // Projects requiring additional headcount soon (next 30 days)
     const projectsNeedingHeadcount = projectsData
@@ -72,7 +96,7 @@ export function ManagerDashboard() {
       })
       .map(allocation => {
         const project = projectsData.find(p => p.id === allocation.project_id);
-        const employee = employeesData.find(e => e.user_id === allocation.user_id);
+        const employee = employeesData.find(e => e.user_id === allocation.employee_id);
         return {
           id: `project-release-${allocation.id}`,
           type: 'project-release' as const,
@@ -222,9 +246,13 @@ export function ManagerDashboard() {
         </div>
       </div>
 
+      {/* Loading/Error States (non-intrusive) */}
+      {loading && <p className="text-sm text-muted-foreground">Loading latest metrics...</p>}
+      {error && <p className="text-sm text-red-600">{error}</p>}
+
       {/* Key Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card 
+        <Card
           className="cursor-pointer hover:shadow-md transition-shadow duration-200 hover:bg-gray-50"
           onClick={navigateToAvailableEmployees}
           role="button"
@@ -243,7 +271,7 @@ export function ManagerDashboard() {
           </CardContent>
         </Card>
 
-        <Card 
+        <Card
           className="cursor-pointer hover:shadow-md transition-shadow duration-200 hover:bg-gray-50"
           onClick={navigateToActiveProjects}
           role="button"
@@ -262,7 +290,7 @@ export function ManagerDashboard() {
           </CardContent>
         </Card>
 
-        <Card 
+        <Card
           className="cursor-pointer hover:shadow-md transition-shadow duration-200 hover:bg-gray-50"
           onClick={navigateToRollingOffEmployees}
           role="button"
@@ -281,7 +309,7 @@ export function ManagerDashboard() {
           </CardContent>
         </Card>
 
-        <Card 
+        <Card
           className="cursor-pointer hover:shadow-md transition-shadow duration-200 hover:bg-gray-50"
           onClick={navigateToBenchEmployees}
           role="button"

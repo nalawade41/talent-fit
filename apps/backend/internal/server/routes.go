@@ -89,6 +89,9 @@ func (s *Server) setupManagerRoutes(api *gin.RouterGroup) {
 	api.GET("/project/:id/allocation", s.container.ProjectAllocationHandler.GetAllocationsByProject) 
 	api.PATCH("/project/:id/allocation", s.container.ProjectAllocationHandler.UpdateAllocation)      
 	api.POST("/project/:id/allocation", s.container.ProjectAllocationHandler.CreateAllocation)      
+
+    // Manager dashboard metrics
+    api.GET("/manager/dashboard/metrics", s.container.DashboardHandler.GetManagerDashboardMetrics)
 }
 
 // setupNotificationRoutes sets up notification routes
