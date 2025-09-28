@@ -1,94 +1,118 @@
 # TalentFit
 
-<a alt="Nx logo" href="https://nx.dev" target="_blank" rel="noreferrer"><img src="https://raw.githubusercontent.com/nrwl/nx/master/images/nx-logo.png" width="45"></a>
+## What this app does
 
-✨ Your new, shiny [Nx workspace](https://nx.dev) is almost ready ✨.
+TalentFit is an internal talent-matching platform that helps managers staff projects faster and helps employees showcase their skills.
 
-[Learn more about this workspace setup and its capabilities](https://nx.dev/getting-started/intro#learn-nx?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-or run `npx nx graph` to visually explore what was created. Now, let's get you up to speed!
+- **Smart matching**: AI-assisted suggestions align employee skills, availability, and interests to project needs.
+- **Profiles and projects**: CRUD for employee profiles, projects, and allocations.
+- **Role-based access**: Manager and employee workflows behind authenticated APIs.
+- **Notifications**: In-app notifications with read/unread tracking.
 
-## Finish your CI setup
+The backend is a Go service (Gin, GORM, Postgres, vector embeddings). The frontend is a React + Vite app. The monorepo is managed with Nx.
 
-[Click here to finish setting up your workspace!](https://cloud.nx.app/connect/CpqgwDG5Fj)
+## Local setup
 
-## Run tasks
+### Prerequisites
 
-To run tasks with Nx use:
+- Node.js 20+
+- Go 1.23+
+- Postgres database (local or hosted)
 
-```sh
-npx nx <target> <project-name>
+### Backend (Go API)
+
+1) Create `apps/backend/.env` with at least:
+
+```env
+ENV=development
+SERVER_HOST=0.0.0.0
+SERVER_PORT=8080
+
+# Either provide DB_URL or all fields below
+DB_URL=
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=talent_matching
+DB_USER=postgres
+DB_PASSWORD=postgres
+DB_SSL_MODE=disable
+
+# Auth (required)
+JWT_SECRET=replace-with-a-secret
+GOOGLE_CLIENT_ID=your-google-client-id
+GOOGLE_CLIENT_SECRET=your-google-client-secret
+GOOGLE_REDIRECT_URL=http://localhost:5173/auth/callback
+
+# AI (optional)
+OPENAI_API_KEY=
+OPENAI_API_EMBEDDING_MODEL=text-embedding-3-small
+AI_MODEL=gpt-4
+GROKK_API_KEY=
+GROKK_BASE_URL=https://api.x.ai/v1
+GROKK_MODEL=grok-4-fast
 ```
 
-For example:
+2) Install workspace deps (from repo root):
 
 ```sh
-npx nx build myproject
+npm ci --legacy-peer-deps
 ```
 
-These targets are either
-[inferred automatically](https://nx.dev/concepts/inferred-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-or defined in the `project.json` or `package.json` files.
-
-[More about running tasks in the docs &raquo;](https://nx.dev/features/run-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-## Add new projects
-
-While you could add new projects to your workspace manually, you might want to leverage
-[Nx plugins](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-and their
-[code generation](https://nx.dev/features/generate-code?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-feature.
-
-To install a new plugin you can use the `nx add` command. Here's an example of adding the React
-plugin:
+3) Run database migrations:
 
 ```sh
-npx nx add @nx/react
+cd apps/backend
+go run ./cmd/migrate --action up
 ```
 
-Use the plugin's generator to create new projects. For example, to create a new React app or
-library:
+4) Start the API server:
 
 ```sh
-# Generate an app
-npx nx g @nx/react:app demo
+# from repo root using Nx
+npx nx serve backend
 
-# Generate a library
-npx nx g @nx/react:lib some-lib
+# or directly in backend app
+cd apps/backend && go run ./cmd/api
 ```
 
-You can use `npx nx list` to get a list of installed plugins. Then, run `npx nx list <plugin-name>`
-to learn about more specific capabilities of a particular plugin. Alternatively,
-[install Nx Console](https://nx.dev/getting-started/editor-setup?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-to browse plugins and generators in your IDE.
+API runs at `http://localhost:8080`. Health: `GET /health`.
 
-[Learn more about Nx plugins &raquo;](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-|
-[Browse the plugin registry &raquo;](https://nx.dev/plugin-registry?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+### Frontend (React + Vite)
 
-[Learn more about Nx on CI](https://nx.dev/ci/intro/ci-with-nx#ready-get-started-with-your-provider?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+1) Install deps (if not already):
 
-## Install Nx Console
+```sh
+cd apps/web
+npm install
+```
 
-Nx Console is an editor extension that enriches your developer experience. It lets you run tasks,
-generate code, and improves code autocompletion in your IDE. It is available for VSCode and
-IntelliJ.
+2) Start dev server:
 
-[Install Nx Console &raquo;](https://nx.dev/getting-started/editor-setup?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+```sh
+npm run dev
+```
 
-## Useful links
+App runs at `http://localhost:5173`.
 
-Learn more:
+## CI/CD and deployment
 
-- [Learn more about this workspace setup](https://nx.dev/getting-started/intro#learn-nx?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Learn about Nx on CI](https://nx.dev/ci/intro/ci-with-nx?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Releasing Packages with Nx release](https://nx.dev/features/manage-releases?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [What are Nx plugins?](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+### GitHub Actions CI
 
-And join the Nx community:
+Workflow at `.github/workflows/ci.yml`:
 
-- [Discord](https://go.nx.dev/community)
-- [Follow us on X](https://twitter.com/nxdevtools) or
-  [LinkedIn](https://www.linkedin.com/company/nrwl)
-- [Our Youtube channel](https://www.youtube.com/@nxdevtools)
-- [Our blog](https://nx.dev/blog?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+- Installs Node.js 20 and caches npm deps
+- Runs `npm ci` then `npx nx run-many -t lint test build`
+- Optional Nx Cloud integration for distributed caching/logs
+
+### Deploying to Render (example)
+
+- **Backend**: Render Web Service (Go)
+  - Build: `go build -o dist/api ./cmd/api`
+  - Start: `./dist/api`
+  - Set env vars as in `.env` (DB_URL or DB_* and JWT/Google keys)
+- **Database**: Render Postgres. Set `DB_URL` (or discrete DB_* vars) in backend service.
+- **Frontend**: Render Static Site from `apps/web`
+  - Build: `npm ci && npm run build`
+  - Publish directory: `dist`
+
+Connect the GitHub repo to Render and enable auto-deploy on `main`. GitHub Actions will run CI on pushes; Render can auto-deploy after successful builds.
