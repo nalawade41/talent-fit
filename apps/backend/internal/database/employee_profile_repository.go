@@ -2,6 +2,7 @@ package database
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
 	"github.com/talent-fit/backend/internal/domain"
@@ -98,4 +99,186 @@ func (r *EmployeeProfileRepository) GetAvailableEmployees(ctx context.Context) (
 		return nil, result.Error
 	}
 	return profiles, nil
+}
+
+// GetSimilarAvailableProfiles finds the most similar available employee profiles to a project using vector similarity
+// Availability Logic:
+// - Either: Not currently allocated to any project
+// - Or: Marked as available for extra work (availability_flag = true) AND not already working on the same project
+func (r *EmployeeProfileRepository) GetSimilarAvailableProfiles(ctx context.Context, projectID string, limit int) ([]*domain.SimilarityMatch, error) {
+	if limit <= 0 {
+		limit = 10 // Default limit
+	}
+
+	query := `
+		WITH proj AS (
+			SELECT embedding AS e
+			FROM projects
+			WHERE id = ? AND embedding IS NOT NULL
+		)
+		SELECT 
+			ep.user_id,
+			ep.geo,
+			ep.date_of_joining,
+			ep.end_date,
+			ep.notice_date,
+			ep.type,
+			ep.skills,
+			ep.years_of_experience,
+			ep.industry,
+			ep.availability_flag,
+			ep.embedding,
+			ep.created_at,
+			ep.updated_at,
+			1 - (ep.embedding <=> proj.e) AS similarity
+		FROM employee_profiles ep, proj
+		WHERE ep.embedding IS NOT NULL
+			AND ep.deleted_at IS NULL
+			AND (
+				NOT EXISTS (
+					SELECT 1
+					FROM project_allocations pa
+					WHERE pa.employee_id = ep.user_id
+						AND pa.deleted_at IS NULL
+						AND pa.end_date IS NULL
+				)
+				OR (
+					ep.availability_flag = true
+					AND NOT EXISTS (
+						SELECT 1
+						FROM project_allocations pa
+						WHERE pa.employee_id = ep.user_id
+							AND pa.project_id = ?
+							AND pa.deleted_at IS NULL
+					)
+				)
+			)
+		ORDER BY ep.embedding <=> proj.e
+		LIMIT ?`
+
+	type QueryResult struct {
+		entities.EmployeeProfile
+		Similarity float64 `gorm:"column:similarity"`
+	}
+
+	var results []QueryResult
+	err := r.db.WithContext(ctx).Raw(query, projectID, projectID, limit).Scan(&results).Error
+	if err != nil {
+		return nil, fmt.Errorf("failed to execute similarity search: %w", err)
+	}
+
+	// Convert to SimilarityMatch slice
+	matches := make([]*domain.SimilarityMatch, len(results))
+	for i, result := range results {
+		// Create a copy of the profile to avoid pointer issues
+		profile := result.EmployeeProfile
+		matches[i] = &domain.SimilarityMatch{
+			Profile:    &profile,
+			Similarity: result.Similarity,
+		}
+	}
+
+	return matches, nil
+}
+
+// GetSimilarAvailableProfilesWithUser finds similar profiles and includes user information
+// Availability Logic:
+// - Either: Not currently allocated to any project
+// - Or: Marked as available for extra work (availability_flag = true) AND not already working on the same project
+func (r *EmployeeProfileRepository) GetSimilarAvailableProfilesWithUser(ctx context.Context, projectID string, limit int) ([]*domain.SimilarityMatch, error) {
+	if limit <= 0 {
+		limit = 10 // Default limit
+	}
+
+	query := `
+		WITH proj AS (
+			SELECT embedding AS e
+			FROM projects
+			WHERE id = ? AND embedding IS NOT NULL
+		)
+		SELECT 
+			ep.user_id,
+			ep.geo,
+			ep.date_of_joining,
+			ep.end_date,
+			ep.notice_date,
+			ep.type,
+			ep.skills,
+			ep.years_of_experience,
+			ep.industry,
+			ep.availability_flag,
+			ep.embedding,
+			ep.created_at,
+			ep.updated_at,
+			u.first_name,
+			u.last_name,
+			u.email,
+			u.role,
+			1 - (ep.embedding <=> proj.e) AS similarity
+		FROM employee_profiles ep
+		INNER JOIN users u ON ep.user_id = u.id
+		CROSS JOIN proj
+		WHERE ep.embedding IS NOT NULL
+			AND ep.deleted_at IS NULL
+			AND u.deleted_at IS NULL
+			AND (
+				NOT EXISTS (
+					SELECT 1
+					FROM project_allocations pa
+					WHERE pa.employee_id = ep.user_id
+						AND pa.deleted_at IS NULL
+						AND pa.end_date IS NULL
+				)
+				OR (
+					ep.availability_flag = true
+					AND NOT EXISTS (
+						SELECT 1
+						FROM project_allocations pa
+						WHERE pa.employee_id = ep.user_id
+							AND pa.project_id = ?
+							AND pa.deleted_at IS NULL
+					)
+				)
+			)
+		ORDER BY ep.embedding <=> proj.e
+		LIMIT ?`
+
+	type QueryResultWithUser struct {
+		entities.EmployeeProfile
+		// User fields
+		FirstName string  `gorm:"column:first_name"`
+		LastName  string  `gorm:"column:last_name"`
+		Email     string  `gorm:"column:email"`
+		Role      string  `gorm:"column:role"`
+		Similarity float64 `gorm:"column:similarity"`
+	}
+
+	var results []QueryResultWithUser
+	err := r.db.WithContext(ctx).Raw(query, projectID, projectID, limit).Scan(&results).Error
+	if err != nil {
+		return nil, fmt.Errorf("failed to execute similarity search with user data: %w", err)
+	}
+
+	// Convert to SimilarityMatch slice and populate user data
+	matches := make([]*domain.SimilarityMatch, len(results))
+	for i, result := range results {
+		// Create a copy of the profile
+		profile := result.EmployeeProfile
+		
+		// Populate user data
+		profile.User = entities.User{
+			ID:        profile.UserID,
+			FirstName: result.FirstName,
+			LastName:  result.LastName,
+			Email:     result.Email,
+			Role:      result.Role,
+		}
+
+		matches[i] = &domain.SimilarityMatch{
+			Profile:    &profile,
+			Similarity: result.Similarity,
+		}
+	}
+
+	return matches, nil
 }

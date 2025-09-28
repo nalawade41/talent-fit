@@ -7,6 +7,12 @@ import (
 	"github.com/talent-fit/backend/internal/models"
 )
 
+// SimilarityMatch represents the result of similarity matching
+type SimilarityMatch struct {
+	Profile    *entities.EmployeeProfile
+	Similarity float64
+}
+
 // EmployeeProfileRepository defines the interface for employee profile data operations
 type EmployeeProfileRepository interface {
 	GetAll(ctx context.Context) ([]*entities.EmployeeProfile, error)
@@ -15,6 +21,8 @@ type EmployeeProfileRepository interface {
 	Create(ctx context.Context, profile *entities.EmployeeProfile) (*entities.EmployeeProfile, error)
 	Update(ctx context.Context, userID string, profile *entities.EmployeeProfile) (*entities.EmployeeProfile, error)
 	GetAvailableEmployees(ctx context.Context) ([]*entities.EmployeeProfile, error)
+	GetSimilarAvailableProfiles(ctx context.Context, projectID string, limit int) ([]*SimilarityMatch, error)
+	GetSimilarAvailableProfilesWithUser(ctx context.Context, projectID string, limit int) ([]*SimilarityMatch, error)
 }
 
 // EmployeeProfileService defines the interface for employee profile business logic

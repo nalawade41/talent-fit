@@ -6,6 +6,7 @@ import (
 	"errors"
 	"time"
 
+	"github.com/pgvector/pgvector-go"
 	"gorm.io/gorm"
 )
 
@@ -48,8 +49,8 @@ type EmployeeProfile struct {
 	Skills            Skills `gorm:"type:jsonb"`
 	YearsOfExperience int
 	Industry          string
-	AvailabilityFlag  bool `gorm:"default:false"`
-	Embedding         []float32 `gorm:"type:vector(1536)"`
+	AvailabilityFlag  bool            `gorm:"default:false"`
+	Embedding         pgvector.Vector `gorm:"type:vector(1536)"`
 	CreatedAt         time.Time
 	UpdatedAt         time.Time
 	DeletedAt         gorm.DeletedAt `gorm:"index"`
