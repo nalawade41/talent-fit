@@ -1,9 +1,9 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
-import { EmployeeProfileService, ProjectAllocationService } from '../services';
-import type { Employee } from '../data/employees';
 import type { ProjectAllocation } from '../data/allocations';
+import type { Employee } from '../data/employees';
+import { EmployeeProfileService, ProjectAllocationService } from '../services';
 
 interface UseEmployeeDashboardReturn {
   employee: Employee | null;

@@ -1,6 +1,6 @@
-import { apiService } from './api/client';
-import type { BackendEmployeeProfile, ApiResponse } from '../types/api';
 import type { Employee } from '../data/employees';
+import type { ApiResponse, BackendEmployeeProfile } from '../types/api';
+import { apiService } from './api/client';
 
 // Convert backend response to frontend Employee type
 const convertToEmployee = (backendProfile: BackendEmployeeProfile): Employee => {
