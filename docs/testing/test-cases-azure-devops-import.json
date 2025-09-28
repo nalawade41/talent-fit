@@ -1,0 +1,2113 @@
+[
+  {
+    "id": "TC-DV-001",
+    "title": "Valid Employee Data Structure",
+    "description": "Validates that employee data contains all required fields with correct types",
+    "type": "Manual Test Case",
+    "priority": "High",
+    "state": "Design",
+    "area": "Data Validation",
+    "tags": ["data", "validation", "employee"],
+    "steps": [
+      {
+        "step": "1. Load employee data",
+        "expected": "Employee data loads successfully"
+      },
+      {
+        "step": "2. Verify all required fields exist",
+        "expected": "All required fields are present"
+      },
+      {
+        "step": "3. Verify field types are correct",
+        "expected": "Field types match specifications"
+      }
+    ],
+    "expectedResult": "All employee data structure validations pass",
+    "preconditions": "Mock employee data is available",
+    "testData": "employee: {id: '1', name: 'John Doe', skills: ['React'], availability: true}"
+  },
+  {
+    "id": "TC-DV-002",
+    "title": "Employee Skills Array Validation",
+    "description": "Ensures employee skills are stored as arrays and contain valid skill names",
+    "type": "Manual Test Case",
+    "priority": "High",
+    "state": "Design",
+    "area": "Data Validation",
+    "tags": ["data", "validation", "skills"],
+    "steps": [
+      {
+        "step": "1. Load employee with skills",
+        "expected": "Employee data loads with skills array"
+      },
+      {
+        "step": "2. Verify skills is an array",
+        "expected": "Skills field is an array type"
+      },
+      {
+        "step": "3. Verify each skill is a non-empty string",
+        "expected": "All skills are valid non-empty strings"
+      }
+    ],
+    "expectedResult": "Skills validation passes",
+    "preconditions": "Employee data with skills array",
+    "testData": "skills: ['React', 'TypeScript']"
+  },
+  {
+    "id": "TC-DV-003",
+    "title": "Employee Availability Status Validation",
+    "description": "Validates that availability status is boolean and properly set",
+    "type": "Manual Test Case",
+    "priority": "Medium",
+    "state": "Design",
+    "area": "Data Validation",
+    "tags": ["data", "validation", "availability"],
+    "steps": [
+      {
+        "step": "1. Load employee data",
+        "expected": "Employee data loads successfully"
+      },
+      {
+        "step": "2. Verify availability is boolean",
+        "expected": "Availability field is boolean type"
+      },
+      {
+        "step": "3. Test both available and unavailable states",
+        "expected": "Both true and false values are accepted"
+      }
+    ],
+    "expectedResult": "Availability status validation passes",
+    "preconditions": "Employee data with availability status",
+    "testData": "availability: true"
+  },
+  {
+    "id": "TC-DV-004",
+    "title": "Valid Project Data Structure",
+    "description": "Validates project data contains required fields with correct types",
+    "type": "Manual Test Case",
+    "priority": "High",
+    "state": "Design",
+    "area": "Data Validation",
+    "tags": ["data", "validation", "project"],
+    "steps": [
+      {
+        "step": "1. Load project data",
+        "expected": "Project data loads successfully"
+      },
+      {
+        "step": "2. Verify required fields exist",
+        "expected": "All required fields are present"
+      },
+      {
+        "step": "3. Verify field types are correct",
+        "expected": "Field types match specifications"
+      }
+    ],
+    "expectedResult": "Project structure validation passes",
+    "preconditions": "Mock project data available",
+    "testData": "project: {id: 'p1', name: 'Project Alpha', status: 'active'}"
+  },
+  {
+    "id": "TC-DV-005",
+    "title": "Project Status Validation",
+    "description": "Ensures project status is one of the valid enum values",
+    "type": "Manual Test Case",
+    "priority": "Medium",
+    "state": "Design",
+    "area": "Data Validation",
+    "tags": ["data", "validation", "status"],
+    "steps": [
+      {
+        "step": "1. Load project data",
+        "expected": "Project data loads successfully"
+      },
+      {
+        "step": "2. Verify status is valid enum value",
+        "expected": "Status is one of: active, planning, completed"
+      },
+      {
+        "step": "3. Test all valid status values",
+        "expected": "All enum values are accepted"
+      }
+    ],
+    "expectedResult": "Status validation passes",
+    "preconditions": "Project data with status field",
+    "testData": "status: 'active' | 'planning' | 'completed'"
+  },
+  {
+    "id": "TC-DV-006",
+    "title": "Project Requirements Array Validation",
+    "description": "Validates project requirements are arrays of valid skill names",
+    "type": "Manual Test Case",
+    "priority": "Medium",
+    "state": "Design",
+    "area": "Data Validation",
+    "tags": ["data", "validation", "requirements"],
+    "steps": [
+      {
+        "step": "1. Load project data",
+        "expected": "Project data loads successfully"
+      },
+      {
+        "step": "2. Verify requirements is array",
+        "expected": "Requirements field is an array"
+      },
+      {
+        "step": "3. Verify each requirement is valid skill",
+        "expected": "All requirements are valid skill names"
+      }
+    ],
+    "expectedResult": "Requirements validation passes",
+    "preconditions": "Project with requirements array",
+    "testData": "requirements: ['React', 'Node.js']"
+  },
+  {
+    "id": "TC-DV-007",
+    "title": "Valid Allocation Data Structure",
+    "description": "Validates allocation data contains required relationship fields",
+    "type": "Manual Test Case",
+    "priority": "High",
+    "state": "Design",
+    "area": "Data Validation",
+    "tags": ["data", "validation", "allocation"],
+    "steps": [
+      {
+        "step": "1. Load allocation data",
+        "expected": "Allocation data loads successfully"
+      },
+      {
+        "step": "2. Verify employeeId and projectId exist",
+        "expected": "Both relationship IDs are present"
+      },
+      {
+        "step": "3. Verify date fields are valid",
+        "expected": "Date fields are in correct format"
+      }
+    ],
+    "expectedResult": "Allocation structure validation passes",
+    "preconditions": "Mock allocation data available",
+    "testData": "allocation: {employeeId: '1', projectId: 'p1', startDate: '2024-01-01'}"
+  },
+  {
+    "id": "TC-DV-008",
+    "title": "Allocation Date Validation",
+    "description": "Ensures allocation dates are valid and logical",
+    "type": "Manual Test Case",
+    "priority": "Medium",
+    "state": "Design",
+    "area": "Data Validation",
+    "tags": ["data", "validation", "dates"],
+    "steps": [
+      {
+        "step": "1. Load allocation data",
+        "expected": "Allocation data loads successfully"
+      },
+      {
+        "step": "2. Verify start date is before end date",
+        "expected": "Start date precedes end date"
+      },
+      {
+        "step": "3. Verify dates are in valid format",
+        "expected": "Dates are in YYYY-MM-DD format"
+      }
+    ],
+    "expectedResult": "Date validation passes",
+    "preconditions": "Allocation with start and end dates",
+    "testData": "dates: {start: '2024-01-01', end: '2024-06-01'}"
+  },
+  {
+    "id": "TC-DV-009",
+    "title": "Employee-Allocation Relationship",
+    "description": "Validates that allocations reference valid employees",
+    "type": "Manual Test Case",
+    "priority": "High",
+    "state": "Design",
+    "area": "Data Validation",
+    "tags": ["data", "relationship", "employee"],
+    "steps": [
+      {
+        "step": "1. Load employee data",
+        "expected": "Employee data loads successfully"
+      },
+      {
+        "step": "2. Load allocation data",
+        "expected": "Allocation data loads successfully"
+      },
+      {
+        "step": "3. Verify allocation employeeId exists in employees",
+        "expected": "Employee ID references valid employee"
+      }
+    ],
+    "expectedResult": "Relationship validation passes",
+    "preconditions": "Employee and allocation data",
+    "testData": "employeeId: '1', employees: [{id: '1', ...}]"
+  },
+  {
+    "id": "TC-DV-010",
+    "title": "Project-Allocation Relationship",
+    "description": "Validates that allocations reference valid projects",
+    "type": "Manual Test Case",
+    "priority": "High",
+    "state": "Design",
+    "area": "Data Validation",
+    "tags": ["data", "relationship", "project"],
+    "steps": [
+      {
+        "step": "1. Load project data",
+        "expected": "Project data loads successfully"
+      },
+      {
+        "step": "2. Load allocation data",
+        "expected": "Allocation data loads successfully"
+      },
+      {
+        "step": "3. Verify allocation projectId exists in projects",
+        "expected": "Project ID references valid project"
+      }
+    ],
+    "expectedResult": "Relationship validation passes",
+    "preconditions": "Project and allocation data",
+    "testData": "projectId: 'p1', projects: [{id: 'p1', ...}]"
+  },
+  {
+    "id": "TC-DV-011",
+    "title": "Employee-Project Skill Matching",
+    "description": "Validates that employees have skills required by their projects",
+    "type": "Manual Test Case",
+    "priority": "Medium",
+    "state": "Design",
+    "area": "Data Validation",
+    "tags": ["business", "logic", "skills"],
+    "steps": [
+      {
+        "step": "1. Load allocated employee and project",
+        "expected": "Employee and project data loads"
+      },
+      {
+        "step": "2. Compare employee skills with project requirements",
+        "expected": "Skills comparison completes"
+      },
+      {
+        "step": "3. Verify skill match exists",
+        "expected": "At least one skill matches requirements"
+      }
+    ],
+    "expectedResult": "Skill matching validation passes",
+    "preconditions": "Employee, project, and allocation data",
+    "testData": "employeeSkills: ['React'], projectRequirements: ['React']"
+  },
+  {
+    "id": "TC-DV-012",
+    "title": "Employee Filtering by Skills",
+    "description": "Tests filtering employees by specific skills",
+    "type": "Manual Test Case",
+    "priority": "Medium",
+    "state": "Design",
+    "area": "Data Validation",
+    "tags": ["filtering", "functional"],
+    "steps": [
+      {
+        "step": "1. Load employee data",
+        "expected": "Employee data loads successfully"
+      },
+      {
+        "step": "2. Apply skill filter",
+        "expected": "Filter is applied to data"
+      },
+      {
+        "step": "3. Verify correct employees returned",
+        "expected": "Only employees with matching skills returned"
+      }
+    ],
+    "expectedResult": "Filtering works correctly",
+    "preconditions": "Multiple employees with different skills",
+    "testData": "filter: 'React', employees: [{skills: ['React']}, {skills: ['Vue']}]"
+  },
+  {
+    "id": "TC-DV-013",
+    "title": "Employee Filtering by Availability",
+    "description": "Tests filtering employees by availability status",
+    "type": "Manual Test Case",
+    "priority": "Medium",
+    "state": "Design",
+    "area": "Data Validation",
+    "tags": ["filtering", "functional"],
+    "steps": [
+      {
+        "step": "1. Load employee data",
+        "expected": "Employee data loads successfully"
+      },
+      {
+        "step": "2. Apply availability filter",
+        "expected": "Filter is applied to data"
+      },
+      {
+        "step": "3. Verify correct employees returned",
+        "expected": "Only employees with matching availability returned"
+      }
+    ],
+    "expectedResult": "Availability filtering works",
+    "preconditions": "Employees with mixed availability",
+    "testData": "filter: true, employees: [{availability: true}, {availability: false}]"
+  },
+  {
+    "id": "TC-DV-014",
+    "title": "Project Filtering by Status",
+    "description": "Tests filtering projects by status",
+    "type": "Manual Test Case",
+    "priority": "Medium",
+    "state": "Design",
+    "area": "Data Validation",
+    "tags": ["filtering", "functional"],
+    "steps": [
+      {
+        "step": "1. Load project data",
+        "expected": "Project data loads successfully"
+      },
+      {
+        "step": "2. Apply status filter",
+        "expected": "Filter is applied to data"
+      },
+      {
+        "step": "3. Verify correct projects returned",
+        "expected": "Only projects with matching status returned"
+      }
+    ],
+    "expectedResult": "Status filtering works",
+    "preconditions": "Projects with different statuses",
+    "testData": "filter: 'active', projects: [{status: 'active'}, {status: 'planning'}]"
+  },
+  {
+    "id": "TC-DV-015",
+    "title": "Project Filtering by Skills",
+    "description": "Tests filtering projects by required skills",
+    "type": "Manual Test Case",
+    "priority": "Medium",
+    "state": "Design",
+    "area": "Data Validation",
+    "tags": ["filtering", "functional"],
+    "steps": [
+      {
+        "step": "1. Load project data",
+        "expected": "Project data loads successfully"
+      },
+      {
+        "step": "2. Apply skill filter",
+        "expected": "Filter is applied to data"
+      },
+      {
+        "step": "3. Verify correct projects returned",
+        "expected": "Only projects with matching requirements returned"
+      }
+    ],
+    "expectedResult": "Skill filtering works",
+    "preconditions": "Projects with different requirements",
+    "testData": "filter: 'React', projects: [{requirements: ['React']}, {requirements: ['Vue']}]"
+  },
+  {
+    "id": "TC-DV-016",
+    "title": "Unique Employee IDs",
+    "description": "Ensures all employee IDs are unique",
+    "type": "Manual Test Case",
+    "priority": "High",
+    "state": "Design",
+    "area": "Data Validation",
+    "tags": ["data", "integrity", "unique"],
+    "steps": [
+      {
+        "step": "1. Load all employees",
+        "expected": "All employee data loads"
+      },
+      {
+        "step": "2. Check for duplicate IDs",
+        "expected": "Duplicate check completes"
+      },
+      {
+        "step": "3. Verify uniqueness",
+        "expected": "All IDs are unique"
+      }
+    ],
+    "expectedResult": "All IDs are unique",
+    "preconditions": "Multiple employee records",
+    "testData": "employees: [{id: '1'}, {id: '2'}, {id: '1'}] - should fail"
+  },
+  {
+    "id": "TC-DV-017",
+    "title": "Unique Project IDs",
+    "description": "Ensures all project IDs are unique",
+    "type": "Manual Test Case",
+    "priority": "High",
+    "state": "Design",
+    "area": "Data Validation",
+    "tags": ["data", "integrity", "unique"],
+    "steps": [
+      {
+        "step": "1. Load all projects",
+        "expected": "All project data loads"
+      },
+      {
+        "step": "2. Check for duplicate IDs",
+        "expected": "Duplicate check completes"
+      },
+      {
+        "step": "3. Verify uniqueness",
+        "expected": "All IDs are unique"
+      }
+    ],
+    "expectedResult": "All IDs are unique",
+    "preconditions": "Multiple project records",
+    "testData": "projects: [{id: 'p1'}, {id: 'p2'}, {id: 'p1'}] - should fail"
+  },
+  {
+    "id": "TC-DV-018",
+    "title": "Unique Allocation IDs",
+    "description": "Ensures all allocation IDs are unique",
+    "type": "Manual Test Case",
+    "priority": "High",
+    "state": "Design",
+    "area": "Data Validation",
+    "tags": ["data", "integrity", "unique"],
+    "steps": [
+      {
+        "step": "1. Load all allocations",
+        "expected": "All allocation data loads"
+      },
+      {
+        "step": "2. Check for duplicate IDs",
+        "expected": "Duplicate check completes"
+      },
+      {
+        "step": "3. Verify uniqueness",
+        "expected": "All IDs are unique"
+      }
+    ],
+    "expectedResult": "All IDs are unique",
+    "preconditions": "Multiple allocation records",
+    "testData": "allocations: [{id: 'a1'}, {id: 'a2'}, {id: 'a1'}] - should fail"
+  },
+  {
+    "id": "TC-DV-019",
+    "title": "Active Project Allocation Rules",
+    "description": "Validates business rules for active project allocations",
+    "type": "Manual Test Case",
+    "priority": "Medium",
+    "state": "Design",
+    "area": "Data Validation",
+    "tags": ["business", "logic", "rules"],
+    "steps": [
+      {
+        "step": "1. Load active projects",
+        "expected": "Active project data loads"
+      },
+      {
+        "step": "2. Check allocation rules",
+        "expected": "Business rules are evaluated"
+      },
+      {
+        "step": "3. Verify business logic compliance",
+        "expected": "All rules are followed"
+      }
+    ],
+    "expectedResult": "Business rules are followed",
+    "preconditions": "Active projects and allocations",
+    "testData": "activeProjects: [{status: 'active'}], allocations: [...]"
+  },
+  {
+    "id": "TC-DV-020",
+    "title": "Employee Availability Business Rules",
+    "description": "Validates business rules for employee availability",
+    "type": "Manual Test Case",
+    "priority": "Medium",
+    "state": "Design",
+    "area": "Data Validation",
+    "tags": ["business", "logic", "rules"],
+    "steps": [
+      {
+        "step": "1. Load employee data",
+        "expected": "Employee data loads"
+      },
+      {
+        "step": "2. Check availability rules",
+        "expected": "Business rules are evaluated"
+      },
+      {
+        "step": "3. Verify business logic compliance",
+        "expected": "All rules are followed"
+      }
+    ],
+    "expectedResult": "Availability rules are followed",
+    "preconditions": "Employee availability data",
+    "testData": "employees: [{availability: true}, {availability: false}]"
+  },
+  {
+    "id": "TC-DV-021",
+    "title": "Data Completeness Validation",
+    "description": "Ensures all required data relationships are complete",
+    "type": "Manual Test Case",
+    "priority": "High",
+    "state": "Design",
+    "area": "Data Validation",
+    "tags": ["data", "integrity", "complete"],
+    "steps": [
+      {
+        "step": "1. Load all data",
+        "expected": "Complete dataset loads"
+      },
+      {
+        "step": "2. Check for orphaned records",
+        "expected": "Orphan check completes"
+      },
+      {
+        "step": "3. Verify data completeness",
+        "expected": "All relationships are complete"
+      }
+    ],
+    "expectedResult": "All data relationships are complete",
+    "preconditions": "Full dataset loaded",
+    "testData": "Complete dataset with all relationships"
+  },
+  {
+    "id": "TC-UI-001",
+    "title": "Basic Component Rendering",
+    "description": "Validates that basic UI components render without errors",
+    "type": "Manual Test Case",
+    "priority": "Medium",
+    "state": "Design",
+    "area": "UI Components",
+    "tags": ["ui", "rendering", "basic"],
+    "steps": [
+      {
+        "step": "1. Render basic UI component",
+        "expected": "Component renders in DOM"
+      },
+      {
+        "step": "2. Verify component appears in DOM",
+        "expected": "Component is visible"
+      },
+      {
+        "step": "3. Check for console errors",
+        "expected": "No console errors appear"
+      }
+    ],
+    "expectedResult": "Component renders successfully",
+    "preconditions": "Component library available",
+    "testData": "component: BasicButton"
+  },
+  {
+    "id": "TC-UI-002",
+    "title": "Component Props Handling",
+    "description": "Tests that components handle props correctly",
+    "type": "Manual Test Case",
+    "priority": "Medium",
+    "state": "Design",
+    "area": "UI Components",
+    "tags": ["ui", "props", "functional"],
+    "steps": [
+      {
+        "step": "1. Render component with different props",
+        "expected": "Component renders with props"
+      },
+      {
+        "step": "2. Verify prop values are applied",
+        "expected": "Props affect component behavior"
+      },
+      {
+        "step": "3. Check component behavior changes",
+        "expected": "Behavior matches prop values"
+      }
+    ],
+    "expectedResult": "Props are handled correctly",
+    "preconditions": "Component with configurable props",
+    "testData": "props: {variant: 'primary', size: 'large'}"
+  },
+  {
+    "id": "TC-UI-003",
+    "title": "Component State Management",
+    "description": "Validates internal component state management",
+    "type": "Manual Test Case",
+    "priority": "Medium",
+    "state": "Design",
+    "area": "UI Components",
+    "tags": ["ui", "state", "functional"],
+    "steps": [
+      {
+        "step": "1. Render component with initial state",
+        "expected": "Component renders with initial state"
+      },
+      {
+        "step": "2. Trigger state changes",
+        "expected": "State change triggers"
+      },
+      {
+        "step": "3. Verify state updates correctly",
+        "expected": "State reflects changes"
+      }
+    ],
+    "expectedResult": "State management works",
+    "preconditions": "Stateful component",
+    "testData": "initialState: {count: 0}"
+  },
+  {
+    "id": "TC-UI-004",
+    "title": "Component Event Handling",
+    "description": "Tests component event handling and callbacks",
+    "type": "Manual Test Case",
+    "priority": "Medium",
+    "state": "Design",
+    "area": "UI Components",
+    "tags": ["ui", "events", "functional"],
+    "steps": [
+      {
+        "step": "1. Render component with event handlers",
+        "expected": "Component renders with handlers"
+      },
+      {
+        "step": "2. Trigger events",
+        "expected": "Events are triggered"
+      },
+      {
+        "step": "3. Verify callbacks are called",
+        "expected": "Callbacks execute correctly"
+      }
+    ],
+    "expectedResult": "Events are handled correctly",
+    "preconditions": "Component with event handlers",
+    "testData": "event: onClick"
+  },
+  {
+    "id": "TC-PB-005",
+    "title": "Profile Component Rendering",
+    "description": "Validates profile component renders with data",
+    "type": "Manual Test Case",
+    "priority": "High",
+    "state": "Design",
+    "area": "UI Components",
+    "tags": ["ui", "profile", "rendering"],
+    "steps": [
+      {
+        "step": "1. Render profile component",
+        "expected": "Profile component renders"
+      },
+      {
+        "step": "2. Verify profile data displays",
+        "expected": "Profile data is visible"
+      },
+      {
+        "step": "3. Check component structure",
+        "expected": "Component structure is correct"
+      }
+    ],
+    "expectedResult": "Profile renders correctly",
+    "preconditions": "Profile component and mock data",
+    "testData": "profileData: {name: 'John', skills: ['React']}"
+  },
+  {
+    "id": "TC-PB-006",
+    "title": "Profile Data Display",
+    "description": "Tests that profile information displays correctly",
+    "type": "Manual Test Case",
+    "priority": "High",
+    "state": "Design",
+    "area": "UI Components",
+    "tags": ["ui", "profile", "data"],
+    "steps": [
+      {
+        "step": "1. Load profile data",
+        "expected": "Profile data loads"
+      },
+      {
+        "step": "2. Render profile component",
+        "expected": "Component renders with data"
+      },
+      {
+        "step": "3. Verify all data fields display",
+        "expected": "All fields are visible"
+      }
+    ],
+    "expectedResult": "All profile data shows",
+    "preconditions": "Profile with complete data",
+    "testData": "completeProfile: {name, email, skills, location}"
+  },
+  {
+    "id": "TC-PB-007",
+    "title": "Profile Edit Mode",
+    "description": "Validates profile editing functionality",
+    "type": "Manual Test Case",
+    "priority": "High",
+    "state": "Design",
+    "area": "UI Components",
+    "tags": ["ui", "profile", "functional"],
+    "steps": [
+      {
+        "step": "1. Enter edit mode",
+        "expected": "Edit mode activates"
+      },
+      {
+        "step": "2. Modify profile fields",
+        "expected": "Fields can be modified"
+      },
+      {
+        "step": "3. Save changes",
+        "expected": "Changes are saved"
+      }
+    ],
+    "expectedResult": "Profile editing works",
+    "preconditions": "Editable profile component",
+    "testData": "editMode: true"
+  },
+  {
+    "id": "TC-PB-008",
+    "title": "Profile Validation",
+    "description": "Tests profile form validation",
+    "type": "Manual Test Case",
+    "priority": "High",
+    "state": "Design",
+    "area": "UI Components",
+    "tags": ["ui", "profile", "validation"],
+    "steps": [
+      {
+        "step": "1. Enter invalid data",
+        "expected": "Invalid data is entered"
+      },
+      {
+        "step": "2. Attempt to save",
+        "expected": "Save is attempted"
+      },
+      {
+        "step": "3. Verify validation messages",
+        "expected": "Validation messages appear"
+      }
+    ],
+    "expectedResult": "Validation works correctly",
+    "preconditions": "Profile form with validation",
+    "testData": "invalidData: {email: 'invalid'}"
+  },
+  {
+    "id": "TC-PB-009",
+    "title": "Profile Save Functionality",
+    "description": "Validates profile save operation",
+    "type": "Manual Test Case",
+    "priority": "High",
+    "state": "Design",
+    "area": "UI Components",
+    "tags": ["ui", "profile", "functional"],
+    "steps": [
+      {
+        "step": "1. Modify profile data",
+        "expected": "Data is modified"
+      },
+      {
+        "step": "2. Click save button",
+        "expected": "Save button is clicked"
+      },
+      {
+        "step": "3. Verify data persistence",
+        "expected": "Data persists after save"
+      }
+    ],
+    "expectedResult": "Profile saves successfully",
+    "preconditions": "Profile form with save capability",
+    "testData": "saveData: {name: 'Updated Name'}"
+  },
+  {
+    "id": "TC-PC-010",
+    "title": "ProfileForm Rendering",
+    "description": "Tests ProfileForm renders with employee data",
+    "type": "Manual Test Case",
+    "priority": "High",
+    "state": "Design",
+    "area": "UI Components",
+    "tags": ["ui", "form", "rendering"],
+    "steps": [
+      {
+        "step": "1. Render ProfileForm with employee data",
+        "expected": "Form renders with data"
+      },
+      {
+        "step": "2. Verify form fields are populated",
+        "expected": "Fields show correct values"
+      },
+      {
+        "step": "3. Check form structure",
+        "expected": "Form structure is correct"
+      }
+    ],
+    "expectedResult": "Form renders with data",
+    "preconditions": "Employee data available",
+    "testData": "employeeData: {first_name: 'John', email: 'john@example.com'}"
+  },
+  {
+    "id": "TC-PC-011",
+    "title": "ProfileForm Submission",
+    "description": "Validates form submission functionality",
+    "type": "Manual Test Case",
+    "priority": "High",
+    "state": "Design",
+    "area": "UI Components",
+    "tags": ["ui", "form", "functional"],
+    "steps": [
+      {
+        "step": "1. Fill form fields",
+        "expected": "Fields are filled"
+      },
+      {
+        "step": "2. Click submit button",
+        "expected": "Submit button is clicked"
+      },
+      {
+        "step": "3. Verify onSave callback called",
+        "expected": "Callback is executed"
+      }
+    ],
+    "expectedResult": "Form submits correctly",
+    "preconditions": "ProfileForm rendered",
+    "testData": "formData: {first_name: 'Jane', email: 'jane@example.com'}"
+  },
+  {
+    "id": "TC-PC-012",
+    "title": "ProfileForm Validation",
+    "description": "Tests form field validation",
+    "type": "Manual Test Case",
+    "priority": "High",
+    "state": "Design",
+    "area": "UI Components",
+    "tags": ["ui", "form", "validation"],
+    "steps": [
+      {
+        "step": "1. Leave required fields empty",
+        "expected": "Required fields are empty"
+      },
+      {
+        "step": "2. Submit form",
+        "expected": "Form submission is attempted"
+      },
+      {
+        "step": "3. Verify validation errors display",
+        "expected": "Validation errors appear"
+      }
+    ],
+    "expectedResult": "Validation errors show",
+    "preconditions": "ProfileForm with validation",
+    "testData": "emptyFields: {first_name: '', email: ''}"
+  },
+  {
+    "id": "TC-PC-013",
+    "title": "AvailabilityToggle Initial State",
+    "description": "Tests toggle renders with correct initial state",
+    "type": "Manual Test Case",
+    "priority": "Medium",
+    "state": "Design",
+    "area": "UI Components",
+    "tags": ["ui", "toggle", "rendering"],
+    "steps": [
+      {
+        "step": "1. Render with isAvailable=true",
+        "expected": "Toggle renders with true state"
+      },
+      {
+        "step": "2. Verify toggle shows 'Available'",
+        "expected": "'Available' text displays"
+      },
+      {
+        "step": "3. Render with isAvailable=false",
+        "expected": "Toggle renders with false state"
+      },
+      {
+        "step": "4. Verify toggle shows 'Not available'",
+        "expected": "'Not available' text displays"
+      }
+    ],
+    "expectedResult": "Initial state displays correctly",
+    "preconditions": "AvailabilityToggle component",
+    "testData": "isAvailable: true"
+  },
+  {
+    "id": "TC-PC-014",
+    "title": "AvailabilityToggle Click Handler",
+    "description": "Validates toggle click functionality",
+    "type": "Manual Test Case",
+    "priority": "Medium",
+    "state": "Design",
+    "area": "UI Components",
+    "tags": ["ui", "toggle", "functional"],
+    "steps": [
+      {
+        "step": "1. Click toggle button",
+        "expected": "Toggle button is clicked"
+      },
+      {
+        "step": "2. Verify onToggle called with opposite value",
+        "expected": "Callback called with correct value"
+      },
+      {
+        "step": "3. Check visual state changes",
+        "expected": "Visual state updates"
+      }
+    ],
+    "expectedResult": "Toggle works correctly",
+    "preconditions": "AvailabilityToggle rendered",
+    "testData": "clickAction: toggle from true to false"
+  },
+  {
+    "id": "TC-PC-015",
+    "title": "AvailabilityToggle State Text",
+    "description": "Tests status text updates correctly",
+    "type": "Manual Test Case",
+    "priority": "Medium",
+    "state": "Design",
+    "area": "UI Components",
+    "tags": ["ui", "toggle", "functional"],
+    "steps": [
+      {
+        "step": "1. Toggle between states",
+        "expected": "State changes occur"
+      },
+      {
+        "step": "2. Verify status text changes",
+        "expected": "Text updates correctly"
+      },
+      {
+        "step": "3. Check accessibility labels",
+        "expected": "Accessibility labels are correct"
+      }
+    ],
+    "expectedResult": "Status text updates",
+    "preconditions": "AvailabilityToggle rendered",
+    "testData": "stateChange: true -> false"
+  },
+  {
+    "id": "TC-PC-016",
+    "title": "SkillsSelector Rendering",
+    "description": "Tests skills selector displays available skills",
+    "type": "Manual Test Case",
+    "priority": "Medium",
+    "state": "Design",
+    "area": "UI Components",
+    "tags": ["ui", "selector", "rendering"],
+    "steps": [
+      {
+        "step": "1. Render SkillsSelector",
+        "expected": "Selector component renders"
+      },
+      {
+        "step": "2. Verify available skills display",
+        "expected": "Skills list is visible"
+      },
+      {
+        "step": "3. Check selected skills are highlighted",
+        "expected": "Selected skills are highlighted"
+      }
+    ],
+    "expectedResult": "Skills display correctly",
+    "preconditions": "Skills data available",
+    "testData": "availableSkills: ['React', 'Vue', 'Angular']"
+  },
+  {
+    "id": "TC-PC-017",
+    "title": "SkillsSelector Selection",
+    "description": "Validates skill selection functionality",
+    "type": "Manual Test Case",
+    "priority": "Medium",
+    "state": "Design",
+    "area": "UI Components",
+    "tags": ["ui", "selector", "functional"],
+    "steps": [
+      {
+        "step": "1. Click unselected skill",
+        "expected": "Skill is clicked"
+      },
+      {
+        "step": "2. Verify onSkillsChange called with updated array",
+        "expected": "Callback called with correct data"
+      },
+      {
+        "step": "3. Check skill becomes selected",
+        "expected": "Skill selection updates"
+      }
+    ],
+    "expectedResult": "Skill selection works",
+    "preconditions": "SkillsSelector rendered",
+    "testData": "selectAction: add 'React' to []"
+  },
+  {
+    "id": "TC-PC-018",
+    "title": "SkillsSelector Removal",
+    "description": "Tests skill removal functionality",
+    "type": "Manual Test Case",
+    "priority": "Medium",
+    "state": "Design",
+    "area": "UI Components",
+    "tags": ["ui", "selector", "functional"],
+    "steps": [
+      {
+        "step": "1. Click selected skill",
+        "expected": "Selected skill is clicked"
+      },
+      {
+        "step": "2. Verify skill is removed from selection",
+        "expected": "Skill is deselected"
+      },
+      {
+        "step": "3. Check onSkillsChange called correctly",
+        "expected": "Callback called with updated data"
+      }
+    ],
+    "expectedResult": "Skill removal works",
+    "preconditions": "SkillsSelector with selected skills",
+    "testData": "removeAction: remove 'React' from ['React', 'Vue']"
+  },
+  {
+    "id": "TC-PC-019",
+    "title": "CountrySelector Rendering",
+    "description": "Tests country selector displays options",
+    "type": "Manual Test Case",
+    "priority": "Medium",
+    "state": "Design",
+    "area": "UI Components",
+    "tags": ["ui", "selector", "rendering"],
+    "steps": [
+      {
+        "step": "1. Render CountrySelector",
+        "expected": "Selector renders"
+      },
+      {
+        "step": "2. Verify country options display",
+        "expected": "Country list is visible"
+      },
+      {
+        "step": "3. Check current value is selected",
+        "expected": "Current selection is highlighted"
+      }
+    ],
+    "expectedResult": "Countries display correctly",
+    "preconditions": "Country data available",
+    "testData": "countries: ['US', 'UK', 'CA']"
+  },
+  {
+    "id": "TC-PC-020",
+    "title": "CountrySelector Selection",
+    "description": "Validates country selection functionality",
+    "type": "Manual Test Case",
+    "priority": "Medium",
+    "state": "Design",
+    "area": "UI Components",
+    "tags": ["ui", "selector", "functional"],
+    "steps": [
+      {
+        "step": "1. Select different country",
+        "expected": "Country option is selected"
+      },
+      {
+        "step": "2. Verify onChange called with new value",
+        "expected": "Callback called with correct value"
+      },
+      {
+        "step": "3. Check selection updates",
+        "expected": "Selection updates visually"
+      }
+    ],
+    "expectedResult": "Country selection works",
+    "preconditions": "CountrySelector rendered",
+    "testData": "selectAction: change from 'US' to 'UK'"
+  },
+  {
+    "id": "TC-PC-021",
+    "title": "IndustrySelector Rendering",
+    "description": "Tests industry selector displays options",
+    "type": "Manual Test Case",
+    "priority": "Medium",
+    "state": "Design",
+    "area": "UI Components",
+    "tags": ["ui", "selector", "rendering"],
+    "steps": [
+      {
+        "step": "1. Render IndustrySelector",
+        "expected": "Selector renders"
+      },
+      {
+        "step": "2. Verify industry options display",
+        "expected": "Industry list is visible"
+      },
+      {
+        "step": "3. Check current value is selected",
+        "expected": "Current selection is highlighted"
+      }
+    ],
+    "expectedResult": "Industries display correctly",
+    "preconditions": "Industry data available",
+    "testData": "industries: ['Technology', 'Finance', 'Healthcare']"
+  },
+  {
+    "id": "TC-PC-022",
+    "title": "IndustrySelector Selection",
+    "description": "Validates industry selection functionality",
+    "type": "Manual Test Case",
+    "priority": "Medium",
+    "state": "Design",
+    "area": "UI Components",
+    "tags": ["ui", "selector", "functional"],
+    "steps": [
+      {
+        "step": "1. Select different industry",
+        "expected": "Industry option is selected"
+      },
+      {
+        "step": "2. Verify onChange called with new value",
+        "expected": "Callback called with correct value"
+      },
+      {
+        "step": "3. Check selection updates",
+        "expected": "Selection updates visually"
+      }
+    ],
+    "expectedResult": "Industry selection works",
+    "preconditions": "IndustrySelector rendered",
+    "testData": "selectAction: change from 'Technology' to 'Finance'"
+  },
+  {
+    "id": "TC-PC-023",
+    "title": "IndustrySelector Custom Industries",
+    "description": "Tests selector with custom industry list",
+    "type": "Manual Test Case",
+    "priority": "Low",
+    "state": "Design",
+    "area": "UI Components",
+    "tags": ["ui", "selector", "functional"],
+    "steps": [
+      {
+        "step": "1. Render with custom industry array",
+        "expected": "Selector renders with custom data"
+      },
+      {
+        "step": "2. Verify only provided industries show",
+        "expected": "Only custom industries are visible"
+      },
+      {
+        "step": "3. Test selection from custom list",
+        "expected": "Selection works with custom data"
+      }
+    ],
+    "expectedResult": "Custom industries work",
+    "preconditions": "IndustrySelector with custom industries prop",
+    "testData": "customIndustries: ['Custom1', 'Custom2']"
+  },
+  {
+    "id": "TC-EDI-001",
+    "title": "Data Loading Lifecycle",
+    "description": "Tests complete data loading process from service to component",
+    "type": "Manual Test Case",
+    "priority": "High",
+    "state": "Design",
+    "area": "Integration Testing",
+    "tags": ["integration", "data", "loading"],
+    "steps": [
+      {
+        "step": "1. Render component with employee ID",
+        "expected": "Component renders with ID"
+      },
+      {
+        "step": "2. Verify loading state displays",
+        "expected": "Loading indicator appears"
+      },
+      {
+        "step": "3. Wait for data to load",
+        "expected": "Data loading completes"
+      },
+      {
+        "step": "4. Verify data displays correctly",
+        "expected": "Data displays in component"
+      }
+    ],
+    "expectedResult": "Data loads successfully",
+    "preconditions": "Mock data service available",
+    "testData": "employeeId: '1'"
+  },
+  {
+    "id": "TC-EDI-002",
+    "title": "Projects and Allocations Display",
+    "description": "Validates projects and allocations display together",
+    "type": "Manual Test Case",
+    "priority": "High",
+    "state": "Design",
+    "area": "Integration Testing",
+    "tags": ["integration", "data", "display"],
+    "steps": [
+      {
+        "step": "1. Load employee data",
+        "expected": "Employee data loads"
+      },
+      {
+        "step": "2. Verify projects section shows",
+        "expected": "Projects section is visible"
+      },
+      {
+        "step": "3. Check allocations section displays",
+        "expected": "Allocations section is visible"
+      },
+      {
+        "step": "4. Verify correct data in both sections",
+        "expected": "Data is accurate in both sections"
+      }
+    ],
+    "expectedResult": "Projects and allocations display",
+    "preconditions": "Employee with and without allocations",
+    "testData": "employeeWithAllocations: {id: '1', allocations: ['a1']}"
+  },
+  {
+    "id": "TC-EDI-003",
+    "title": "Existing Allocations Display",
+    "description": "Tests display of employee's current allocations",
+    "type": "Manual Test Case",
+    "priority": "High",
+    "state": "Design",
+    "area": "Integration Testing",
+    "tags": ["integration", "data", "display"],
+    "steps": [
+      {
+        "step": "1. Load employee with allocations",
+        "expected": "Employee data with allocations loads"
+      },
+      {
+        "step": "2. Verify allocation details display",
+        "expected": "Allocation details are visible"
+      },
+      {
+        "step": "3. Check project information shows",
+        "expected": "Project info displays correctly"
+      },
+      {
+        "step": "4. Verify date formatting",
+        "expected": "Dates are formatted correctly"
+      }
+    ],
+    "expectedResult": "Allocations display correctly",
+    "preconditions": "Employee with existing allocations",
+    "testData": "allocationData: {projectId: 'p1', startDate: '2024-01-01'}"
+  },
+  {
+    "id": "TC-EDI-004",
+    "title": "Employee Availability Update",
+    "description": "Tests updating employee availability status",
+    "type": "Manual Test Case",
+    "priority": "High",
+    "state": "Design",
+    "area": "Integration Testing",
+    "tags": ["integration", "functional", "update"],
+    "steps": [
+      {
+        "step": "1. Click availability toggle",
+        "expected": "Toggle is clicked"
+      },
+      {
+        "step": "2. Verify API call made",
+        "expected": "API call is made"
+      },
+      {
+        "step": "3. Check UI updates immediately",
+        "expected": "UI updates before API response"
+      },
+      {
+        "step": "4. Verify data persists after reload",
+        "expected": "Data persists after page reload"
+      }
+    ],
+    "expectedResult": "Availability updates correctly",
+    "preconditions": "Employee data loaded",
+    "testData": "availabilityChange: true -> false"
+  },
+  {
+    "id": "TC-EDI-005",
+    "title": "Skills Profile Update",
+    "description": "Tests adding skills to employee profile",
+    "type": "Manual Test Case",
+    "priority": "High",
+    "state": "Design",
+    "area": "Integration Testing",
+    "tags": ["integration", "functional", "update"],
+    "steps": [
+      {
+        "step": "1. Add new skill",
+        "expected": "Skill is added"
+      },
+      {
+        "step": "2. Verify API call made",
+        "expected": "API call is made"
+      },
+      {
+        "step": "3. Check skills list updates",
+        "expected": "Skills list updates"
+      },
+      {
+        "step": "4. Verify data persists",
+        "expected": "Data persists after reload"
+      }
+    ],
+    "expectedResult": "Skills update correctly",
+    "preconditions": "Employee data loaded",
+    "testData": "newSkill: 'Python'"
+  },
+  {
+    "id": "TC-EDI-006",
+    "title": "Project Allocation Creation",
+    "description": "Tests creating new project allocation",
+    "type": "Manual Test Case",
+    "priority": "High",
+    "state": "Design",
+    "area": "Integration Testing",
+    "tags": ["integration", "functional", "create"],
+    "steps": [
+      {
+        "step": "1. Click 'Request Assignment' on project",
+        "expected": "Assignment button is clicked"
+      },
+      {
+        "step": "2. Verify allocation API called",
+        "expected": "API call is made"
+      },
+      {
+        "step": "3. Check allocations list updates",
+        "expected": "Allocations list updates"
+      },
+      {
+        "step": "4. Verify allocation details correct",
+        "expected": "Allocation details are accurate"
+      }
+    ],
+    "expectedResult": "Allocation creates successfully",
+    "preconditions": "Employee and available projects",
+    "testData": "projectId: 'p1', employeeId: '1'"
+  },
+  {
+    "id": "TC-EDI-007",
+    "title": "Error Handling - Missing Employee",
+    "description": "Tests graceful handling of non-existent employee",
+    "type": "Manual Test Case",
+    "priority": "Medium",
+    "state": "Design",
+    "area": "Integration Testing",
+    "tags": ["integration", "error", "handling"],
+    "steps": [
+      {
+        "step": "1. Load component with invalid ID",
+        "expected": "Component attempts to load invalid ID"
+      },
+      {
+        "step": "2. Verify error state displays",
+        "expected": "Error state is shown"
+      },
+      {
+        "step": "3. Check appropriate error message",
+        "expected": "Error message is appropriate"
+      },
+      {
+        "step": "4. Verify no data displayed",
+        "expected": "No data is displayed"
+      }
+    ],
+    "expectedResult": "Error handled gracefully",
+    "preconditions": "Invalid employee ID",
+    "testData": "invalidId: '999'"
+  },
+  {
+    "id": "TC-EDI-008",
+    "title": "Data Consistency Across Operations",
+    "description": "Tests data remains consistent across multiple operations",
+    "type": "Manual Test Case",
+    "priority": "High",
+    "state": "Design",
+    "area": "Integration Testing",
+    "tags": ["integration", "data", "consistency"],
+    "steps": [
+      {
+        "step": "1. Update availability",
+        "expected": "Availability is updated"
+      },
+      {
+        "step": "2. Add skill",
+        "expected": "Skill is added"
+      },
+      {
+        "step": "3. Create allocation",
+        "expected": "Allocation is created"
+      },
+      {
+        "step": "4. Verify all changes persist",
+        "expected": "All changes persist"
+      },
+      {
+        "step": "5. Check data integrity maintained",
+        "expected": "Data integrity is maintained"
+      }
+    ],
+    "expectedResult": "Data consistency maintained",
+    "preconditions": "Employee data loaded",
+    "testData": "multipleOperations: [update, add, create]"
+  },
+  {
+    "id": "TC-EWI-009",
+    "title": "Interface Rendering",
+    "description": "Tests complete employee interface renders",
+    "type": "Manual Test Case",
+    "priority": "High",
+    "state": "Design",
+    "area": "Integration Testing",
+    "tags": ["integration", "ui", "rendering"],
+    "steps": [
+      {
+        "step": "1. Render workflow component",
+        "expected": "Component renders"
+      },
+      {
+        "step": "2. Verify all main elements present",
+        "expected": "All main elements are present"
+      },
+      {
+        "step": "3. Check navigation elements",
+        "expected": "Navigation elements are present"
+      },
+      {
+        "step": "4. Verify initial state",
+        "expected": "Initial state is correct"
+      }
+    ],
+    "expectedResult": "Interface renders completely",
+    "preconditions": "Employee workflow component",
+    "testData": "initialState: dashboard view"
+  },
+  {
+    "id": "TC-EWI-010",
+    "title": "Default Dashboard View",
+    "description": "Tests dashboard is default view on load",
+    "type": "Manual Test Case",
+    "priority": "Medium",
+    "state": "Design",
+    "area": "Integration Testing",
+    "tags": ["integration", "ui", "navigation"],
+    "steps": [
+      {
+        "step": "1. Render component",
+        "expected": "Component renders"
+      },
+      {
+        "step": "2. Verify dashboard view active",
+        "expected": "Dashboard view is active"
+      },
+      {
+        "step": "3. Check dashboard content displays",
+        "expected": "Dashboard content is visible"
+      },
+      {
+        "step": "4. Verify navigation state",
+        "expected": "Navigation state is correct"
+      }
+    ],
+    "expectedResult": "Dashboard is default view",
+    "preconditions": "Workflow component rendered",
+    "testData": "defaultView: 'dashboard'"
+  },
+  {
+    "id": "TC-EWI-011",
+    "title": "Profile Information Display",
+    "description": "Tests employee profile displays on dashboard",
+    "type": "Manual Test Case",
+    "priority": "High",
+    "state": "Design",
+    "area": "Integration Testing",
+    "tags": ["integration", "ui", "data"],
+    "steps": [
+      {
+        "step": "1. Load dashboard view",
+        "expected": "Dashboard view loads"
+      },
+      {
+        "step": "2. Verify profile summary shows",
+        "expected": "Profile summary is visible"
+      },
+      {
+        "step": "3. Check all profile fields display",
+        "expected": "All profile fields are visible"
+      },
+      {
+        "step": "4. Verify data accuracy",
+        "expected": "Data is accurate"
+      }
+    ],
+    "expectedResult": "Profile displays correctly",
+    "preconditions": "Employee data loaded",
+    "testData": "profileData: {name: 'John', skills: ['React']}"
+  },
+  {
+    "id": "TC-EWI-012",
+    "title": "Assignment Status Display",
+    "description": "Tests current assignment status shows",
+    "type": "Manual Test Case",
+    "priority": "Medium",
+    "state": "Design",
+    "area": "Integration Testing",
+    "tags": ["integration", "ui", "data"],
+    "steps": [
+      {
+        "step": "1. Load dashboard",
+        "expected": "Dashboard loads"
+      },
+      {
+        "step": "2. Verify assignments section",
+        "expected": "Assignments section is visible"
+      },
+      {
+        "step": "3. Check current status displays",
+        "expected": "Current status is visible"
+      },
+      {
+        "step": "4. Verify appropriate messaging",
+        "expected": "Messaging is appropriate"
+      }
+    ],
+    "expectedResult": "Assignment status shows",
+    "preconditions": "Employee with assignment data",
+    "testData": "assignmentStatus: 'unassigned'"
+  },
+  {
+    "id": "TC-EWI-013",
+    "title": "Profile View Navigation",
+    "description": "Tests navigation to profile editing view",
+    "type": "Manual Test Case",
+    "priority": "High",
+    "state": "Design",
+    "area": "Integration Testing",
+    "tags": ["integration", "ui", "navigation"],
+    "steps": [
+      {
+        "step": "1. Click profile navigation button",
+        "expected": "Navigation button is clicked"
+      },
+      {
+        "step": "2. Verify view changes to profile",
+        "expected": "View changes to profile"
+      },
+      {
+        "step": "3. Check profile form displays",
+        "expected": "Profile form is visible"
+      },
+      {
+        "step": "4. Verify navigation state updates",
+        "expected": "Navigation state updates"
+      }
+    ],
+    "expectedResult": "Profile view loads",
+    "preconditions": "Dashboard view active",
+    "testData": "navigationAction: dashboard -> profile"
+  },
+  {
+    "id": "TC-EWI-014",
+    "title": "Profile Data Editing",
+    "description": "Tests editing profile information",
+    "type": "Manual Test Case",
+    "priority": "High",
+    "state": "Design",
+    "area": "Integration Testing",
+    "tags": ["integration", "ui", "functional"],
+    "steps": [
+      {
+        "step": "1. Modify form fields",
+        "expected": "Form fields are modified"
+      },
+      {
+        "step": "2. Verify input values update",
+        "expected": "Input values update"
+      },
+      {
+        "step": "3. Check form validation",
+        "expected": "Form validation works"
+      },
+      {
+        "step": "4. Verify data binding works",
+        "expected": "Data binding works"
+      }
+    ],
+    "expectedResult": "Profile editing works",
+    "preconditions": "Profile view active",
+    "testData": "editAction: change name field"
+  },
+  {
+    "id": "TC-EWI-015",
+    "title": "Availability Toggle Functionality",
+    "description": "Tests availability toggle in profile view",
+    "type": "Manual Test Case",
+    "priority": "High",
+    "state": "Design",
+    "area": "Integration Testing",
+    "tags": ["integration", "ui", "functional"],
+    "steps": [
+      {
+        "step": "1. Locate availability toggle",
+        "expected": "Toggle is located"
+      },
+      {
+        "step": "2. Click to change state",
+        "expected": "Toggle is clicked"
+      },
+      {
+        "step": "3. Verify visual feedback",
+        "expected": "Visual feedback is shown"
+      },
+      {
+        "step": "4. Check state persistence",
+        "expected": "State persists"
+      }
+    ],
+    "expectedResult": "Availability toggle works",
+    "preconditions": "Profile view active",
+    "testData": "toggleAction: available -> unavailable"
+  },
+  {
+    "id": "TC-EWI-016",
+    "title": "Dashboard Return Navigation",
+    "description": "Tests navigation back to dashboard from profile",
+    "type": "Manual Test Case",
+    "priority": "High",
+    "state": "Design",
+    "area": "Integration Testing",
+    "tags": ["integration", "ui", "navigation"],
+    "steps": [
+      {
+        "step": "1. Click save/return button",
+        "expected": "Return button is clicked"
+      },
+      {
+        "step": "2. Verify view changes to dashboard",
+        "expected": "View changes to dashboard"
+      },
+      {
+        "step": "3. Check dashboard content loads",
+        "expected": "Dashboard content loads"
+      },
+      {
+        "step": "4. Verify navigation state",
+        "expected": "Navigation state is correct"
+      }
+    ],
+    "expectedResult": "Returns to dashboard",
+    "preconditions": "Profile view active",
+    "testData": "returnAction: profile -> dashboard"
+  },
+  {
+    "id": "TC-EWI-017",
+    "title": "Cross-View Data Consistency",
+    "description": "Tests data consistency when switching views",
+    "type": "Manual Test Case",
+    "priority": "High",
+    "state": "Design",
+    "area": "Integration Testing",
+    "tags": ["integration", "data", "consistency"],
+    "steps": [
+      {
+        "step": "1. Modify data in profile view",
+        "expected": "Data is modified"
+      },
+      {
+        "step": "2. Navigate to dashboard",
+        "expected": "Navigation occurs"
+      },
+      {
+        "step": "3. Verify changes reflect in dashboard",
+        "expected": "Changes are reflected"
+      },
+      {
+        "step": "4. Navigate back to profile",
+        "expected": "Navigation back occurs"
+      },
+      {
+        "step": "5. Verify data still correct",
+        "expected": "Data is still correct"
+      }
+    ],
+    "expectedResult": "Data consistent across views",
+    "preconditions": "Profile data modified",
+    "testData": "consistencyCheck: profile -> dashboard -> profile"
+  },
+  {
+    "id": "TC-AEI-018",
+    "title": "Advanced Interface Rendering",
+    "description": "Tests advanced interface renders all elements",
+    "type": "Manual Test Case",
+    "priority": "High",
+    "state": "Design",
+    "area": "Integration Testing",
+    "tags": ["integration", "ui", "rendering"],
+    "steps": [
+      {
+        "step": "1. Render advanced interface",
+        "expected": "Interface renders"
+      },
+      {
+        "step": "2. Verify header, navigation, content areas",
+        "expected": "All areas are present"
+      },
+      {
+        "step": "3. Check notification system",
+        "expected": "Notification system is present"
+      },
+      {
+        "step": "4. Verify tab system",
+        "expected": "Tab system is present"
+      }
+    ],
+    "expectedResult": "Interface renders completely",
+    "preconditions": "Advanced interface component",
+    "testData": "fullInterface: header + tabs + content"
+  },
+  {
+    "id": "TC-AEI-019",
+    "title": "Notification Count Display",
+    "description": "Tests notification count in header",
+    "type": "Manual Test Case",
+    "priority": "Medium",
+    "state": "Design",
+    "area": "Integration Testing",
+    "tags": ["integration", "ui", "notifications"],
+    "steps": [
+      {
+        "step": "1. Render with unread notifications",
+        "expected": "Interface renders with notifications"
+      },
+      {
+        "step": "2. Verify count displays correctly",
+        "expected": "Count displays accurately"
+      },
+      {
+        "step": "3. Check count updates as notifications read",
+        "expected": "Count updates correctly"
+      },
+      {
+        "step": "4. Verify visual indicators",
+        "expected": "Visual indicators are correct"
+      }
+    ],
+    "expectedResult": "Notification count accurate",
+    "preconditions": "Notifications available",
+    "testData": "unreadCount: 2"
+  },
+  {
+    "id": "TC-AEI-020",
+    "title": "Notification Modal Operation",
+    "description": "Tests notification modal open/close",
+    "type": "Manual Test Case",
+    "priority": "Medium",
+    "state": "Design",
+    "area": "Integration Testing",
+    "tags": ["integration", "ui", "modal"],
+    "steps": [
+      {
+        "step": "1. Click notification button",
+        "expected": "Notification button is clicked"
+      },
+      {
+        "step": "2. Verify modal opens",
+        "expected": "Modal opens"
+      },
+      {
+        "step": "3. Check modal content",
+        "expected": "Modal content is correct"
+      },
+      {
+        "step": "4. Click close button",
+        "expected": "Close button is clicked"
+      },
+      {
+        "step": "5. Verify modal closes",
+        "expected": "Modal closes"
+      }
+    ],
+    "expectedResult": "Modal operates correctly",
+    "preconditions": "Notification system active",
+    "testData": "modalAction: open -> close"
+  },
+  {
+    "id": "TC-AEI-021",
+    "title": "Notification Read Status",
+    "description": "Tests marking notifications as read",
+    "type": "Manual Test Case",
+    "priority": "Medium",
+    "state": "Design",
+    "area": "Integration Testing",
+    "tags": ["integration", "ui", "notifications"],
+    "steps": [
+      {
+        "step": "1. Open notification modal",
+        "expected": "Modal opens"
+      },
+      {
+        "step": "2. Click 'Mark as read' on notification",
+        "expected": "Mark as read is clicked"
+      },
+      {
+        "step": "3. Close modal",
+        "expected": "Modal closes"
+      },
+      {
+        "step": "4. Verify count decreases",
+        "expected": "Count decreases"
+      },
+      {
+        "step": "5. Check notification marked read",
+        "expected": "Notification is marked read"
+      }
+    ],
+    "expectedResult": "Read status updates",
+    "preconditions": "Unread notifications exist",
+    "testData": "readAction: mark notification as read"
+  },
+  {
+    "id": "TC-AEI-022",
+    "title": "Tab Navigation System",
+    "description": "Tests tab-based navigation",
+    "type": "Manual Test Case",
+    "priority": "High",
+    "state": "Design",
+    "area": "Integration Testing",
+    "tags": ["integration", "ui", "navigation"],
+    "steps": [
+      {
+        "step": "1. Click different tab buttons",
+        "expected": "Tab buttons are clicked"
+      },
+      {
+        "step": "2. Verify content changes",
+        "expected": "Content changes correctly"
+      },
+      {
+        "step": "3. Check active tab indicators",
+        "expected": "Active indicators are correct"
+      },
+      {
+        "step": "4. Verify tab state persistence",
+        "expected": "State persists"
+      }
+    ],
+    "expectedResult": "Tab navigation works",
+    "preconditions": "Multi-tab interface",
+    "testData": "tabSwitch: overview -> profile -> projects"
+  },
+  {
+    "id": "TC-AEI-023",
+    "title": "Overview Information Display",
+    "description": "Tests overview tab displays correct information",
+    "type": "Manual Test Case",
+    "priority": "High",
+    "state": "Design",
+    "area": "Integration Testing",
+    "tags": ["integration", "ui", "data"],
+    "steps": [
+      {
+        "step": "1. Navigate to overview tab",
+        "expected": "Overview tab is navigated to"
+      },
+      {
+        "step": "2. Verify profile summary shows",
+        "expected": "Profile summary is visible"
+      },
+      {
+        "step": "3. Check statistics display",
+        "expected": "Statistics are visible"
+      },
+      {
+        "step": "4. Verify data accuracy",
+        "expected": "Data is accurate"
+      }
+    ],
+    "expectedResult": "Overview displays correctly",
+    "preconditions": "Overview tab active",
+    "testData": "overviewData: {name, status, skills, workPreference}"
+  },
+  {
+    "id": "TC-AEI-024",
+    "title": "Profile Management Editing",
+    "description": "Tests profile editing in advanced interface",
+    "type": "Manual Test Case",
+    "priority": "High",
+    "state": "Design",
+    "area": "Integration Testing",
+    "tags": ["integration", "ui", "functional"],
+    "steps": [
+      {
+        "step": "1. Navigate to profile tab",
+        "expected": "Profile tab is navigated to"
+      },
+      {
+        "step": "2. Edit various form fields",
+        "expected": "Form fields are edited"
+      },
+      {
+        "step": "3. Test skills management",
+        "expected": "Skills management works"
+      },
+      {
+        "step": "4. Verify form validation",
+        "expected": "Form validation works"
+      }
+    ],
+    "expectedResult": "Profile editing works",
+    "preconditions": "Profile tab active",
+    "testData": "editActions: [name, bio, workPreference, skills]"
+  },
+  {
+    "id": "TC-AEI-025",
+    "title": "Skills Management System",
+    "description": "Tests advanced skills management",
+    "type": "Manual Test Case",
+    "priority": "High",
+    "state": "Design",
+    "area": "Integration Testing",
+    "tags": ["integration", "ui", "functional"],
+    "steps": [
+      {
+        "step": "1. View current skills",
+        "expected": "Current skills are visible"
+      },
+      {
+        "step": "2. Add new skills",
+        "expected": "New skills are added"
+      },
+      {
+        "step": "3. Remove existing skills",
+        "expected": "Existing skills are removed"
+      },
+      {
+        "step": "4. Verify skills list updates",
+        "expected": "Skills list updates correctly"
+      }
+    ],
+    "expectedResult": "Skills management works",
+    "preconditions": "Profile tab active",
+    "testData": "skillsActions: [add 'Vue', remove 'React']"
+  },
+  {
+    "id": "TC-AEI-026",
+    "title": "Project Filtering by Status",
+    "description": "Tests project filtering functionality",
+    "type": "Manual Test Case",
+    "priority": "Medium",
+    "state": "Design",
+    "area": "Integration Testing",
+    "tags": ["integration", "ui", "filtering"],
+    "steps": [
+      {
+        "step": "1. Navigate to projects tab",
+        "expected": "Projects tab is navigated to"
+      },
+      {
+        "step": "2. Apply status filter",
+        "expected": "Status filter is applied"
+      },
+      {
+        "step": "3. Verify projects filter correctly",
+        "expected": "Projects filter correctly"
+      },
+      {
+        "step": "4. Test multiple filter combinations",
+        "expected": "Multiple filters work"
+      }
+    ],
+    "expectedResult": "Filtering works correctly",
+    "preconditions": "Projects tab active",
+    "testData": "filterAction: status = 'active'"
+  },
+  {
+    "id": "TC-AEI-027",
+    "title": "Project Search Functionality",
+    "description": "Tests project search by name",
+    "type": "Manual Test Case",
+    "priority": "Medium",
+    "state": "Design",
+    "area": "Integration Testing",
+    "tags": ["integration", "ui", "search"],
+    "steps": [
+      {
+        "step": "1. Enter search query",
+        "expected": "Search query is entered"
+      },
+      {
+        "step": "2. Verify results filter",
+        "expected": "Results filter correctly"
+      },
+      {
+        "step": "3. Test partial matches",
+        "expected": "Partial matches work"
+      },
+      {
+        "step": "4. Clear search and verify reset",
+        "expected": "Search resets correctly"
+      }
+    ],
+    "expectedResult": "Search works correctly",
+    "preconditions": "Projects tab active",
+    "testData": "searchQuery: 'Mobile'"
+  },
+  {
+    "id": "TC-AEI-028",
+    "title": "No Results Handling",
+    "description": "Tests handling when no projects match filters",
+    "type": "Manual Test Case",
+    "priority": "Medium",
+    "state": "Design",
+    "area": "Integration Testing",
+    "tags": ["integration", "ui", "edge"],
+    "steps": [
+      {
+        "step": "1. Apply restrictive filters",
+        "expected": "Restrictive filters are applied"
+      },
+      {
+        "step": "2. Verify no results message",
+        "expected": "No results message appears"
+      },
+      {
+        "step": "3. Clear filters",
+        "expected": "Filters are cleared"
+      },
+      {
+        "step": "4. Verify results return",
+        "expected": "Results return"
+      }
+    ],
+    "expectedResult": "No results handled gracefully",
+    "preconditions": "Projects tab with filters",
+    "testData": "noResultsFilter: status='nonexistent'"
+  },
+  {
+    "id": "TC-AEI-029",
+    "title": "Multi-Tab State Consistency",
+    "description": "Tests data consistency across tab switches",
+    "type": "Manual Test Case",
+    "priority": "High",
+    "state": "Design",
+    "area": "Integration Testing",
+    "tags": ["integration", "data", "consistency"],
+    "steps": [
+      {
+        "step": "1. Modify data in one tab",
+        "expected": "Data is modified"
+      },
+      {
+        "step": "2. Switch to another tab",
+        "expected": "Tab switch occurs"
+      },
+      {
+        "step": "3. Return to first tab",
+        "expected": "Return to first tab occurs"
+      },
+      {
+        "step": "4. Verify data persists",
+        "expected": "Data persists"
+      },
+      {
+        "step": "5. Check cross-tab consistency",
+        "expected": "Consistency is maintained"
+      }
+    ],
+    "expectedResult": "State consistent across tabs",
+    "preconditions": "Multi-tab interface with data",
+    "testData": "consistencyTest: modify -> switch -> verify"
+  }
+]
