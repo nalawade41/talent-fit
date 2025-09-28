@@ -11,6 +11,7 @@ import (
 type SimilarityMatch struct {
 	Profile    *entities.EmployeeProfile
 	Similarity float64
+	Status string
 }
 
 // EmployeeProfileRepository defines the interface for employee profile data operations

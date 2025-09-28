@@ -183,14 +183,16 @@ type ScoringRules struct {
 	SkillsWeight     int `json:"skills_weight"`
 	GeoWeight        int `json:"geo_weight"`
 	ExperienceWeight int `json:"experience_weight"`
+	StatusWeight int `json:"status_weight"`
 }
 
 // DefaultScoringRules returns the default scoring weights
 func DefaultScoringRules() ScoringRules {
 	return ScoringRules{
-		SkillsWeight:     50,
+		SkillsWeight:     30,
 		GeoWeight:        30,
 		ExperienceWeight: 20,
+		StatusWeight: 	20,
 	}
 }
 
@@ -236,6 +238,7 @@ func (u *EmbeddingUtils) GenerateMatchingPrompt(projectSummary string, candidate
 				Experience: %s
 				Industry: %s
 				Availability: %s
+				Status: %s
 				Similarity Score: %.1f%%`,
 							candidateNum,
 							name,
@@ -245,28 +248,32 @@ func (u *EmbeddingUtils) GenerateMatchingPrompt(projectSummary string, candidate
 							experience,
 							profile.Industry,
 							availability,
+							match.Status,
 							match.Similarity*100)
 					}
-
 					prompt += fmt.Sprintf(`
 				Scoring rules:
 				- Skills match = %d%%
 				- Geo match = %d%%
 				- Experience match = %d%%
+				- Status match = %d%%
 				- Candidates outside required geo can still be scored, but lower.
 				- SPECIAL RULE: If project location/geo is "Unspecified" or not mentioned, prefer candidates from India for same skill levels.
+				- SPECIAL RULE: If canidate status is OnBench, give prefrence to candidates even if skills match is less.
 
 				Instructions:
 				1. Score each candidate from 0–100.
 				2. Provide a short explanation in human language (2–3 sentences) why the candidate got this score.
 				3. For unspecified project geo: Give slight preference (5-10 points bonus) to India-based candidates when skills are comparable.
-				4. Return results as JSON:
+				4. If canidate status is OnBench, give prefrence to candidates even if skills match is less for OnBench add (5-10 points bonus).
+				5. Return results as JSON:
 
 				[
 				{ "candidate_id": <id>, "score": <int>, "reason": "<string>" }
 				]`, 
 						rules.SkillsWeight, 
 						rules.GeoWeight, 
-						rules.ExperienceWeight)
+						rules.ExperienceWeight,
+						rules.StatusWeight)
 					return prompt
 }

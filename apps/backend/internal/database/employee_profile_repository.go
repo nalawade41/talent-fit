@@ -214,7 +214,41 @@ func (r *EmployeeProfileRepository) GetSimilarAvailableProfilesWithUser(ctx cont
 			u.last_name,
 			u.email,
 			u.role,
-			1 - (ep.embedding <=> proj.e) AS similarity
+			1 - (ep.embedding <=> proj.e) AS similarity,
+			CASE
+				WHEN NOT EXISTS (
+					SELECT 1
+					FROM project_allocations pa
+					WHERE pa.employee_id = ep.user_id
+					AND pa.deleted_at IS NULL
+					AND pa.end_date IS NULL
+				)
+				THEN 'onBench'
+				WHEN (
+					ep.availability_flag = false
+					AND EXISTS (
+						SELECT 1
+						FROM project_allocations pa
+						CROSS JOIN proj
+						WHERE pa.employee_id = ep.user_id
+						AND pa.deleted_at IS NULL
+						AND pa.end_date IS NOT NULL
+						AND pa.end_date <= proj.start_date + INTERVAL 7 DAY
+					)
+				)
+				THEN 'onBench'
+				WHEN (
+					ep.availability_flag = true
+					AND NOT EXISTS (
+						SELECT 1
+						FROM project_allocations pa
+						WHERE pa.employee_id = ep.user_id
+						AND pa.project_id = ?
+						AND pa.deleted_at IS NULL
+					)
+				)
+				THEN 'onWork'
+			END AS status
 		FROM employee_profiles ep
 		INNER JOIN users u ON ep.user_id = u.id
 		CROSS JOIN proj
@@ -239,6 +273,18 @@ func (r *EmployeeProfileRepository) GetSimilarAvailableProfilesWithUser(ctx cont
 							AND pa.deleted_at IS NULL
 					)
 				)
+				 OR (
+					ep.availability_flag = false
+					AND EXISTS (
+						SELECT 1
+						FROM project_allocations pa
+						CROSS JOIN proj
+						WHERE pa.employee_id = ep.user_id
+						AND pa.deleted_at IS NULL
+						AND pa.end_date IS NOT NULL
+						AND pa.end_date <= (proj_start_date + INTERVAL 7 DAY)
+					)
+				)
 			)
 		ORDER BY ep.embedding <=> proj.e
 		LIMIT ?`
@@ -251,6 +297,7 @@ func (r *EmployeeProfileRepository) GetSimilarAvailableProfilesWithUser(ctx cont
 		Email     string  `gorm:"column:email"`
 		Role      string  `gorm:"column:role"`
 		Similarity float64 `gorm:"column:similarity"`
+		Status string 	`gorm:"column:status"`
 	}
 
 	var results []QueryResultWithUser
@@ -277,6 +324,7 @@ func (r *EmployeeProfileRepository) GetSimilarAvailableProfilesWithUser(ctx cont
 		matches[i] = &domain.SimilarityMatch{
 			Profile:    &profile,
 			Similarity: result.Similarity,
+			Status: result.Status,
 		}
 	}
 
