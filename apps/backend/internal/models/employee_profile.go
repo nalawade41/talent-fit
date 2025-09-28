@@ -24,6 +24,7 @@ const (
 
 // EmployeeProfileModel represents the employee profile business model
 type EmployeeProfileModel struct {
+	ID                int       `json:"id"`
 	UserID            uint       `json:"user_id"`
 	Geo               string     `json:"geo"`
 	DateOfJoining     *time.Time `json:"date_of_joining"`

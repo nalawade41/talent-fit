@@ -8,10 +8,12 @@ export interface ProjectAllocation {
   end_date: string | null;
   created_at: string;
   updated_at: string;
+  summary?: string;
   project?: {
     id: number;
     name: string;
     description: string;
+    summary?: string;
     required_seats: number;
     seats_by_type: Record<string, number>;
     start_date: string;
@@ -26,6 +28,9 @@ export interface ProjectAllocation {
     last_name: string;
     email: string;
     role: string;
+    created_at?: string;
+    updated_at?: string;
+    name?: string;
   };
 }
 

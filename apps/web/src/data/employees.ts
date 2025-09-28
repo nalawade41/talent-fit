@@ -1,6 +1,7 @@
 // Employee Profile dummy data
 export interface Employee {
   user_id: number;
+  employee_id: number;
   geo: string;
   date_of_joining: string | null;
   end_date: string | null;
@@ -37,6 +38,7 @@ export interface Employee {
 export const employeesData: Employee[] = [
   {
     user_id: 1,
+    employee_id: 1,
     geo: "US-West",
     date_of_joining: "2022-03-15T00:00:00Z",
     end_date: "2025-03-15T00:00:00Z",
@@ -69,6 +71,7 @@ export const employeesData: Employee[] = [
   },
   {
     user_id: 2,
+    employee_id: 2,
     geo: "US-East",
     date_of_joining: "2021-08-20T00:00:00Z",
     end_date: "2024-08-20T00:00:00Z",
@@ -101,6 +104,7 @@ export const employeesData: Employee[] = [
   },
   {
     user_id: 3,
+    employee_id: 3,
     geo: "Europe",
     date_of_joining: "2023-01-10T00:00:00Z",
     end_date: null,
@@ -133,6 +137,7 @@ export const employeesData: Employee[] = [
   },
   {
     user_id: 4,
+    employee_id: 4,
     geo: "Asia-Pacific",
     date_of_joining: "2020-06-01T00:00:00Z",
     end_date: null,
@@ -165,6 +170,7 @@ export const employeesData: Employee[] = [
   },
   {
     user_id: 5,
+    employee_id: 5,
     geo: "US-Central",
     date_of_joining: "2023-09-01T00:00:00Z",
     end_date: "2024-12-31T00:00:00Z",
@@ -197,6 +203,7 @@ export const employeesData: Employee[] = [
   },
   {
     user_id: 6,
+    employee_id: 6,
     geo: "US-West",
     date_of_joining: "2022-11-15T00:00:00Z",
     end_date: null,
@@ -229,6 +236,7 @@ export const employeesData: Employee[] = [
   },
   {
     user_id: 7,
+    employee_id: 7,
     geo: "Canada",
     date_of_joining: "2021-02-10T00:00:00Z",
     end_date: null,
@@ -261,6 +269,7 @@ export const employeesData: Employee[] = [
   },
   {
     user_id: 8,
+    employee_id: 8,
     geo: "Europe",
     date_of_joining: "2023-05-20T00:00:00Z",
     end_date: "2025-05-20T00:00:00Z",
