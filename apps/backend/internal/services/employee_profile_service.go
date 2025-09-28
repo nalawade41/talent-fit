@@ -15,7 +15,6 @@ type EmployeeProfileService struct {
 	profileRepo      domain.EmployeeProfileRepository
 	embeddingService domain.EmbeddingService
 	embeddingUtils   *utils.EmbeddingEntityUtils
-    orchestrator     domain.NotificationOrchestrator
 }
 
 // NewEmployeeProfileService creates a new employee profile service
@@ -39,22 +38,21 @@ func (s *EmployeeProfileService) GetAllProfiles(ctx context.Context) ([]*models.
 
 // SearchProfiles retrieves profiles by filters
 func (s *EmployeeProfileService) SearchProfiles(ctx context.Context, skills []string, geos []string, availableOnly bool) ([]*models.EmployeeProfileModel, error) {
-    entities, err := s.profileRepo.GetFiltered(ctx, skills, geos, availableOnly)
-    if err != nil {
-        return nil, err
-    }
-    modelsOut := make([]*models.EmployeeProfileModel, 0, len(entities))
-    for _, e := range entities {
-        var m models.EmployeeProfileModel
-        m.FromEntity(e)
-        modelsOut = append(modelsOut, &m)
-    }
-    return modelsOut, nil
+	entities, err := s.profileRepo.GetFiltered(ctx, skills, geos, availableOnly)
+	if err != nil {
+		return nil, err
+	}
+	modelsOut := make([]*models.EmployeeProfileModel, 0, len(entities))
+	for _, e := range entities {
+		var m models.EmployeeProfileModel
+		m.FromEntity(e)
+		modelsOut = append(modelsOut, &m)
+	}
+	return modelsOut, nil
 }
 
-// GetProfileByUserID retrieves an employee profile by user ID
-func (s *EmployeeProfileService) GetProfileByUserID(ctx context.Context, userID string) (*models.EmployeeProfileModel, error) {
-	entity, err := s.profileRepo.GetByUserID(ctx, userID)
+func (s *EmployeeProfileService) GetProfileByUserEmail(ctx context.Context, email string) (*models.EmployeeProfileModel, error) {
+	entity, err := s.profileRepo.GetByUserEmail(ctx, email)
 	if err != nil {
 		return nil, err
 	}

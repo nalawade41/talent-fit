@@ -4,17 +4,21 @@ import { Button } from '../ui/button';
 import { useEmployeeDashboard } from '../../hooks/useEmployeeDashboard';
 
 export function EmployeeDashboard() {
+  const componentId = Math.random().toString(36).substr(2, 9);
+  console.log('🏠 EmployeeDashboard component rendered:', {
+    timestamp: new Date().toISOString(),
+    componentId: componentId
+  });
+  
   const { 
     employee: employeeData, 
     loading, 
     error, 
     currentAllocations, 
     projectHistory, 
-    
     daysUntilEnd, 
     refetch 
   } = useEmployeeDashboard();
-
   // Show loading state
   if (loading) {
     return (

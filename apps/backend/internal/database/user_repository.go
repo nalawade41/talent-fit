@@ -63,10 +63,10 @@ func (r *UserRepository) Delete(ctx context.Context, id string) error {
 }
 
 // GetByEmail checks user existence by email
-func (r *UserRepository) GetByEmail(ctx context.Context, email string) error {
+func (r *UserRepository) GetByEmail(ctx context.Context, email string) (*entities.User, error) {
     var user entities.User
     result := r.db.WithContext(ctx).Where("email = ?", email).First(&user)
-    return result.Error
+    return &user, result.Error
 }
 
 // CreateWithEntity creates a user from entity

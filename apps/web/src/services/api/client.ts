@@ -4,7 +4,7 @@ import toast from 'react-hot-toast';
 // Create axios instance with base configuration
 const apiClient: AxiosInstance = axios.create({
   baseURL: import.meta.env.VITE_API_URL_DEV || 'http://localhost:8080',
-  timeout: 10000,
+  timeout: 300000, // 5 minutes
   headers: {
     'Content-Type': 'application/json',
   },

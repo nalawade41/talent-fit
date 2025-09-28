@@ -42,7 +42,7 @@ type UserRepository interface {
 	Delete(ctx context.Context, id string) error
 
 	// GetByEmail checks user existence by email
-	GetByEmail(ctx context.Context, email string) error
+	GetByEmail(ctx context.Context, email string) (*entities.User, error)
 
 	// CreateWithEntity creates a user from entity
     CreateWithEntity(ctx context.Context, user *entities.User) error

@@ -1,10 +1,9 @@
 package services
 
 import (
-	"context"
-	"fmt"
-	"log"
-	"strconv"
+  "context"
+  "fmt"
+  "log"
 
 	"github.com/talent-fit/backend/internal/domain"
 	"github.com/talent-fit/backend/internal/entities"

@@ -5,10 +5,10 @@ import { apiService } from './api/client';
 // Convert backend response to frontend Employee type
 const convertToEmployee = (backendProfile: BackendEmployeeProfile): Employee => {
   // Split name from backend user.name field
-  const nameParts = backendProfile.user.name.split(' ');
+  const nameParts = backendProfile.user.first_name.split(' ');
   const firstName = nameParts[0] || '';
   const lastName = nameParts.slice(1).join(' ') || '';
-
+  debugger;
   // Determine status based on availability and dates
   let status: Employee['status'] = 'available';
   if (backendProfile.notice_date) {
@@ -55,22 +55,52 @@ const convertToEmployee = (backendProfile: BackendEmployeeProfile): Employee => 
     employment_type: 'Full-time', // Default, could be enhanced later
     primary_skills: primarySkills,
     secondary_skills: secondarySkills,
-    industry_experience: [backendProfile.industry], // Convert single industry to array
+    industry_experience: backendProfile.industry, // Convert single industry to array
     avatar: undefined, // Could be enhanced later
   };
 };
 
 export class EmployeeProfileService {
   // Get employee profile by user ID
-  static async getEmployeeProfile(userId: number): Promise<Employee> {
+  static async getEmployeeProfile(): Promise<Employee> {
     try {
       const response = await apiService.get<ApiResponse<BackendEmployeeProfile>>(
-        `/api/v1/employee/${userId}`
+        `/api/v1/employee/me`
+      ) as any;
+      
+      return convertToEmployee(response);
+    } catch (error) {
+      console.error('Error fetching employee profile:', error);
+      throw error;
+    }
+  }
+
+  // Create employee profile
+  static async createEmployeeProfile(userId: number, profileData: Partial<BackendEmployeeProfile>): Promise<Employee> {
+    try {
+      const response = await apiService.post<ApiResponse<BackendEmployeeProfile>>(
+        `/api/v1/employee/${userId}`,
+        profileData
       );
       
       return convertToEmployee(response.data);
     } catch (error) {
-      console.error('Error fetching employee profile:', error);
+      console.error('Error creating employee profile:', error);
+      throw error;
+    }
+  }
+
+  // Update employee profile
+  static async updateEmployeeProfile(userId: number, profileData: Partial<BackendEmployeeProfile>): Promise<Employee> {
+    try {
+      const response = await apiService.patch<ApiResponse<BackendEmployeeProfile>>(
+        `/api/v1/employee/${userId}`,
+        profileData
+      );
+      
+      return convertToEmployee(response.data);
+    } catch (error) {
+      console.error('Error updating employee profile:', error);
       throw error;
     }
   }

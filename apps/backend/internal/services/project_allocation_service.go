@@ -1,14 +1,14 @@
 package services
 
 import (
-	"context"
-	"fmt"
-	"log"
-	"strconv"
+  "context"
+  "fmt"
+  "log"
+  "strconv"
 
-	"github.com/talent-fit/backend/internal/domain"
-	"github.com/talent-fit/backend/internal/entities"
-	"github.com/talent-fit/backend/internal/models"
+  "github.com/talent-fit/backend/internal/domain"
+  "github.com/talent-fit/backend/internal/entities"
+  "github.com/talent-fit/backend/internal/models"
 )
 
 // ProjectAllocationService implements the domain.ProjectAllocationService interface
@@ -44,14 +44,14 @@ func (s *ProjectAllocationService) GetAllocationsByProject(ctx context.Context, 
 }
 
 // GetAllocationsByEmployee retrieves allocations by employee ID
-func (s *ProjectAllocationService) GetAllocationsByEmployee(ctx context.Context, employeeID string) ([]*models.ProjectAllocationModel, error) {
-	entities, err := s.allocationRepo.GetByEmployeeID(ctx, employeeID)
+func (s *ProjectAllocationService) GetAllocationsByEmployee(ctx context.Context, userId string) ([]*models.ProjectAllocationModel, error) {
+  resEntities, err := s.allocationRepo.GetByEmployeeID(ctx, userId)
 	if err != nil {
 		return nil, err
 	}
 
-	allocationModels := make([]*models.ProjectAllocationModel, len(entities))
-	for i, entity := range entities {
+	allocationModels := make([]*models.ProjectAllocationModel, len(resEntities))
+	for i, entity := range resEntities {
 		var model models.ProjectAllocationModel
 		model.FromEntity(entity)
 		allocationModels[i] = &model
@@ -128,31 +128,31 @@ func (s *ProjectAllocationService) CreateAllocation(ctx context.Context, allocat
 
 // UpdateAllocation updates project allocations (create new, delete removed)
 func (s *ProjectAllocationService) UpdateAllocation(ctx context.Context, projectID string, allocation []*models.ProjectAllocationModel) ([]*models.ProjectAllocationModel, error) {
-	// Get existing allocations for this project
-	existingAllocations, err := s.allocationRepo.GetByProjectID(ctx, projectID)
-	if err != nil {
-		return nil, err
-	}
+  // Get existing allocations for this project
+  existingAllocations, err := s.allocationRepo.GetByProjectID(ctx, projectID)
+  if err != nil {
+    return nil, err
+  }
 
-	// Helper function to check if an employee is in the incoming allocation list
-	isEmployeeInNewList := func(employeeID int) bool {
-		for _, newAlloc := range allocation {
-			if newAlloc.EmployeeID == employeeID {
-				return true
-			}
-		}
-		return false
-	}
+  // Helper function to check if an employee is in the incoming allocation list
+  isEmployeeInNewList := func(employeeID int) bool {
+    for _, newAlloc := range allocation {
+      if newAlloc.EmployeeID == employeeID {
+        return true
+      }
+    }
+    return false
+  }
 
-	// Helper function to check if an employee already exists in current allocations
-	existingAllocationForEmployee := func(employeeID int) *entities.ProjectAllocation {
-		for _, existing := range existingAllocations {
-			if existing.EmployeeID == employeeID {
-				return existing
-			}
-		}
-		return nil
-	}
+  // Helper function to check if an employee already exists in current allocations
+  existingAllocationForEmployee := func(employeeID int) *entities.ProjectAllocation {
+    for _, existing := range existingAllocations {
+      if existing.EmployeeID == employeeID {
+        return existing
+      }
+    }
+    return nil
+  }
 
 	// Step 1: Delete allocations that are not in the new list (soft delete)
 	for _, existing := range existingAllocations {
@@ -170,11 +170,11 @@ func (s *ProjectAllocationService) UpdateAllocation(ctx context.Context, project
 		}
 	}
 
-	// Convert projectID string to int
-	projectIDInt, err := strconv.Atoi(projectID)
-	if err != nil {
-		return nil, err
-	}
+  // Convert projectID string to int
+  projectIDInt, err := strconv.Atoi(projectID)
+  if err != nil {
+    return nil, err
+  }
 
 	// Step 2: Process incoming allocations (create new or keep existing)
 	var result []*models.ProjectAllocationModel

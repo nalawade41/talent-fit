@@ -61,7 +61,7 @@ func (s *Server) setupProtectedRoutes() {
 // setupEmployeeRoutes sets up employee-specific routes (personal and professional details)
 func (s *Server) setupEmployeeRoutes(api *gin.RouterGroup) {
 	// Employee details for both personal and professional
-	api.GET("/employee/:id", s.container.EmployeeProfileHandler.GetProfileByUserID) 
+	api.GET("/employee/me", s.container.EmployeeProfileHandler.GetMe) 
 	api.POST("/employee/:id", s.container.EmployeeProfileHandler.CreateProfile)     
 	api.PATCH("/employee/:id", s.container.EmployeeProfileHandler.UpdateProfile)    
 

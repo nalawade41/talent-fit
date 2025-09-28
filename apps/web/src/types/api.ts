@@ -1,7 +1,8 @@
 // Backend API Response Types
 export interface BackendUser {
   id: number;
-  name: string;
+  first_name: string;
+  last_name: string;
   email: string;
   role: string;
   type: string;
@@ -18,7 +19,7 @@ export interface BackendEmployeeProfile {
   notice_date: string | null;
   skills: string[];
   years_of_experience: number;
-  industry: string;
+  industry: string[];
   availability_flag: boolean;
   created_at: string;
   updated_at: string;

@@ -11,10 +11,11 @@ import (
 	"github.com/talent-fit/backend/internal/config"
 )
 
-// GenerateJWTToken creates a signed JWT containing the user email
-func GenerateJWTToken(cfg *config.Config, email string) (string, error) {
+// GenerateJWTToken creates a signed JWT containing the user email and role
+func GenerateJWTToken(cfg *config.Config, email string, role string) (string, error) {
 	claims := jwt.MapClaims{
 		"sub":   email,
+		"role":  role,
 		"exp":   time.Now().Add(24 * time.Hour).Unix(),
 		"iat":   time.Now().Unix(),
 		"iss":   "talent-fit",

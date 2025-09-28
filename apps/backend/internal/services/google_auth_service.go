@@ -49,9 +49,10 @@ func (s *GoogleAuthService) AuthenticateWithGoogle(ctx context.Context, credenti
     }
 
     // Ensure user exists; if not, create minimal Employee user
-    if err := s.userRepo.GetByEmail(ctx, claims.Email); err != nil {
+    user, err := s.userRepo.GetByEmail(ctx, claims.Email)
+    if err != nil {
         // Create a new user with Employee role
-        user := &entities.User{
+        user = &entities.User{
             FirstName: models.UserModel{FirstName: claims.Name}.FirstName,
             LastName:  "",
             Email:     claims.Email,
@@ -63,7 +64,7 @@ func (s *GoogleAuthService) AuthenticateWithGoogle(ctx context.Context, credenti
     }
 
     // Issue app JWT
-    token, err := middleware.GenerateJWTToken(s.cfg, claims.Email)
+    token, err := middleware.GenerateJWTToken(s.cfg, claims.Email, user.Role)
     if err != nil {
         return nil, errors.New("failed to generate jwt")
     }

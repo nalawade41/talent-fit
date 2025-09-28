@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
 import type { ProjectAllocation } from '../data/allocations';
@@ -20,11 +20,13 @@ export const useEmployeeDashboard = (): UseEmployeeDashboardReturn => {
   const [employee, setEmployee] = useState<Employee | null>(null);
   const [currentAllocations, setCurrentAllocations] = useState<ProjectAllocation[]>([]);
   const [projectHistory, setProjectHistory] = useState<ProjectAllocation[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const hasFetchedRef = useRef(false);
 
   const fetchEmployeeData = async () => {
-    if (!user?.id) {
+    setLoading(true);
+    if (!user?.email) {
       setError('No user found');
       setLoading(false);
       toast.error('User not found. Please login again.');
@@ -32,18 +34,13 @@ export const useEmployeeDashboard = (): UseEmployeeDashboardReturn => {
       return;
     }
     try {
-      setLoading(true);
       setError(null);
       
-      // Fetch employee profile and allocations in parallel
-      const employeeData = await EmployeeProfileService.getEmployeeProfile(user.id);
-
+      const employeeData = await EmployeeProfileService.getEmployeeProfile();
       if (employeeData) {
         setEmployee(employeeData);
 
-        const allAllocations = await ProjectAllocationService.getEmployeeAllocations(employeeData.employee_id);
-
-        // Lets set current allocations and history allocations
+        const allAllocations = await ProjectAllocationService.getEmployeeAllocations(employeeData.user_id);
         const currentAllocs = allAllocations.filter((alloc) => !alloc.end_date);
         const historyAllocs = allAllocations.filter((alloc) => alloc.end_date);
         setCurrentAllocations(currentAllocs);
@@ -51,7 +48,6 @@ export const useEmployeeDashboard = (): UseEmployeeDashboardReturn => {
       }
       
     } catch (err) {
-      console.error('Error fetching employee data:', err);
       setError(err instanceof Error ? err.message : 'Failed to fetch employee data');
     } finally {
       setLoading(false);
@@ -60,8 +56,19 @@ export const useEmployeeDashboard = (): UseEmployeeDashboardReturn => {
 
   // Fetch data when user changes or component mounts
   useEffect(() => {
-    fetchEmployeeData();
-  }, [user?.id]);
+    console.log('🎯 useEffect triggered:', {
+      userEmail: user?.email,
+      hasEmployee: !!employee,
+      hasFetched: hasFetchedRef.current,
+      willFetch: !!user?.email && !hasFetchedRef.current,
+      timestamp: new Date().toISOString()
+    });
+    
+    if (user?.email && !hasFetchedRef.current) {
+      hasFetchedRef.current = true;
+      fetchEmployeeData();
+    }
+  }, [user?.email]);
 
   // Refetch function for manual refresh
   const refetch = async () => {

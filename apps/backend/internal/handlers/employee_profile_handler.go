@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/talent-fit/backend/internal/domain"
 	"github.com/talent-fit/backend/internal/models"
+	"github.com/talent-fit/backend/pkg/middleware"
 )
 
 // EmployeeProfileHandler handles HTTP requests for employee profiles
@@ -61,16 +62,18 @@ func (h *EmployeeProfileHandler) GetAllProfiles(c *gin.Context) {
 	c.JSON(http.StatusOK, profiles)
 }
 
-// GetProfileByUserID handles GET /profiles/user/:userId
-func (h *EmployeeProfileHandler) GetProfileByUserID(c *gin.Context) {
+// GetProfileByUserID handles GET /employee/me
+func (h *EmployeeProfileHandler) GetMe(c *gin.Context) {
 	ctx := c.Request.Context()
-	userID := c.Param("id")
-	if userID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "User ID is required"})
+
+	// Get user email from context
+	email, ok := middleware.GetUserEmail(c)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User email not found"})
 		return
 	}
-
-	profile, err := h.profileService.GetProfileByUserID(ctx, userID)
+	
+	profile, err := h.profileService.GetProfileByUserEmail(ctx, email)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
