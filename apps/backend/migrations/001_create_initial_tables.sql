@@ -195,3 +195,7 @@ create index if not exists projects_embedding_idx
 
 analyze employee_profiles;
 analyze projects;
+
+
+alter table projects
+add column summary text;

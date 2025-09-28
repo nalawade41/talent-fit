@@ -16,9 +16,10 @@ const (
 
 // ProjectModel represents the project business model
 type ProjectModel struct {
-	ID            uint                `json:"id"`
+	ID            int                 `json:"id"`
 	Name          string              `json:"name"`
 	Description   string              `json:"description"`
+	Summary       string              `json:"summary"`
 	RequiredSeats int                 `json:"required_seats"`
 	SeatsByType   map[string]int      `json:"seats_by_type"`
 	StartDate     time.Time           `json:"start_date"`
@@ -37,6 +38,7 @@ func (p *ProjectModel) ToEntity() *entities.Project {
 		ID:            p.ID,
 		Name:          p.Name,
 		Description:   p.Description,
+		Summary:       p.Summary,
 		RequiredSeats: p.RequiredSeats,
 		SeatsByType:   entities.SeatsByType(p.SeatsByType),
 		StartDate:     p.StartDate,
@@ -53,6 +55,7 @@ func (p *ProjectModel) FromEntity(entity *entities.Project) {
 	p.ID = entity.ID
 	p.Name = entity.Name
 	p.Description = entity.Description
+	p.Summary = entity.Summary
 	p.RequiredSeats = entity.RequiredSeats
 	p.SeatsByType = map[string]int(entity.SeatsByType)
 	p.StartDate = entity.StartDate

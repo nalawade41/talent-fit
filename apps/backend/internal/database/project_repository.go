@@ -31,7 +31,7 @@ func (r *ProjectRepository) GetAll(ctx context.Context) ([]*entities.Project, er
 }
 
 // GetByID retrieves a project by ID from database
-func (r *ProjectRepository) GetByID(ctx context.Context, id string) (*entities.Project, error) {
+func (r *ProjectRepository) GetByID(ctx context.Context, id int) (*entities.Project, error) {
 	var project entities.Project
 	result := r.db.WithContext(ctx).Preload("ProjectAllocations").First(&project, "id = ?", id)
 	if result.Error != nil {
@@ -50,7 +50,7 @@ func (r *ProjectRepository) Create(ctx context.Context, project *entities.Projec
 }
 
 // Update updates a project in database
-func (r *ProjectRepository) Update(ctx context.Context, id string, project *entities.Project) (*entities.Project, error) {
+func (r *ProjectRepository) Update(ctx context.Context, id int, project *entities.Project) (*entities.Project, error) {
 	result := r.db.WithContext(ctx).Model(&entities.Project{}).Where("id = ?", id).Updates(project)
 	if result.Error != nil {
 		return nil, result.Error
@@ -59,7 +59,7 @@ func (r *ProjectRepository) Update(ctx context.Context, id string, project *enti
 }
 
 // Delete deletes a project from database
-func (r *ProjectRepository) Delete(ctx context.Context, id string) error {
+func (r *ProjectRepository) Delete(ctx context.Context, id int) error {
 	result := r.db.WithContext(ctx).Delete(&entities.Project{}, "id = ?", id)
 	if result.Error != nil {
 		return result.Error

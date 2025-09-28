@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/talent-fit/backend/internal/domain"
@@ -42,7 +43,13 @@ func (h *ProjectHandler) GetProjectByID(c *gin.Context) {
 		return
 	}
 
-	project, err := h.projectService.GetProjectByID(ctx, id)
+	idInt, err := strconv.Atoi(id)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid project ID"})
+		return
+	}
+
+	project, err := h.projectService.GetProjectByID(ctx, idInt)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -84,7 +91,13 @@ func (h *ProjectHandler) UpdateProject(c *gin.Context) {
 		return
 	}
 
-	updatedProject, err := h.projectService.UpdateProject(ctx, id, &project)
+	idInt, err := strconv.Atoi(id)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid project ID"})
+		return
+	}
+
+	updatedProject, err := h.projectService.UpdateProject(ctx, idInt, &project)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

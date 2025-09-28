@@ -6,6 +6,7 @@ import (
 	"errors"
 	"time"
 
+	"github.com/pgvector/pgvector-go"
 	"gorm.io/gorm"
 )
 
@@ -39,7 +40,7 @@ func (s SeatsByType) Value() (driver.Value, error) {
 
 // Project entity for database operations
 type Project struct {
-	ID            uint        `gorm:"primaryKey"`
+	ID            int        `gorm:"primaryKey"`
 	Name          string      `gorm:"not null"`
 	Description   string
 	RequiredSeats int         `gorm:"not null"`
@@ -47,10 +48,11 @@ type Project struct {
 	StartDate     time.Time   `gorm:"not null"`
 	EndDate       time.Time   `gorm:"not null"`
 	Status        string      `gorm:"not null;default:'Open'"`
-	Embedding     []float32   `gorm:"type:vector(1536)"`
+	Embedding     pgvector.Vector   `gorm:"type:vector(1536)"`
 	CreatedAt     time.Time
 	UpdatedAt     time.Time
 	DeletedAt     gorm.DeletedAt `gorm:"index"`
+	Summary       string
 
 	// Relationships
 	ProjectAllocations []ProjectAllocation `gorm:"foreignKey:ProjectID"`

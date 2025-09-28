@@ -1,12 +1,12 @@
 package utils
 
 import (
-  "context"
-  "fmt"
+	"context"
+	"fmt"
 
-  "github.com/pgvector/pgvector-go"
-  "github.com/talent-fit/backend/internal/domain"
-  "github.com/talent-fit/backend/internal/entities"
+	"github.com/pgvector/pgvector-go"
+	"github.com/talent-fit/backend/internal/domain"
+	"github.com/talent-fit/backend/internal/entities"
 )
 
 // EmbeddingEntityUtils provides utility functions for working with embeddings in entities
@@ -65,6 +65,7 @@ func (u *EmbeddingEntityUtils) GenerateProjectEmbedding(ctx context.Context, pro
     "name":          project.Name,
     "description":   project.Description,
     "seats_by_type": seatsByType,
+	"summary":       project.Summary,
   }
 
   // Generate embedding using the utility
@@ -75,7 +76,7 @@ func (u *EmbeddingEntityUtils) GenerateProjectEmbedding(ctx context.Context, pro
   }
 
   // Set the embedding in the entity
-  project.Embedding = embedding
+  project.Embedding = pgvector.NewVector(embedding)
   return nil
 }
 
@@ -92,7 +93,7 @@ func (u *EmbeddingEntityUtils) UpdateEmployeeProfileEmbedding(ctx context.Contex
 // UpdateProjectEmbedding updates the embedding for a project if needed
 func (u *EmbeddingEntityUtils) UpdateProjectEmbedding(ctx context.Context, project *entities.Project, forceUpdate bool) error {
   // Only generate if embedding is empty or force update is requested
-  if !forceUpdate && len(project.Embedding) > 0 {
+  if !forceUpdate && len(project.Embedding.String()) > 0 {
     return nil // Embedding already exists
   }
 
@@ -223,7 +224,7 @@ func (u *EmbeddingEntityUtils) BatchGenerateProjectEmbeddings(ctx context.Contex
   // Assign embeddings to projects
   for i, embedding := range embeddings {
     if i < len(validProjects) {
-      validProjects[i].Embedding = embedding
+      validProjects[i].Embedding = pgvector.NewVector(embedding)
     }
   }
 

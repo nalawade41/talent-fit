@@ -48,6 +48,9 @@ type AIConfig struct {
 	OpenAIAPIKey string
 	OpenAIEmbeddingModel string
 	AIModel      string
+	GrokAPIKey string
+	GrokAPIBaseURL string
+	GrokModel string
 }
 
 // LoggingConfig holds logging configuration
@@ -88,6 +91,9 @@ func Load() (*Config, error) {
 			OpenAIAPIKey: getEnv("OPENAI_API_KEY", ""),
 			OpenAIEmbeddingModel: getEnv("OPENAI_API_EMBEDDING_MODEL", "text-embedding-3-small"),
 			AIModel:      getEnv("AI_MODEL", "gpt-4"),
+			GrokAPIKey: getEnv("GROKK_API_KEY", ""),
+			GrokAPIBaseURL: getEnv("GROKK_BASE_URL", "https://api.x.ai/v1"),
+			GrokModel: getEnv("GROKK_MODEL", "grok-4-fast"),
 		},
 		Logging: LoggingConfig{
 			Level:  getEnv("LOG_LEVEL", "info"),

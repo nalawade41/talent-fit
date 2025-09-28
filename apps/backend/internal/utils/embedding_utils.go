@@ -96,6 +96,11 @@ func (u *EmbeddingUtils) GenerateProjectEmbedding(ctx context.Context, projectDa
 		}
 	}
 
+	// Add summary (prioritize summary over individual parts if available)
+	if summary, ok := projectData["summary"].(string); ok && summary != "" {
+		textParts = []string{"Project Requirements: " + summary}
+	}
+
 	if len(textParts) == 0 {
 		return nil, fmt.Errorf("no valid project data to generate embedding")
 	}
