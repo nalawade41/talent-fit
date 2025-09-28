@@ -11,15 +11,15 @@ export interface Project {
   created_at: string;
   updated_at: string;
   // Additional UI fields
+  role_title?: string;
   client_name: string;
-  role_title: string;
-  required_skills: string[];
-  nice_to_have_skills: string[];
-  role_type: 'Frontend' | 'Backend' | 'Fullstack' | 'AI' | 'UI' | 'UX' | 'Tester' | 'Manager';
-  industry: string;
-  geo_preference: string;
-  duration_weeks: number;
-  priority: 'low' | 'medium' | 'high';
+  required_skills?: string[];
+  nice_to_have_skills?: string[];
+  role_type?: 'Frontend' | 'Backend' | 'Fullstack' | 'AI' | 'UI' | 'UX' | 'Tester' | 'Manager';
+  industry?: string;
+  geo_preference?: string;
+  duration_weeks?: number;
+  priority?: 'low' | 'medium' | 'high' | string;
   progress: number;
   budget?: number;
   project_manager?: string;
@@ -230,13 +230,13 @@ export const getProjectsByPriority = (priority: 'low' | 'medium' | 'high') =>
   projectsData.filter(project => project.priority === priority);
 
 export const getProjectsByIndustry = (industry: string) => 
-  projectsData.filter(project => project.industry.toLowerCase().includes(industry.toLowerCase()));
+  projectsData.filter(project => project.industry?.toLowerCase().includes(industry.toLowerCase()));
 
 export const getProjectsBySkills = (skills: string[]) =>
   projectsData.filter(project =>
     skills.some(skill =>
-      project.required_skills.some(s => s.toLowerCase().includes(skill.toLowerCase())) ||
-      project.nice_to_have_skills.some(s => s.toLowerCase().includes(skill.toLowerCase()))
+      project.required_skills?.some(s => s.toLowerCase().includes(skill.toLowerCase())) ||
+      project.nice_to_have_skills?.some(s => s.toLowerCase().includes(skill.toLowerCase()))
     )
   );
 

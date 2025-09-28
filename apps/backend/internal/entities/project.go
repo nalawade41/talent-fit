@@ -52,7 +52,12 @@ type Project struct {
 	CreatedAt     time.Time
 	UpdatedAt     time.Time
 	DeletedAt     gorm.DeletedAt `gorm:"index"`
-	Summary       string
+	Summary       string 
+	ClientName    string
+	Industry      string
+	GeoPreference string
+	Priority      string
+	Budget        float64
 
 	// Relationships
 	ProjectAllocations []ProjectAllocation `gorm:"foreignKey:ProjectID"`

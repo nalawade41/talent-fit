@@ -43,6 +43,11 @@ export interface BackendProject {
   status: 'Open' | 'Closed';
   created_at: string;
   updated_at: string;
+  client_name: string;
+  industry: string;
+  geo_preference: string;
+  priority: string;
+  budget: number;
 }
 
 // Backend Project Allocation Types
