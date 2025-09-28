@@ -91,7 +91,14 @@ func (h *EmployeeProfileHandler) CreateProfile(c *gin.Context) {
 		return
 	}
 
-	createdProfile, err := h.profileService.CreateProfile(ctx, &profile)
+	// Get user email from context
+	email, ok := middleware.GetUserEmail(c)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User email not found"})
+		return
+	}
+
+	createdProfile, err := h.profileService.CreateProfile(ctx, email, &profile)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

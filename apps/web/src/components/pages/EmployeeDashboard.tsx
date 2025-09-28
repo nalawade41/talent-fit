@@ -2,13 +2,10 @@ import { Card } from '../ui/card';
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
 import { useEmployeeDashboard } from '../../hooks/useEmployeeDashboard';
+import { useNavigate } from 'react-router-dom';
 
 export function EmployeeDashboard() {
-  const componentId = Math.random().toString(36).substr(2, 9);
-  console.log('🏠 EmployeeDashboard component rendered:', {
-    timestamp: new Date().toISOString(),
-    componentId: componentId
-  });
+  const navigate = useNavigate();
   
   const { 
     employee: employeeData, 
@@ -360,7 +357,15 @@ export function EmployeeDashboard() {
             <div className="text-xs text-purple-600">
               Keep your skills updated to improve project matches
             </div>
-            <Button variant="outline" className="border-purple-200 text-purple-700 hover:bg-purple-50 shadow-sm">
+            <Button 
+              variant="outline" 
+              className="border-purple-200 text-purple-700 hover:bg-purple-50 shadow-sm"
+              onClick={() => navigate('/profile', { 
+                state: { 
+                  employeeProfile: employeeData 
+                } 
+              })}
+            >
               <svg className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
               </svg>

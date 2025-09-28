@@ -30,10 +30,10 @@ type UserRepository interface {
 	GetAll(ctx context.Context) error
 
 	// GetByID retrieves a user by ID from database
-	GetByID(ctx context.Context, id string) error
+	GetByID(ctx context.Context, id string) (*entities.User, error)
 
 	// Update updates a user in database
-	Update(ctx context.Context, id string) error
+	Update(ctx context.Context, user *entities.User) error
 
 	// Create creates a new user in database
 	Create(ctx context.Context) error

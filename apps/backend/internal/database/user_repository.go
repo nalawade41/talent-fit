@@ -30,20 +30,17 @@ func (r *UserRepository) GetAll(ctx context.Context) error {
 }
 
 // GetByID retrieves a user by ID from database
-func (r *UserRepository) GetByID(ctx context.Context, id string) error {
+func (r *UserRepository) GetByID(ctx context.Context, id string) (*entities.User, error) {
 	// TODO: Implement database query to get user by ID
-	// TODO: var user models.User
-	// TODO: result := r.db.WithContext(ctx).First(&user, "id = ?", id)
-	// TODO: return result.Error
-	return nil
+	var user entities.User
+	result := r.db.WithContext(ctx).First(&user, "id = ?", id)
+	return &user, result.Error
 }
 
 // Update updates a user in database
-func (r *UserRepository) Update(ctx context.Context, id string) error {
-	// TODO: Implement database query to update user
-	// TODO: result := r.db.WithContext(ctx).Model(&user).Where("id = ?", id).Updates(updates)
-	// TODO: return result.Error
-	return nil
+func (r *UserRepository) Update(ctx context.Context, user *entities.User) error {
+	result := r.db.WithContext(ctx).Updates(user).Where("id = ?", user.ID)
+	return result.Error
 }
 
 // Create creates a new user in database

@@ -1,58 +1,24 @@
-import { useState, useMemo } from 'react';
+import { useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
-import { Input } from '../ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
-import { Briefcase, AlertTriangle, Download, Filter, Search, Users, TrendingUp } from 'lucide-react';
+import { Briefcase, AlertTriangle, Download, Users, TrendingUp } from 'lucide-react';
 import { employeesData, getAvailableEmployees, getRollingOffEmployees, getAllocatedEmployees, getBenchEmployees } from '../../data/employees';
 import { projectsData } from '../../data/projects';
 import { projectAllocationsData } from '../../data/allocations';
 
 export function ManagerDashboard() {
-  const [skillFilter, setSkillFilter] = useState<string>('all');
-  const [geoFilter, setGeoFilter] = useState<string>('all');
-  const [availabilityFilter, setAvailabilityFilter] = useState<string>('all');
-  const [searchTerm, setSearchTerm] = useState<string>('');
-
+  const navigate = useNavigate();
+  
   // Calculate metrics
   const availableEngineers = getAvailableEmployees().length;
   const rollingOffEngineers = getRollingOffEmployees().length;
   const allocatedEngineers = getAllocatedEmployees().length;
   const benchEngineers = getBenchEmployees().length;
   const activeProjects = projectsData.filter(p => p.status === 'Open').length;
-
-  // Get unique skills and geos for filters
-  const allSkills = useMemo(() => {
-    const skills = new Set<string>();
-    employeesData.forEach(emp => emp.skills.forEach(skill => skills.add(skill)));
-    return Array.from(skills).sort();
-  }, []);
-
-  const allGeos = useMemo(() => {
-    const geos = new Set<string>();
-    employeesData.forEach(emp => geos.add(emp.geo));
-    return Array.from(geos).sort();
-  }, []);
-
-  // Filter employees based on current filters
-  const filteredEmployees = useMemo(() => {
-    return employeesData.filter(employee => {
-      const matchesSkill = skillFilter === 'all' || employee.skills.includes(skillFilter);
-      const matchesGeo = geoFilter === 'all' || employee.geo === geoFilter;
-      const matchesAvailability = availabilityFilter === 'all' ||
-        (availabilityFilter === 'available' && employee.status === 'available') ||
-        (availabilityFilter === 'allocated' && employee.status === 'allocated') ||
-        (availabilityFilter === 'bench' && employee.status === 'bench') ||
-        (availabilityFilter === 'rolling_off' && employee.status === 'rolling_off');
-      const matchesSearch = searchTerm === '' ||
-        `${employee.user.first_name} ${employee.user.last_name}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        employee.skills.some(skill => skill.toLowerCase().includes(searchTerm.toLowerCase()));
-
-      return matchesSkill && matchesGeo && matchesAvailability && matchesSearch;
-    });
-  }, [skillFilter, geoFilter, availabilityFilter, searchTerm]);
 
   // Chart data
   const utilizationData = [
@@ -190,6 +156,27 @@ export function ManagerDashboard() {
     });
   }, [projectsData, employeesData, projectAllocationsData, allocatedEngineers]);
 
+  // Navigation handlers for metric cards
+  const navigateToAvailableEmployees = () => {
+    navigate('/employees?status=available');
+    toast.success('Showing available engineers');
+  };
+
+  const navigateToActiveProjects = () => {
+    navigate('/projects');
+    toast.success('Showing active projects');
+  };
+
+  const navigateToRollingOffEmployees = () => {
+    navigate('/employees?status=rolling_off');
+    toast.success('Showing employees rolling off soon');
+  };
+
+  const navigateToBenchEmployees = () => {
+    navigate('/employees?status=bench');
+    toast.success('Showing bench resources');
+  };
+
   const handleExport = () => {
     // Mock export functionality
     const data = {
@@ -199,7 +186,7 @@ export function ManagerDashboard() {
         rollingOffEngineers,
         benchEngineers
       },
-      filteredEmployees: filteredEmployees.map(emp => ({
+      filteredEmployees: employeesData.map(emp => ({
         name: `${emp.user.first_name} ${emp.user.last_name}`,
         skills: emp.skills,
         status: emp.status,
@@ -237,7 +224,14 @@ export function ManagerDashboard() {
 
       {/* Key Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
+        <Card 
+          className="cursor-pointer hover:shadow-md transition-shadow duration-200 hover:bg-gray-50"
+          onClick={navigateToAvailableEmployees}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => e.key === 'Enter' && navigateToAvailableEmployees()}
+          aria-label="Navigate to available engineers"
+        >
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -249,7 +243,14 @@ export function ManagerDashboard() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card 
+          className="cursor-pointer hover:shadow-md transition-shadow duration-200 hover:bg-gray-50"
+          onClick={navigateToActiveProjects}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => e.key === 'Enter' && navigateToActiveProjects()}
+          aria-label="Navigate to active projects"
+        >
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -261,7 +262,14 @@ export function ManagerDashboard() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card 
+          className="cursor-pointer hover:shadow-md transition-shadow duration-200 hover:bg-gray-50"
+          onClick={navigateToRollingOffEmployees}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => e.key === 'Enter' && navigateToRollingOffEmployees()}
+          aria-label="Navigate to employees rolling off soon"
+        >
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -273,7 +281,14 @@ export function ManagerDashboard() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card 
+          className="cursor-pointer hover:shadow-md transition-shadow duration-200 hover:bg-gray-50"
+          onClick={navigateToBenchEmployees}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => e.key === 'Enter' && navigateToBenchEmployees()}
+          aria-label="Navigate to bench resources"
+        >
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -285,82 +300,6 @@ export function ManagerDashboard() {
           </CardContent>
         </Card>
       </div>
-
-      {/* Quick Filters */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Filter className="w-5 h-5" />
-            Quick Filters
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Search</label>
-              <div className="relative">
-                <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search employees..."
-                  value={searchTerm}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
-                  className="pl-9"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Skills</label>
-              <Select value={skillFilter} onValueChange={setSkillFilter}>
-                <SelectTrigger>
-                  <SelectValue placeholder="All Skills" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Skills</SelectItem>
-                  {allSkills.map(skill => (
-                    <SelectItem key={skill} value={skill}>{skill}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Location</label>
-              <Select value={geoFilter} onValueChange={setGeoFilter}>
-                <SelectTrigger>
-                  <SelectValue placeholder="All Locations" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Locations</SelectItem>
-                  {allGeos.map(geo => (
-                    <SelectItem key={geo} value={geo}>{geo}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Availability</label>
-              <Select value={availabilityFilter} onValueChange={setAvailabilityFilter}>
-                <SelectTrigger>
-                  <SelectValue placeholder="All Status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Status</SelectItem>
-                  <SelectItem value="available">Available</SelectItem>
-                  <SelectItem value="allocated">Allocated</SelectItem>
-                  <SelectItem value="bench">Bench</SelectItem>
-                  <SelectItem value="rolling_off">Rolling Off</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <div className="mt-4 text-sm text-muted-foreground">
-            Showing {filteredEmployees.length} of {employeesData.length} employees
-          </div>
-        </CardContent>
-      </Card>
 
       {/* Charts and Attention Items */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

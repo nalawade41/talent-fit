@@ -32,7 +32,7 @@ type EmployeeProfileService interface {
 	GetAllProfiles(ctx context.Context) ([]*models.EmployeeProfileModel, error)
 	SearchProfiles(ctx context.Context, skills []string, geos []string, availableOnly bool) ([]*models.EmployeeProfileModel, error)
 	GetProfileByUserEmail(ctx context.Context, email string) (*models.EmployeeProfileModel, error)
-	CreateProfile(ctx context.Context, profile *models.EmployeeProfileModel) (*models.EmployeeProfileModel, error)
+	CreateProfile(ctx context.Context, email string, profile *models.EmployeeProfileModel) (*models.EmployeeProfileModel, error)
 	UpdateProfile(ctx context.Context, userID string, profile *models.EmployeeProfileModel) (*models.EmployeeProfileModel, error)
 	GetAvailableEmployees(ctx context.Context) ([]*models.EmployeeProfileModel, error)
 }

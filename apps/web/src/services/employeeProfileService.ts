@@ -8,7 +8,6 @@ const convertToEmployee = (backendProfile: BackendEmployeeProfile): Employee => 
   const nameParts = backendProfile.user.first_name.split(' ');
   const firstName = nameParts[0] || '';
   const lastName = nameParts.slice(1).join(' ') || '';
-  debugger;
   // Determine status based on availability and dates
   let status: Employee['status'] = 'available';
   if (backendProfile.notice_date) {
@@ -33,10 +32,26 @@ const convertToEmployee = (backendProfile: BackendEmployeeProfile): Employee => 
     type: backendProfile.user.type,
     skills: backendProfile.skills,
     years_of_experience: backendProfile.years_of_experience,
-    industry: backendProfile.industry,
+    industry: backendProfile.industry.map(industryStr => {
+      // Handle both old format (string) and new format (string with years)
+      if (industryStr.includes('|')) {
+        const [industryName, years] = industryStr.split('|');
+        return {
+          industry: industryName,
+          years: Number(years) || 1
+        };
+      } else {
+        // Fallback for simple string format
+        return {
+          industry: industryStr,
+          years: 1
+        };
+      }
+    }),
     availability_flag: backendProfile.availability_flag,
     created_at: backendProfile.created_at,
     updated_at: backendProfile.updated_at,
+    department: backendProfile.department,
     user: {
       id: backendProfile.user.id,
       first_name: firstName,
@@ -81,9 +96,9 @@ export class EmployeeProfileService {
       const response = await apiService.post<ApiResponse<BackendEmployeeProfile>>(
         `/api/v1/employee/${userId}`,
         profileData
-      );
+      ) as any;
       
-      return convertToEmployee(response.data);
+      return convertToEmployee(response);
     } catch (error) {
       console.error('Error creating employee profile:', error);
       throw error;
@@ -96,9 +111,9 @@ export class EmployeeProfileService {
       const response = await apiService.patch<ApiResponse<BackendEmployeeProfile>>(
         `/api/v1/employee/${userId}`,
         profileData
-      );
+      ) as any;
       
-      return convertToEmployee(response.data);
+      return convertToEmployee(response);
     } catch (error) {
       console.error('Error updating employee profile:', error);
       throw error;

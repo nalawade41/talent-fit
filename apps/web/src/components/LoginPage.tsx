@@ -1,17 +1,29 @@
 import { AlertCircle, Key, LogIn, User } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
+const LOGIN_VIA_CREDENTIALS = false; //import.meta.env.LOGIN_VIA_CREDENTIALS; // Set to false to test Google Sign-In only
 export function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const { loginWithGoogleCredential } = useAuth();
+  const { loginWithGoogleCredential, loginWithCredentials } = useAuth();
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    if (!LOGIN_VIA_CREDENTIALS) return; // Skip if disabled
+    setIsLoading(true);
+    const ok = await loginWithCredentials(email, password);
+    setIsLoading(false);
+    if (ok) {
+      navigate('/');
+    } else {
+      setError('Invalid email or password');
+    }
   };
 
   useEffect(() => {
@@ -56,7 +68,7 @@ export function LoginPage() {
               <span className="text-sm">{error}</span>
             </div>
           )}
-
+          {(LOGIN_VIA_CREDENTIALS) && (
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
@@ -96,19 +108,23 @@ export function LoginPage() {
 
             <button
               type="submit"
-              disabled
-              className="w-full bg-gray-100 text-gray-500 py-2 px-4 rounded-lg focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 opacity-60 cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+              disabled={isLoading}
+              className={`w-full ${isLoading ? 'opacity-50 cursor-not-allowed' : 'bg-blue-500 text-white hover:bg-blue-600'} py-2 px-4 rounded-lg focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors flex items-center justify-center gap-2`}
             >
-              <LogIn className="w-5 h-5" />
-              Sign in with email (disabled)
+              {isLoading ? (
+                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <LogIn className="w-5 h-5 text-white" />
+              )}
+              <span>{isLoading ? 'Signing in...' : 'Sign in'}</span>
             </button>
-          </form>
+          </form>)}
 
-          <div className="my-6 flex items-center">
+          {(LOGIN_VIA_CREDENTIALS) && (<div className="my-6 flex items-center">
             <div className="flex-1 h-px bg-gray-200" />
             <span className="px-3 text-xs text-gray-500">or</span>
             <div className="flex-1 h-px bg-gray-200" />
-          </div>
+          </div>)}
 
           {/* Default Google Sign-In button (iframe) */}
           {!(import.meta as any).env.VITE_GOOGLE_CLIENT_ID && (
@@ -140,13 +156,13 @@ export function LoginPage() {
             )}
           </div>
 
-          <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+          {(LOGIN_VIA_CREDENTIALS) && (<div className="mt-6 p-4 bg-gray-50 rounded-lg">
             <h3 className="text-sm font-medium text-gray-700 mb-2">Demo Accounts:</h3>
             <div className="space-y-1 text-xs text-gray-600">
               <div>Employee: sarah@company.com / demo123</div>
               <div>Manager: michael@company.com / demo123</div>
             </div>
-          </div>
+          </div>)}
         </div>
       </div>
     </div>
