@@ -21,7 +21,7 @@ export function ProtectedRoute({
   }
 
   if (requiredPermission) {
-    const userRole = user.role === 'manager' ? UserRole.MANAGER : UserRole.EMPLOYEE;
+    const userRole = user.role === UserRole.MANAGER ? UserRole.MANAGER : UserRole.EMPLOYEE;
     const permissions = getRolePermissions(userRole);
     
     if (!permissions[requiredPermission]) {

@@ -27,7 +27,11 @@ type ProjectModel struct {
 	Status        ProjectStatus       `json:"status"`
 	CreatedAt     time.Time           `json:"created_at"`
 	UpdatedAt     time.Time           `json:"updated_at"`
-
+	ClientName    string              `json:"client_name"`
+	Industry      string              `json:"industry"`
+	GeoPreference string              `json:"geo_preference"`
+	Priority      string              `json:"priority"`
+	Budget        float64             `json:"budget"`
 	// Relationships
 	ProjectAllocations []ProjectAllocationModel `json:"project_allocations,omitempty"`
 }
@@ -46,6 +50,11 @@ func (p *ProjectModel) ToEntity() *entities.Project {
 		Status:        string(p.Status),
 		CreatedAt:     p.CreatedAt,
 		UpdatedAt:     p.UpdatedAt,
+		ClientName:    p.ClientName,
+		Industry:      p.Industry,
+		GeoPreference: p.GeoPreference,
+		Priority:      p.Priority,
+		Budget:        p.Budget,
 	}
 	return entity
 }
@@ -63,4 +72,9 @@ func (p *ProjectModel) FromEntity(entity *entities.Project) {
 	p.Status = ProjectStatus(entity.Status)
 	p.CreatedAt = entity.CreatedAt
 	p.UpdatedAt = entity.UpdatedAt
+	p.ClientName = entity.ClientName
+	p.Industry = entity.Industry
+	p.GeoPreference = entity.GeoPreference
+	p.Priority = entity.Priority
+	p.Budget = entity.Budget
 }

@@ -1,7 +1,3 @@
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
@@ -10,139 +6,28 @@ import { Label } from '../ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Badge } from '../ui/badge';
 import { X, Plus, Save } from 'lucide-react';
-import toast from 'react-hot-toast';
-import { Project } from '../../types';
-
-const projectSchema = z.object({
-  name: z.string().min(1, 'Project name is required'),
-  description: z.string().min(10, 'Description must be at least 10 characters'),
-  required_seats: z.number().min(1, 'At least 1 seat is required'),
-  start_date: z.string().min(1, 'Start date is required'),
-  end_date: z.string().min(1, 'End date is required'),
-  client_name: z.string().optional(),
-  role_title: z.string().optional(),
-  role_type: z.string().optional(),
-  industry: z.string().optional(),
-  geo_preference: z.string().optional(),
-  priority: z.enum(['low', 'medium', 'high']).optional(),
-  budget: z.number().optional(),
-});
-
-type ProjectFormData = z.infer<typeof projectSchema>;
-
-interface ProjectCreationFormProps {
-  onProjectCreated?: (project: Project) => void;
-  onCancel?: () => void;
-}
-
-const ROLE_TYPES = [
-  'Frontend', 'Backend', 'Fullstack', 'AI', 'UI', 'UX', 'Tester', 'Manager'
-];
-
-const INDUSTRIES = [
-  'Technology', 'Finance', 'Healthcare', 'E-commerce', 'Education', 'Entertainment',
-  'Manufacturing', 'Consulting', 'Real Estate', 'Transportation', 'Energy', 'Retail'
-];
-
-const PRIORITIES = ['low', 'medium', 'high'] as const;
+import { ProjectCreationFormProps, ROLE_TYPES, INDUSTRIES, PRIORITIES } from '../../types/project';
+import useProjectCreationForm from '../../hooks/useProjectCreationForm';
 
 export function ProjectCreationForm({ onProjectCreated, onCancel }: ProjectCreationFormProps) {
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [seatsByType, setSeatsByType] = useState<Record<string, number>>({});
-  const [newRoleType, setNewRoleType] = useState('');
-  const [newRoleSeats, setNewRoleSeats] = useState<number>(1);
-
   const {
     register,
     handleSubmit,
     setValue,
     watch,
-    formState: { errors }
-  } = useForm<ProjectFormData>({
-    resolver: zodResolver(projectSchema),
-    defaultValues: {
-      required_seats: 1,
-      priority: 'medium',
-      start_date: new Date().toISOString().split('T')[0],
-      end_date: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 90 days from now
-    }
-  });
+    addRoleType,
+    removeRoleType,
+    onSubmit,
+    errors,
+    isSubmitting,
+    seatsByType,
+    newRoleType,
+    newRoleSeats,
+    setNewRoleType,
+    setNewRoleSeats,
+  } = useProjectCreationForm(onProjectCreated);
 
-  const watchedRequiredSeats = watch('required_seats');
-
-  const addRoleType = () => {
-    if (newRoleType && newRoleSeats > 0) {
-      setSeatsByType(prev => ({
-        ...prev,
-        [newRoleType]: newRoleSeats
-      }));
-      setNewRoleType('');
-      setNewRoleSeats(1);
-
-      // Update total required seats
-      const totalSeats = Object.values({ ...seatsByType, [newRoleType]: newRoleSeats }).reduce((sum, seats) => sum + seats, 0);
-      setValue('required_seats', totalSeats);
-    }
-  };
-
-  const removeRoleType = (roleType: string) => {
-    const updatedSeats = { ...seatsByType };
-    delete updatedSeats[roleType];
-    setSeatsByType(updatedSeats);
-
-    // Update total required seats
-    const totalSeats = Object.values(updatedSeats).reduce((sum, seats) => sum + seats, 0);
-    setValue('required_seats', totalSeats || 1);
-  };
-
-  const onSubmit = async (data: ProjectFormData) => {
-    setIsSubmitting(true);
-
-    try {
-      // Create new project
-      const newProject: Project = {
-        id: Date.now(), // Simple ID generation
-        name: data.name,
-        description: data.description,
-        required_seats: data.required_seats,
-        seats_by_type: seatsByType,
-        start_date: new Date(data.start_date).toISOString(),
-        end_date: new Date(data.end_date).toISOString(),
-        status: 'Open',
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        client_name: data.client_name || '',
-        role_title: data.role_title || '',
-        role_type: data.role_type || '',
-        industry: data.industry || '',
-        geo_preference: data.geo_preference || '',
-        priority: data.priority,
-        budget: data.budget,
-        progress: 0,
-        required_skills: [],
-        nice_to_have_skills: [],
-        duration_weeks: Math.ceil((new Date(data.end_date).getTime() - new Date(data.start_date).getTime()) / (7 * 24 * 60 * 60 * 1000)),
-      };
-
-      // Save to localStorage
-      const existingProjects = JSON.parse(localStorage.getItem('projects') || '[]');
-      const updatedProjects = [...existingProjects, newProject];
-      localStorage.setItem('projects', JSON.stringify(updatedProjects));
-
-      toast.success('Project created successfully!', {
-        icon: '✅',
-      });
-
-      onProjectCreated?.(newProject);
-    } catch (error) {
-      console.error('Error creating project:', error);
-      toast.error('Failed to create project. Please try again.', {
-        icon: '❌',
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  // const watchedRequiredSeats = watch('required_seats');
 
   return (
     <Card className="w-full max-w-4xl mx-auto">
@@ -210,7 +95,7 @@ export function ProjectCreationForm({ onProjectCreated, onCancel }: ProjectCreat
                 {errors.required_seats && <p className="text-sm text-red-500 mt-1">{errors.required_seats.message}</p>}
               </div>
 
-              <div>
+              {/* <div>
                 <Label htmlFor="role_type">Primary Role Type</Label>
                 <Select onValueChange={(value) => setValue('role_type', value)}>
                   <SelectTrigger>
@@ -222,7 +107,7 @@ export function ProjectCreationForm({ onProjectCreated, onCancel }: ProjectCreat
                     ))}
                   </SelectContent>
                 </Select>
-              </div>
+              </div> */}
             </div>
 
             {/* Seats by Type */}
