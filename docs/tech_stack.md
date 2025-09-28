@@ -11,21 +11,21 @@ This document details the technologies used across the TalentFit monorepo and ho
 
 ## Frontend
 
-- **Framework**: React + Vite (TypeScript)
-  - Dev server and build: Vite (`apps/web`)
-  - Routing: `react-router-dom`
-  - Forms: `react-hook-form` + `zod`
-  - Charts: `recharts`
-  - Notifications: `react-hot-toast`
-  - Icons: `lucide-react`
+- **Framework**: React + TypeScript
+- **Build Tool**: Vite (`apps/web`)
+  - Dev server: `npm run dev` (default `http://localhost:5173`)
+  - Production build: `npm run build` 
+  - Preview build: `npm run preview`
+- **Routing**: `react-router-dom`
+- **Forms**: `react-hook-form` + `zod`
+- **Charts**: `recharts`
+- **Notifications**: `react-hot-toast`
+- **Icons**: `lucide-react`
 - **Styling**: Tailwind CSS + `tailwindcss-animate`
   - Tailwind config in `apps/web/tailwind.config.js`
   - PostCSS config in `apps/web/postcss.config.js`
 - **State/HTTP**: Local component state; APIs called to Go backend (protected via JWT)
 - **Scripts**:
-  - `npm run dev`: start Vite dev server (default `http://localhost:5173`)
-  - `npm run build`: production build
-  - `npm run preview`: preview build
   - `npm run lint`, `npm run typecheck`
 
 ## Backend
@@ -83,10 +83,10 @@ This document details the technologies used across the TalentFit monorepo and ho
 - **CI**: GitHub Actions (`.github/workflows/ci.yml`)
   - Node 20, `npm ci`, `npx nx run-many -t lint test build`
   - Optional Nx Cloud distribution and self-healing
-- **CD (example)**: Render
+- **CD Options**: 
   - Backend (Go Web Service): build `go build -o dist/api ./cmd/api`; start `./dist/api`
-  - Frontend (Static Site): `npm ci && npm run build` in `apps/web`, publish `dist`
-  - Database: Render Postgres or Supabase; set `DB_URL`/`DB_*`
+  - Frontend (Static Site): `npm ci && npm run build` in `apps/web` (Vite builds to `dist/`), deploy to static hosting (Netlify, Vercel, GitHub Pages, etc.)
+  - Database: PostgreSQL (Render, Supabase, or self-hosted); set `DB_URL`/`DB_*`
 
 ## Environment Variables (summary)
 

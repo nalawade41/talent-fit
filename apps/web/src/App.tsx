@@ -1,5 +1,6 @@
 import { Toaster } from 'react-hot-toast';
 import { Navigate, Route, BrowserRouter as Router, Routes } from 'react-router-dom';
+import { Suspense, lazy } from 'react';
 import { MainLayout } from './components/Layout/MainLayout';
 import { LoginPage } from './components/LoginPage';
 import { ProtectedRoute, UnauthorizedAccess } from './components/ProtectedRoute';
@@ -7,16 +8,25 @@ import { ManagerDashboard } from './components/pages/ManagerDashboard';
 import { EmployeeDashboard } from './components/pages/EmployeeDashboard';
 import { ProfilePage } from './components/pages/ProfilePage';
 import { TeamManagementPage } from './components/pages/TeamManagementPage';
-import { ProjectsPage } from './components/pages/ProjectsPage';
-import { ProjectDetailsPage } from './components/pages/ProjectDetailsPage';
-import { ProjectEditPage } from './components/pages/ProjectEditPage';
-// import { AnalyticsPage } from './components/pages/AnalyticsPage';
-import { AllEmployeesPage } from './components/pages/AllEmployeesPage';
 import { NotificationsPage } from './components/pages/NotificationsPage';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { useIsRole } from './hooks/useRolePermissions';
 import './index.css';
 import { UserRole } from './types/roles';
+import { AppErrorBoundary } from './components/system/AppErrorBoundary';
+
+// Lazy load heavy pages for better performance
+const ProjectsPage = lazy(() => import('./components/pages/ProjectsPage'));
+const ProjectDetailsPage = lazy(() => import('./components/pages/ProjectDetailsPage'));  
+const ProjectEditPage = lazy(() => import('./components/pages/ProjectEditPage'));
+const AllEmployeesPage = lazy(() => import('./components/pages/AllEmployeesPage'));
+
+// Loading fallback component
+const PageLoader = () => (
+  <div className="flex items-center justify-center min-h-[400px]">
+    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+  </div>
+);
 
 // Removed unused GoogleIcon
 
@@ -60,7 +70,9 @@ function AuthShell() {
           path="projects"
           element={
             <ProtectedRoute requiredPermission="canCreateProjects" fallbackPath="/">
-              <ProjectsPage />
+              <Suspense fallback={<PageLoader />}>
+                <ProjectsPage />
+              </Suspense>
             </ProtectedRoute>
           }
         />
@@ -68,7 +80,9 @@ function AuthShell() {
           path="projects/:id"
           element={
             <ProtectedRoute requiredPermission="canCreateProjects" fallbackPath="/">
-              <ProjectDetailsPage />
+              <Suspense fallback={<PageLoader />}>
+                <ProjectDetailsPage />
+              </Suspense>
             </ProtectedRoute>
           }
         />
@@ -76,7 +90,9 @@ function AuthShell() {
           path="projects/:id/edit"
           element={
             <ProtectedRoute requiredPermission="canCreateProjects" fallbackPath="/">
-              <ProjectEditPage />
+              <Suspense fallback={<PageLoader />}>
+                <ProjectEditPage />
+              </Suspense>
             </ProtectedRoute>
           }
         />
@@ -92,7 +108,9 @@ function AuthShell() {
           path="employees"
           element={
             <ProtectedRoute requiredPermission="canViewAllEmployees" fallbackPath="/">
-              <AllEmployeesPage />
+              <Suspense fallback={<PageLoader />}>
+                <AllEmployeesPage />
+              </Suspense>
             </ProtectedRoute>
           }
         />
@@ -114,28 +132,30 @@ function AuthShell() {
 function App() {
   return (
     <AuthProvider>
-      <Router>
-        <AuthShell />
-      </Router>
-      <Toaster
-        position="top-right"
-        toastOptions={{
-          duration: 3000,
-          success: {
-            style: {
-              background: '#10B981',
-              color: 'white',
+      <AppErrorBoundary>
+        <Router>
+          <AuthShell />
+        </Router>
+        <Toaster
+          position="top-right"
+          toastOptions={{
+            duration: 3000,
+            success: {
+              style: {
+                background: '#10B981',
+                color: 'white',
+              },
             },
-          },
-          error: {
-            duration: 5000,
-            style: {
-              background: '#EF4444',
-              color: 'white',
+            error: {
+              duration: 5000,
+              style: {
+                background: '#EF4444',
+                color: 'white',
+              },
             },
-          },
-        }}
-      />
+          }}
+        />
+      </AppErrorBoundary>
     </AuthProvider>
   );
 }

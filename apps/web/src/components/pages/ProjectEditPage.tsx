@@ -56,3 +56,5 @@ export function ProjectEditPage() {
     </div>
   );
 }
+
+export default ProjectEditPage;

@@ -518,3 +518,5 @@ export function AllEmployeesPage() {
     </div>
   );
 }
+
+export default AllEmployeesPage;

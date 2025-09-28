@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
+const LOGIN_VIA_CREDENTIALS = false; //import.meta.env.LOGIN_VIA_CREDENTIALS; // Set to false to test Google Sign-In only
 export function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -14,6 +15,7 @@ export function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    if (!LOGIN_VIA_CREDENTIALS) return; // Skip if disabled
     setIsLoading(true);
     const ok = await loginWithCredentials(email, password);
     setIsLoading(false);
@@ -66,7 +68,7 @@ export function LoginPage() {
               <span className="text-sm">{error}</span>
             </div>
           )}
-
+          {(LOGIN_VIA_CREDENTIALS) && (
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
@@ -116,13 +118,13 @@ export function LoginPage() {
               )}
               <span>{isLoading ? 'Signing in...' : 'Sign in'}</span>
             </button>
-          </form>
+          </form>)}
 
-          <div className="my-6 flex items-center">
+          {(LOGIN_VIA_CREDENTIALS) && (<div className="my-6 flex items-center">
             <div className="flex-1 h-px bg-gray-200" />
             <span className="px-3 text-xs text-gray-500">or</span>
             <div className="flex-1 h-px bg-gray-200" />
-          </div>
+          </div>)}
 
           {/* Default Google Sign-In button (iframe) */}
           {!(import.meta as any).env.VITE_GOOGLE_CLIENT_ID && (
@@ -154,13 +156,13 @@ export function LoginPage() {
             )}
           </div>
 
-          <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+          {(LOGIN_VIA_CREDENTIALS) && (<div className="mt-6 p-4 bg-gray-50 rounded-lg">
             <h3 className="text-sm font-medium text-gray-700 mb-2">Demo Accounts:</h3>
             <div className="space-y-1 text-xs text-gray-600">
               <div>Employee: sarah@company.com / demo123</div>
               <div>Manager: michael@company.com / demo123</div>
             </div>
-          </div>
+          </div>)}
         </div>
       </div>
     </div>
