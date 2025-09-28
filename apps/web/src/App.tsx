@@ -10,15 +10,9 @@ import { TeamManagementPage } from './components/pages/TeamManagementPage';
 import { ProjectsPage } from './components/pages/ProjectsPage';
 import { ProjectDetailsPage } from './components/pages/ProjectDetailsPage';
 import { ProjectEditPage } from './components/pages/ProjectEditPage';
-import { AnalyticsPage } from './components/pages/AnalyticsPage';
+// import { AnalyticsPage } from './components/pages/AnalyticsPage';
 import { AllEmployeesPage } from './components/pages/AllEmployeesPage';
-import { AnalyticsPage } from './components/pages/AnalyticsPage';
-import { EmployeeDashboard } from './components/pages/EmployeeDashboard';
-import { ManagerDashboard } from './components/pages/ManagerDashboard';
 import { NotificationsPage } from './components/pages/NotificationsPage';
-import { ProfilePage } from './components/pages/ProfilePage';
-import { ProjectsPage } from './components/pages/ProjectsPage';
-import { TeamManagementPage } from './components/pages/TeamManagementPage';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { useIsRole } from './hooks/useRolePermissions';
 import './index.css';
@@ -29,7 +23,8 @@ import { UserRole } from './types/roles';
 // Removed inline mock LoginPage; using components/LoginPage instead
 
 function DashboardRoute() {
-  const isManager = useIsRole(UserRole.MANAGER);
+  const { isRole } = useIsRole();
+  const isManager = isRole(UserRole.MANAGER);
   return isManager ? <ManagerDashboard /> : <EmployeeDashboard />;
 }
 
@@ -85,14 +80,14 @@ function AuthShell() {
             </ProtectedRoute>
           }
         />
-        <Route
+        {/* <Route
           path="analytics"
           element={
             <ProtectedRoute requiredPermission="canViewAnalytics" fallbackPath="/">
               <AnalyticsPage />
             </ProtectedRoute>
           }
-        />
+        /> */}
         <Route
           path="employees"
           element={
@@ -106,14 +101,6 @@ function AuthShell() {
           element={
             <ProtectedRoute requiredPermission="canManageTeam" fallbackPath="/">
               <NotificationsPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="projects/:projectId"
-          element={
-            <ProtectedRoute requiredPermission="canViewProjectDetails" fallbackPath="/">
-              <ProjectDetailsPage />
             </ProtectedRoute>
           }
         />

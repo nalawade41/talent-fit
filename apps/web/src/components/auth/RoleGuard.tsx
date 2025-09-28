@@ -10,7 +10,8 @@ interface RoleGuardProps {
 
 export function RoleGuard({ children, permission, role, fallback = null }: RoleGuardProps) {
   const permissions = useRolePermissions();
-  const hasRole = useIsRole(role!);
+  const { isRole } = useIsRole();
+  const hasRole = isRole(role!);
 
   // If checking for specific role
   if (role && !hasRole) {

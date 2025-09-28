@@ -66,14 +66,13 @@ export function ProfileForm({ onSave }: ProfileFormProps) {
     if (savedProfile) {
       try {
         const parsedProfile = JSON.parse(savedProfile);
-        Object.keys(parsedProfile).forEach((key) => {
-          setValue(key as keyof EmployeeProfile, parsedProfile[key]);
-        });
+        // Use reset to load saved profile without making form dirty
+        reset(parsedProfile);
       } catch (error) {
         console.error('Error loading saved profile:', error);
       }
     }
-  }, [setValue]);
+  }, [reset]);
 
   const onSubmit = async (data: EmployeeProfile) => {
     setIsSubmitting(true);

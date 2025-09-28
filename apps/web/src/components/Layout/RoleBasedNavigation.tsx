@@ -1,10 +1,12 @@
 import { NavLink } from 'react-router-dom';
-import { useRolePermissions } from '../../hooks/useRolePermissions';
+import { useRolePermissions, useIsRole } from '../../hooks/useRolePermissions';
+import { UserRole } from '../../types/roles';
 import { cn } from '../../lib/utils';
 import { 
   LayoutDashboard, 
   FolderOpen, 
-  Building
+  Building,
+  User
 } from 'lucide-react';
 
 interface NavItem {
@@ -12,18 +14,27 @@ interface NavItem {
   label: string;
   permission?: keyof ReturnType<typeof useRolePermissions>;
   icon: React.ElementType;
+  roleSpecific?: UserRole; // Add role-specific navigation
 }
 
 const navigationItems: NavItem[] = [
   { path: '/', label: 'Dashboard', icon: LayoutDashboard },
   { path: '/projects', label: 'Projects', permission: 'canCreateProjects', icon: FolderOpen },
   { path: '/employees', label: 'Employees', permission: 'canViewAllEmployees', icon: Building },
+  { path: '/profile', label: 'Profile', permission: 'canViewOwnProfile', roleSpecific: UserRole.EMPLOYEE, icon: User },
 ];
 
 export function RoleBasedNavigation() {
   const permissions = useRolePermissions();
+  const { isRole } = useIsRole();
 
   const allowedItems = navigationItems.filter(item => {
+    // Check role-specific visibility first
+    if (item.roleSpecific && !isRole(item.roleSpecific)) {
+      return false;
+    }
+    
+    // Check permissions
     if (!item.permission) return true;
     return permissions[item.permission];
   });

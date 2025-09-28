@@ -19,6 +19,7 @@ export interface AuthUser {
 interface AuthContextType {
   user: AuthUser | null;
   loginWithGoogleCredential: (credential: string) => Promise<boolean>;
+  loginWithCredentials: (email: string, password: string) => Promise<boolean>; // Added for dummy credentials
   logout: () => void;
   updateProfile: (updates: Partial<AuthUser>) => void;
   refreshingToken: boolean;
@@ -129,7 +130,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-
+  // Dummy credentials login for demo accounts
+  const loginWithCredentials = async (email: string, password: string): Promise<boolean> => {
+    await new Promise(resolve => setTimeout(resolve, 500)); // simulate delay
+    let role: 'manager' | 'employee';
+    let name: string;
+    if (email === 'sarah@company.com' && password === 'demo123') {
+      role = 'employee';
+      name = 'Sarah Johnson';
+    } else if (email === 'michael@company.com' && password === 'demo123') {
+      role = 'manager';
+      name = 'Michael Chen';
+    } else {
+      return false;
+    }
+    const session: AuthUser = {
+      name,
+      email,
+      role,
+      avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}`,
+      provider: 'credentials',
+      accessToken: undefined,
+      tokenExpiry: Date.now() + TOKEN_LIFETIME_MS,
+      photoUrl: `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}`,
+    };
+    setUser(session);
+    localStorage.setItem('user', JSON.stringify(session));
+    return true;
+  };
 
   const logout = () => {
     setUser(null);
@@ -147,6 +175,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     <AuthContext.Provider value={{ 
       user, 
       loginWithGoogleCredential,
+      loginWithCredentials, // include dummy login in context
       logout, 
       updateProfile, 
       refreshingToken

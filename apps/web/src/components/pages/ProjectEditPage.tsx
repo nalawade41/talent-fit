@@ -46,10 +46,6 @@ export function ProjectEditPage() {
           <ArrowLeft className="w-4 h-4" />
           Back to Project Details
         </Button>
-        <div className="flex-1">
-          <h1 className="text-2xl font-bold">Edit Project</h1>
-          <p className="text-gray-600">{project.name}</p>
-        </div>
       </div>
 
       <ProjectEditForm

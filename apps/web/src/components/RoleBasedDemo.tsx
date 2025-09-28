@@ -8,8 +8,9 @@ import { Badge } from './ui/badge';
 export function RoleBasedDemo() {
   const { user } = useAuth();
   const permissions = useRolePermissions();
-  const isManager = useIsRole(UserRole.MANAGER);
-  const isEmployee = useIsRole(UserRole.EMPLOYEE);
+  const { isRole } = useIsRole();
+  const isManager = isRole(UserRole.MANAGER);
+  const isEmployee = isRole(UserRole.EMPLOYEE);
 
   return (
     <div className="p-6 space-y-6">

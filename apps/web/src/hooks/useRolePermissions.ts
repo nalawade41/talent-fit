@@ -20,10 +20,14 @@ export function useRolePermissions() {
   return getRolePermissions(userRole);
 }
 
-export function useIsRole(role: UserRole) {
+export function useIsRole() {
   const { user } = useAuth();
-  if (!user) return false;
   
-  const userRole = user.role === 'manager' ? UserRole.MANAGER : UserRole.EMPLOYEE;
-  return userRole === role;
+  const isRole = (role: UserRole) => {
+    if (!user) return false;
+    const userRole = user.role === 'manager' ? UserRole.MANAGER : UserRole.EMPLOYEE;
+    return userRole === role;
+  };
+  
+  return { isRole };
 }
