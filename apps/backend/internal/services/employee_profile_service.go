@@ -15,6 +15,7 @@ type EmployeeProfileService struct {
 	profileRepo      domain.EmployeeProfileRepository
 	embeddingService domain.EmbeddingService
 	embeddingUtils   *utils.EmbeddingEntityUtils
+	orchestrator     domain.NotificationOrchestrator
 }
 
 // NewEmployeeProfileService creates a new employee profile service
@@ -23,7 +24,7 @@ func NewEmployeeProfileService(profileRepo domain.EmployeeProfileRepository, emb
 		profileRepo:      profileRepo,
 		embeddingService: embeddingService,
 		embeddingUtils:   utils.NewEmbeddingEntityUtils(embeddingService),
-        orchestrator:     orchestrator,
+		orchestrator:     orchestrator,
 	}
 }
 
@@ -83,9 +84,9 @@ func (s *EmployeeProfileService) CreateProfile(ctx context.Context, profile *mod
 
 // UpdateProfile updates an employee profile
 func (s *EmployeeProfileService) UpdateProfile(ctx context.Context, userID string, profile *models.EmployeeProfileModel) (*models.EmployeeProfileModel, error) {
-    entityProfile := profile.ToEntity()
-    // Load existing to detect rolloff trigger
-    existing, _ := s.profileRepo.GetByUserID(ctx, userID)
+	entityProfile := profile.ToEntity()
+	// Load existing to detect rolloff trigger
+	existing, _ := s.profileRepo.GetByUserID(ctx, userID)
 
 	// Generate embedding before updating (force update to reflect changes)
 	err := s.embeddingUtils.UpdateEmployeeProfileEmbedding(ctx, entityProfile, true)
@@ -101,26 +102,26 @@ func (s *EmployeeProfileService) UpdateProfile(ctx context.Context, userID strin
 	var model models.EmployeeProfileModel
 	model.FromEntity(entity)
 
-    // Trigger: Employee rolling off when EndDate set from nil to non-nil
-    if existing != nil && existing.EndDate == nil && entity.EndDate != nil {
-        fullName := model.User.GetFullName()
-        subject := "Employee rolling off"
-        body := "Employee " + fullName + " is rolling off on " + entity.EndDate.Format("2006-01-02")
-        msg := domain.NotificationMessage{
-            Type:    domain.NotificationTypeRolloffAlert,
-            Subject: subject,
-            Body:    body,
-            Metadata: map[string]string{
-                "employeeId": userID,
-                "endDate":    entity.EndDate.Format(time.RFC3339),
-            },
-            // Manager resolution unknown -> send to default channel only
-            Recipients: []domain.Recipient{{}},
-        }
-        // In-app still needs a user to persist against; use the manager-less pathway by logging only
-        // As minimal approach, post only to Slack default channel (recipient UserID 0)
-        _ = s.orchestrator.Dispatch(ctx, msg)
-    }
+	// Trigger: Employee rolling off when EndDate set from nil to non-nil
+	if existing != nil && existing.EndDate == nil && entity.EndDate != nil {
+		fullName := model.User.GetFullName()
+		subject := "Employee rolling off"
+		body := "Employee " + fullName + " is rolling off on " + entity.EndDate.Format("2006-01-02")
+		msg := domain.NotificationMessage{
+			Type:    domain.NotificationTypeRolloffAlert,
+			Subject: subject,
+			Body:    body,
+			Metadata: map[string]string{
+				"employeeId": userID,
+				"endDate":    entity.EndDate.Format(time.RFC3339),
+			},
+			// Manager resolution unknown -> send to default channel only
+			Recipients: []domain.Recipient{{}},
+		}
+		// In-app still needs a user to persist against; use the manager-less pathway by logging only
+		// As minimal approach, post only to Slack default channel (recipient UserID 0)
+		_ = s.orchestrator.Dispatch(ctx, msg)
+	}
 	return &model, nil
 }
 

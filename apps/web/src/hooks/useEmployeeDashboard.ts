@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
 import type { ProjectAllocation } from '../data/allocations';
@@ -22,7 +22,6 @@ export const useEmployeeDashboard = (): UseEmployeeDashboardReturn => {
   const [projectHistory, setProjectHistory] = useState<ProjectAllocation[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const hasFetchedRef = useRef(false);
 
   const fetchEmployeeData = async () => {
     setLoading(true);
@@ -54,18 +53,8 @@ export const useEmployeeDashboard = (): UseEmployeeDashboardReturn => {
     }
   };
 
-  // Fetch data when user changes or component mounts
   useEffect(() => {
-    console.log('🎯 useEffect triggered:', {
-      userEmail: user?.email,
-      hasEmployee: !!employee,
-      hasFetched: hasFetchedRef.current,
-      willFetch: !!user?.email && !hasFetchedRef.current,
-      timestamp: new Date().toISOString()
-    });
-    
-    if (user?.email && !hasFetchedRef.current) {
-      hasFetchedRef.current = true;
+    if (user?.email) {
       fetchEmployeeData();
     }
   }, [user?.email]);
@@ -75,7 +64,6 @@ export const useEmployeeDashboard = (): UseEmployeeDashboardReturn => {
     await fetchEmployeeData();
   };
 
-  // Utility function to calculate days until end
   const daysUntilEnd = (endDate: string | null): number => {
     if (!endDate) return 999;
     const end = new Date(endDate);
