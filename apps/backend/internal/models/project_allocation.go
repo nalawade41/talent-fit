@@ -17,9 +17,9 @@ const (
 
 // ProjectAllocationModel represents the project allocation business model
 type ProjectAllocationModel struct {
-  ID             int64           `json:"id"`
-  ProjectID      int64           `json:"project_id"`
-  EmployeeID     int64           `json:"employee_id"`
+  ID             int           `json:"id"`
+  ProjectID      int           `json:"project_id"`
+  EmployeeID     int           `json:"employee_id"`
   AllocationType AllocationType `json:"allocation_type"`
   StartDate      time.Time      `json:"start_date"`
   EndDate        *time.Time     `json:"end_date"`

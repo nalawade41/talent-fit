@@ -78,7 +78,7 @@ func (s *Server) setupManagerRoutes(api *gin.RouterGroup) {
 	api.PATCH("/project/:id", s.container.ProjectHandler.UpdateProject) 
 
 	// Employee suggestions (AI matching)
-	api.GET("/employee/suggestions", s.container.MatchHandler.GetProactiveInsights)
+	api.GET("/project/:id/suggestions", s.container.MatchHandler.GenerateMatchSuggestions)
 
 	// Project allocations
 	api.GET("/project/:id/allocation", s.container.ProjectAllocationHandler.GetAllocationsByProject) 

@@ -177,3 +177,96 @@ func StringToVector(vectorStr string) ([]float32, error) {
 
 	return vector, nil
 }
+
+// ScoringRules defines the weights for different matching criteria
+type ScoringRules struct {
+	SkillsWeight     int `json:"skills_weight"`
+	GeoWeight        int `json:"geo_weight"`
+	ExperienceWeight int `json:"experience_weight"`
+}
+
+// DefaultScoringRules returns the default scoring weights
+func DefaultScoringRules() ScoringRules {
+	return ScoringRules{
+		SkillsWeight:     50,
+		GeoWeight:        30,
+		ExperienceWeight: 20,
+	}
+}
+
+// GenerateMatchingPrompt creates an AI prompt for scoring candidates against project requirements
+func (u *EmbeddingUtils) GenerateMatchingPrompt(projectSummary string, candidates []*domain.SimilarityMatch, rules ScoringRules) string {
+	prompt := `You are an expert recruiter AI helping to match employees to projects.
+
+	Project requirements:
+	` + projectSummary + `
+
+	Candidates:`
+
+	// Add each candidate to the prompt
+	for i, match := range candidates {
+		candidateNum := i + 1
+		profile := match.Profile
+		
+		// Format skills as comma-separated string
+		skillsStr := "None specified"
+		if len(profile.Skills) > 0 {
+			skillsStr = strings.Join(profile.Skills, ", ")
+		}
+		
+		// Get user info if available
+		name := "Unknown"
+		if profile.User.FirstName != "" || profile.User.LastName != "" {
+			name = strings.TrimSpace(profile.User.FirstName + " " + profile.User.LastName)
+		}
+		
+		// Format experience
+		experience := fmt.Sprintf("%d years", profile.YearsOfExperience)
+		
+		// Format availability
+		availability := "false"
+		if profile.AvailabilityFlag {
+			availability = "true"
+		}
+		
+		prompt += fmt.Sprintf(`
+				%d. Candidate: %s (ID: %d)
+				Skills: %s
+				Geo: %s
+				Experience: %s
+				Industry: %s
+				Availability: %s
+				Similarity Score: %.1f%%`,
+							candidateNum,
+							name,
+							profile.UserID,
+							skillsStr,
+							profile.Geo,
+							experience,
+							profile.Industry,
+							availability,
+							match.Similarity*100)
+					}
+
+					prompt += fmt.Sprintf(`
+				Scoring rules:
+				- Skills match = %d%%
+				- Geo match = %d%%
+				- Experience match = %d%%
+				- Candidates outside required geo can still be scored, but lower.
+				- SPECIAL RULE: If project location/geo is "Unspecified" or not mentioned, prefer candidates from India for same skill levels.
+
+				Instructions:
+				1. Score each candidate from 0–100.
+				2. Provide a short explanation in human language (2–3 sentences) why the candidate got this score.
+				3. For unspecified project geo: Give slight preference (5-10 points bonus) to India-based candidates when skills are comparable.
+				4. Return results as JSON:
+
+				[
+				{ "candidate_id": <id>, "score": <int>, "reason": "<string>" }
+				]`, 
+						rules.SkillsWeight, 
+						rules.GeoWeight, 
+						rules.ExperienceWeight)
+					return prompt
+}
