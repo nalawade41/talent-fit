@@ -49,7 +49,7 @@ func NewContainer(cfg *config.Config) (*Container, error) {
 	embeddingService := services.NewOpenAIEmbeddingService(cfg)
 	userService := services.NewUserService(userRepo)
 	projectService := services.NewProjectService(projectRepo, embeddingService)
-	allocationService := services.NewProjectAllocationService(allocationRepo)
+	allocationService := services.NewProjectAllocationService(allocationRepo, profileRepo)
 	matchService := services.NewMatchService(userRepo, projectRepo, allocationRepo, profileRepo, embeddingService)
 	notificationService := services.NewNotificationService(notificationRepo)
 	profileService := services.NewEmployeeProfileService(profileRepo, embeddingService)
