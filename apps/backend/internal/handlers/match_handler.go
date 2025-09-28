@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -33,11 +34,35 @@ func (h *MatchHandler) GetEmployeeMatches(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Get matches for employee: " + employeeID + " - TODO"})
 }
 
-// GenerateMatchSuggestions handles POST /matches/projects/:id/suggestions
+// GenerateMatchSuggestions handles GET /employee/suggestions
 func (h *MatchHandler) GenerateMatchSuggestions(c *gin.Context) {
-	// TODO: Implement handler logic for generating AI match suggestions
+	ctx := c.Request.Context()
+	
+	// Get project ID from query parameter
 	projectID := c.Param("id")
-	c.JSON(http.StatusOK, gin.H{"message": "Generate AI suggestions for project: " + projectID + " - TODO"})
+	if projectID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "project_id query parameter is required"})
+		return
+	}
+
+	// Call service to generate match suggestions
+	log.Printf("Generating AI match suggestions for project ID: %s", projectID)
+	suggestions, err := h.matchService.GenerateMatchSuggestions(ctx, projectID)
+	if err != nil {
+		log.Printf("Error generating match suggestions for project %s: %v", projectID, err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	log.Printf("Successfully generated %d match suggestions for project %s", len(suggestions), projectID)
+	
+	// Return successful response
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"data": suggestions,
+		"count": len(suggestions),
+		"message": "AI match suggestions generated successfully",
+	})
 }
 
 // GetMatchExplanation handles GET /matches/projects/:projectId/employees/:employeeId/explanation

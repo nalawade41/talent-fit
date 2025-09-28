@@ -50,7 +50,7 @@ func NewContainer(cfg *config.Config) (*Container, error) {
 	userService := services.NewUserService(userRepo)
 	projectService := services.NewProjectService(projectRepo, embeddingService)
 	allocationService := services.NewProjectAllocationService(allocationRepo)
-	matchService := services.NewMatchService(userRepo, projectRepo, allocationRepo, profileRepo)
+	matchService := services.NewMatchService(userRepo, projectRepo, allocationRepo, profileRepo, embeddingService)
 	notificationService := services.NewNotificationService(notificationRepo)
 	profileService := services.NewEmployeeProfileService(profileRepo, embeddingService)
 	googleAuthService := services.NewGoogleAuthService(userRepo, cfg)

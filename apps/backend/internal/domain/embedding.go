@@ -12,4 +12,7 @@ type EmbeddingService interface {
 	
 	// SummarizeProject generates a structured summary of project requirements
 	SummarizeProject(ctx context.Context, description string, seats map[string]int) (string, error)
+	
+	// GenerateMatchingScores uses the generated matching prompt to score candidates
+	GenerateMatchingScores(ctx context.Context, matchingPrompt string) (string, error)
 }
