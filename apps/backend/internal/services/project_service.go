@@ -1,14 +1,15 @@
 package services
 
 import (
-  "context"
-  "fmt"
-  "log"
+	"context"
+	"fmt"
+	"log"
+	"strconv"
 
-  "github.com/talent-fit/backend/internal/domain"
-  "github.com/talent-fit/backend/internal/entities"
-  "github.com/talent-fit/backend/internal/models"
-  "github.com/talent-fit/backend/internal/utils"
+	"github.com/talent-fit/backend/internal/domain"
+	"github.com/talent-fit/backend/internal/entities"
+	"github.com/talent-fit/backend/internal/models"
+	"github.com/talent-fit/backend/internal/utils"
 )
 
 // ProjectService implements the domain.ProjectService interface
@@ -16,14 +17,18 @@ type ProjectService struct {
   projectRepo      domain.ProjectRepository
   embeddingService domain.EmbeddingService
   embeddingUtils   *utils.EmbeddingEntityUtils
+  allocationRepo   domain.ProjectAllocationRepository
+  orchestrator     domain.NotificationOrchestrator
 }
 
 // NewProjectService creates a new project service
-func NewProjectService(projectRepo domain.ProjectRepository, embeddingService domain.EmbeddingService) domain.ProjectService {
+func NewProjectService(projectRepo domain.ProjectRepository, embeddingService domain.EmbeddingService, allocationRepo domain.ProjectAllocationRepository, orchestrator domain.NotificationOrchestrator) domain.ProjectService {
   return &ProjectService{
     projectRepo:      projectRepo,
     embeddingService: embeddingService,
     embeddingUtils:   utils.NewEmbeddingEntityUtils(embeddingService),
+    allocationRepo:   allocationRepo,
+    orchestrator:     orchestrator,
   }
 }
 
@@ -128,6 +133,33 @@ func (s *ProjectService) UpdateProject(ctx context.Context, id int, project *mod
   }
   model := &models.ProjectModel{}
   model.FromEntity(updatedEntity)
+
+  // Trigger: Project ending date set/changed -> notify employees and manager (fallback channel)
+  if !existingEntity.EndDate.Equal(entity.EndDate) {
+    // Gather recipients: all allocated employees (current allocations)
+    allocs, err := s.allocationRepo.GetByProjectID(ctx, strconv.Itoa(id))
+    if err == nil {
+      var recipients []domain.Recipient
+      for _, a := range allocs {
+        recipients = append(recipients, domain.Recipient{
+          UserID:  uint(a.EmployeeID),
+          Email:   a.Employee.Email,
+          SlackID: a.Employee.SlackUserID,
+          Role:    a.Employee.Role,
+        })
+      }
+      subject := "Project ending"
+      body := fmt.Sprintf("Project %s ends on %s", updatedEntity.Name, updatedEntity.EndDate.Format("2006-01-02"))
+      msg := domain.NotificationMessage{
+        Type:       domain.NotificationTypeProjectEnding,
+        Subject:    subject,
+        Body:       body,
+        Metadata:   map[string]string{"projectId": strconv.Itoa(id), "endDate": updatedEntity.EndDate.Format("2006-01-02")},
+        Recipients: recipients,
+      }
+      _ = s.orchestrator.Dispatch(ctx, msg)
+    }
+  }
   return model, nil
 }
 

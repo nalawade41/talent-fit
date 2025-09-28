@@ -36,6 +36,11 @@ func (s *Server) setupAuthRoutes() {
     auth.POST("/google/login", s.container.GoogleAuthHandler.Login)
 		auth.POST("/logout", s.container.GoogleAuthHandler.Logout)
 	}
+
+    // Dev-only route for sending a test notification to Slack default channel (no JWT)
+    if s.config.IsDevelopment() {
+        s.router.POST("/notifications/test", s.container.DevHandler.SendTestNotification)
+    }
 }
 
 // setupProtectedRoutes sets up all protected API routes

@@ -13,6 +13,7 @@ type User struct {
 	LastName  string `gorm:"not null"`
 	Email     string `gorm:"uniqueIndex;not null"`
 	Role      string `gorm:"not null"`
+    SlackUserID string `gorm:"column:slack_user_id"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
 	DeletedAt gorm.DeletedAt `gorm:"index"`
