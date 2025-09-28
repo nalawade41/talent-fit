@@ -72,7 +72,7 @@ export function ManagerDashboard() {
       })
       .map(allocation => {
         const project = projectsData.find(p => p.id === allocation.project_id);
-        const employee = employeesData.find(e => e.user_id === allocation.user_id);
+        const employee = employeesData.find(e => e.user_id === allocation.employee_id);
         return {
           id: `project-release-${allocation.id}`,
           type: 'project-release' as const,

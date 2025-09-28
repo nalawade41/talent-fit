@@ -134,13 +134,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Dummy credentials login for demo accounts
   const loginWithCredentials = async (email: string, password: string): Promise<boolean> => {
     await new Promise(resolve => setTimeout(resolve, 500)); // simulate delay
-    let role: 'manager' | 'employee';
+    let role: UserRole;
     let name: string;
     if (email === 'sarah@company.com' && password === 'demo123') {
-      role = 'employee';
+      role = UserRole.EMPLOYEE;
       name = 'Sarah Johnson';
     } else if (email === 'michael@company.com' && password === 'demo123') {
-      role = 'manager';
+      role = UserRole.MANAGER;
       name = 'Michael Chen';
     } else {
       return false;
