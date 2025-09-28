@@ -1,11 +1,12 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import apiService from '../services/api/client';
+import { UserRole } from '../types/roles';
 
 // UI auth user shape for client session
 export interface AuthUser {
   name: string;
   email: string;
-  role: 'manager' | 'employee';
+  role: UserRole;
   department?: string;
   experience?: number;
   skills?: string[];
@@ -34,14 +35,14 @@ interface GoogleProfile {
   picture?: string;
 }
 
-function mockGooglePopup(role: 'manager' | 'employee'): Promise<GoogleProfile> {
+function mockGooglePopup(role: UserRole): Promise<GoogleProfile> {
   return new Promise(resolve => {
     setTimeout(() => {
       // Select user based on role for demo
-      const userByRole = role === 'manager' 
+      const userByRole = role === UserRole.MANAGER
         ? { email: 'michael@company.com', name: 'Michael Chen' }
         : { email: 'sarah@company.com', name: 'Sarah Johnson' };
-      
+
       resolve({
         email: userByRole.email,
         name: userByRole.name,
@@ -104,7 +105,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       // Decode JWT to extract role
       const decodedToken = decodeJWT(token);
-      const role = decodedToken?.role || 'employee'; // fallback to employee
+      const role = decodedToken?.role || UserRole.EMPLOYEE; // fallback to employee
 
       // Persist JWT for API calls
       localStorage.setItem('authToken', token);
@@ -113,7 +114,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const session: AuthUser = {
         name: name || email,
         email,
-        role: role as 'manager' | 'employee',
+        role: role as UserRole,
         avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(name || email)}`,
         provider: 'google',
         accessToken: token,
@@ -144,11 +145,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ 
-      user, 
+    <AuthContext.Provider value={{
+      user,
       loginWithGoogleCredential,
-      logout, 
-      updateProfile, 
+      logout,
+      updateProfile,
       refreshingToken
     }}>
       {children}

@@ -16,7 +16,7 @@ export function useRolePermissions() {
     };
   }
 
-  const userRole = user.role === 'manager' ? UserRole.MANAGER : UserRole.EMPLOYEE;
+  const userRole = user.role === UserRole.MANAGER ? UserRole.MANAGER : UserRole.EMPLOYEE;
   return getRolePermissions(userRole);
 }
 
@@ -24,6 +24,6 @@ export function useIsRole(role: UserRole) {
   const { user } = useAuth();
   if (!user) return false;
   
-  const userRole = user.role === 'manager' ? UserRole.MANAGER : UserRole.EMPLOYEE;
+  const userRole = user.role === UserRole.MANAGER ? UserRole.MANAGER : UserRole.EMPLOYEE;
   return userRole === role;
 }

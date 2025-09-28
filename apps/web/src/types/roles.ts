@@ -1,6 +1,6 @@
 export enum UserRole {
-  EMPLOYEE = 'employee',
-  MANAGER = 'manager'
+  EMPLOYEE = 'Employee',
+  MANAGER = 'Manager'
 }
 
 export type RolePermissions = {
