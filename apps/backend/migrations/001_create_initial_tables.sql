@@ -199,3 +199,6 @@ analyze projects;
 
 alter table projects
 add column summary text;
+
+alter table employee_profiles
+add column department text;

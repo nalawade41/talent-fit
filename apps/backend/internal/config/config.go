@@ -13,6 +13,7 @@ type Config struct {
 	Database DatabaseConfig
 	Auth     AuthConfig
 	AI       AIConfig
+    Slack    SlackConfig
 	Logging  LoggingConfig
 }
 
@@ -53,6 +54,12 @@ type AIConfig struct {
 	GrokModel string
 }
 
+// SlackConfig holds Slack integration configuration
+type SlackConfig struct {
+    BotToken           string
+    DefaultChannelID   string
+}
+
 // LoggingConfig holds logging configuration
 type LoggingConfig struct {
 	Level  string
@@ -63,7 +70,7 @@ type LoggingConfig struct {
 func Load() (*Config, error) {
 	// Load .env file if it exists (for local development)
 	_ = godotenv.Load()
-	
+
 
 	config := &Config{
 		Server: ServerConfig{
@@ -95,6 +102,10 @@ func Load() (*Config, error) {
 			GrokAPIBaseURL: getEnv("GROKK_BASE_URL", "https://api.x.ai/v1"),
 			GrokModel: getEnv("GROKK_MODEL", "grok-4-fast"),
 		},
+        Slack: SlackConfig{
+            BotToken: getEnv("SLACK_BOT_TOKEN", ""),
+            DefaultChannelID: getEnv("SLACK_DEFAULT_CHANNEL_ID", ""),
+        },
 		Logging: LoggingConfig{
 			Level:  getEnv("LOG_LEVEL", "info"),
 			Format: getEnv("LOG_FORMAT", "json"),

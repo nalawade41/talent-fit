@@ -32,3 +32,42 @@ type NotificationService interface {
 	SendProjectGapAlert(ctx context.Context, projectID string) error
 	SendAllocationSuggestion(ctx context.Context, projectID string, employeeID string) error
 }
+
+// New extensible notification types and orchestrator interfaces
+type NotificationType string
+
+const (
+    NotificationTypeRolloffAlert        NotificationType = "rolloff_alert"
+    NotificationTypeProjectEnding       NotificationType = "project_ending"
+    NotificationTypeAllocationAssigned  NotificationType = "allocation_assigned"
+)
+
+type Channel string
+
+const (
+    ChannelSlack Channel = "slack"
+    ChannelInApp Channel = "in_app"
+)
+
+type Recipient struct {
+    UserID  uint
+    Email   string
+    SlackID string
+    Role    string
+}
+
+type NotificationMessage struct {
+    Type       NotificationType
+    Subject    string
+    Body       string
+    Metadata   map[string]string
+    Recipients []Recipient
+}
+
+type Notifier interface {
+    Send(ctx context.Context, msg NotificationMessage) error
+}
+
+type NotificationOrchestrator interface {
+    Dispatch(ctx context.Context, msg NotificationMessage) error
+}

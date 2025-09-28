@@ -1,6 +1,7 @@
 package models
 
 import (
+	"strings"
 	"time"
 
 	"github.com/talent-fit/backend/internal/entities"
@@ -31,11 +32,12 @@ type EmployeeProfileModel struct {
 	NoticeDate        *time.Time `json:"notice_date"`
 	Skills            []string   `json:"skills"`
 	YearsOfExperience int        `json:"years_of_experience"`
-	Industry          string     `json:"industry"`
+	Industry          []string     `json:"industry"`
 	AvailabilityFlag  bool       `json:"availability_flag"`
 	CreatedAt         time.Time  `json:"created_at"`
 	UpdatedAt         time.Time  `json:"updated_at"`
 	Type              UserType   `json:"type"`
+	Department        string     `json:"department"`
 
 	// Relationships
 	User UserModel `json:"user,omitempty"`
@@ -51,11 +53,12 @@ func (ep *EmployeeProfileModel) ToEntity() *entities.EmployeeProfile {
 		NoticeDate:        ep.NoticeDate,
 		Skills:            entities.Skills(ep.Skills),
 		YearsOfExperience: ep.YearsOfExperience,
-		Industry:          ep.Industry,
+		Industry:          strings.Join(ep.Industry, "|"),
 		AvailabilityFlag:  ep.AvailabilityFlag,
 		CreatedAt:         ep.CreatedAt,
 		UpdatedAt:         ep.UpdatedAt,
 		Type:              string(ep.Type),
+		Department:        ep.Department,
 	}
 	return entity
 }
@@ -69,7 +72,7 @@ func (ep *EmployeeProfileModel) FromEntity(entity *entities.EmployeeProfile) {
 	ep.NoticeDate = entity.NoticeDate
 	ep.Skills = []string(entity.Skills)
 	ep.YearsOfExperience = entity.YearsOfExperience
-	ep.Industry = entity.Industry
+	ep.Industry = strings.Split(entity.Industry, "|")
 	ep.AvailabilityFlag = entity.AvailabilityFlag
 	ep.CreatedAt = entity.CreatedAt
 	ep.UpdatedAt = entity.UpdatedAt

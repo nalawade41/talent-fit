@@ -1,6 +1,7 @@
 // Employee Profile dummy data
 export interface Employee {
   user_id: number;
+  employee_id: number;
   geo: string;
   date_of_joining: string | null;
   end_date: string | null;
@@ -8,7 +9,7 @@ export interface Employee {
   type: string;
   skills: string[];
   years_of_experience: number;
-  industry: string;
+  industry: string[];
   availability_flag: boolean;
   created_at: string;
   updated_at: string;
@@ -37,6 +38,7 @@ export interface Employee {
 export const employeesData: Employee[] = [
   {
     user_id: 1,
+    employee_id: 1,
     geo: "US-West",
     date_of_joining: "2022-03-15T00:00:00Z",
     end_date: "2025-03-15T00:00:00Z",
@@ -44,7 +46,7 @@ export const employeesData: Employee[] = [
     type: "Frontend Dev",
     skills: ["React", "TypeScript", "Node.js", "CSS", "Tailwind"],
     years_of_experience: 5,
-    industry: "Technology",
+    industry: ["Technology"],
     availability_flag: true,
     created_at: "2022-03-10T10:00:00Z",
     updated_at: "2023-11-15T14:30:00Z",
@@ -69,6 +71,7 @@ export const employeesData: Employee[] = [
   },
   {
     user_id: 2,
+    employee_id: 2,
     geo: "US-East",
     date_of_joining: "2021-08-20T00:00:00Z",
     end_date: "2024-08-20T00:00:00Z",
@@ -76,7 +79,7 @@ export const employeesData: Employee[] = [
     type: "Backend Dev",
     skills: ["Go", "PostgreSQL", "Docker", "Kubernetes", "AWS"],
     years_of_experience: 7,
-    industry: "Fintech",
+    industry: ["Fintech"],
     availability_flag: false,
     created_at: "2021-08-15T10:00:00Z",
     updated_at: "2023-11-20T09:45:00Z",
@@ -101,6 +104,7 @@ export const employeesData: Employee[] = [
   },
   {
     user_id: 3,
+    employee_id: 3,
     geo: "Europe",
     date_of_joining: "2023-01-10T00:00:00Z",
     end_date: null,
@@ -108,7 +112,7 @@ export const employeesData: Employee[] = [
     type: "Fullstack Dev",
     skills: ["React", "Next.js", "Python", "Django", "PostgreSQL"],
     years_of_experience: 4,
-    industry: "Healthcare",
+    industry: ["Healthcare"],
     availability_flag: true,
     created_at: "2023-01-05T10:00:00Z",
     updated_at: "2023-11-18T16:20:00Z",
@@ -133,6 +137,7 @@ export const employeesData: Employee[] = [
   },
   {
     user_id: 4,
+    employee_id: 4,
     geo: "Asia-Pacific",
     date_of_joining: "2020-06-01T00:00:00Z",
     end_date: null,
@@ -140,7 +145,7 @@ export const employeesData: Employee[] = [
     type: "AI",
     skills: ["Python", "TensorFlow", "PyTorch", "Machine Learning", "Data Science"],
     years_of_experience: 6,
-    industry: "Technology",
+    industry: ["Technology"],
     availability_flag: false,
     created_at: "2020-05-25T10:00:00Z",
     updated_at: "2023-11-19T11:15:00Z",
@@ -165,6 +170,7 @@ export const employeesData: Employee[] = [
   },
   {
     user_id: 5,
+    employee_id: 5,
     geo: "US-Central",
     date_of_joining: "2023-09-01T00:00:00Z",
     end_date: "2024-12-31T00:00:00Z",
@@ -172,7 +178,7 @@ export const employeesData: Employee[] = [
     type: "UI",
     skills: ["Figma", "Adobe XD", "CSS", "JavaScript", "Design Systems"],
     years_of_experience: 3,
-    industry: "E-commerce",
+    industry: ["E-commerce"],
     availability_flag: true,
     created_at: "2023-08-25T10:00:00Z",
     updated_at: "2023-11-20T08:30:00Z",
@@ -197,6 +203,7 @@ export const employeesData: Employee[] = [
   },
   {
     user_id: 6,
+    employee_id: 6,
     geo: "US-West",
     date_of_joining: "2022-11-15T00:00:00Z",
     end_date: null,
@@ -204,7 +211,7 @@ export const employeesData: Employee[] = [
     type: "Backend Dev",
     skills: ["Java", "Spring Boot", "MongoDB", "Redis", "Apache Kafka"],
     years_of_experience: 8,
-    industry: "Banking",
+    industry: ["Banking"],
     availability_flag: true,
     created_at: "2022-11-10T10:00:00Z",
     updated_at: "2023-11-21T13:45:00Z",
@@ -229,6 +236,7 @@ export const employeesData: Employee[] = [
   },
   {
     user_id: 7,
+    employee_id: 7,
     geo: "Canada",
     date_of_joining: "2021-02-10T00:00:00Z",
     end_date: null,
@@ -236,7 +244,7 @@ export const employeesData: Employee[] = [
     type: "UX",
     skills: ["User Research", "Wireframing", "Prototyping", "Figma", "Analytics"],
     years_of_experience: 5,
-    industry: "Healthcare",
+    industry: ["Healthcare"],
     availability_flag: false,
     created_at: "2021-02-05T10:00:00Z",
     updated_at: "2023-11-19T10:20:00Z",
@@ -261,6 +269,7 @@ export const employeesData: Employee[] = [
   },
   {
     user_id: 8,
+    employee_id: 8,
     geo: "Europe",
     date_of_joining: "2023-05-20T00:00:00Z",
     end_date: "2025-05-20T00:00:00Z",
@@ -268,7 +277,7 @@ export const employeesData: Employee[] = [
     type: "Tester",
     skills: ["Selenium", "Jest", "Cypress", "API Testing", "Performance Testing"],
     years_of_experience: 4,
-    industry: "Technology",
+    industry: ["Technology"],
     availability_flag: true,
     created_at: "2023-05-15T10:00:00Z",
     updated_at: "2023-11-20T14:10:00Z",

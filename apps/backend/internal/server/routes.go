@@ -36,6 +36,11 @@ func (s *Server) setupAuthRoutes() {
     auth.POST("/google/login", s.container.GoogleAuthHandler.Login)
 		auth.POST("/logout", s.container.GoogleAuthHandler.Logout)
 	}
+
+    // Dev-only route for sending a test notification to Slack default channel (no JWT)
+    if s.config.IsDevelopment() {
+        s.router.POST("/notifications/test", s.container.DevHandler.SendTestNotification)
+    }
 }
 
 // setupProtectedRoutes sets up all protected API routes
@@ -56,7 +61,7 @@ func (s *Server) setupProtectedRoutes() {
 // setupEmployeeRoutes sets up employee-specific routes (personal and professional details)
 func (s *Server) setupEmployeeRoutes(api *gin.RouterGroup) {
 	// Employee details for both personal and professional
-	api.GET("/employee/:id", s.container.EmployeeProfileHandler.GetProfileByUserID) 
+	api.GET("/employee/me", s.container.EmployeeProfileHandler.GetMe) 
 	api.POST("/employee/:id", s.container.EmployeeProfileHandler.CreateProfile)     
 	api.PATCH("/employee/:id", s.container.EmployeeProfileHandler.UpdateProfile)    
 

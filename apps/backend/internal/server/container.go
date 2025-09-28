@@ -7,6 +7,7 @@ import (
 	"github.com/talent-fit/backend/internal/database"
 	"github.com/talent-fit/backend/internal/handlers"
 	"github.com/talent-fit/backend/internal/services"
+	n "github.com/talent-fit/backend/internal/services/notifiers"
 )
 
 // Container holds all application dependencies
@@ -23,6 +24,8 @@ type Container struct {
 	EmployeeProfileHandler   *handlers.EmployeeProfileHandler
 	TokenHandler             *handlers.TokenHandler
 	GoogleAuthHandler        *handlers.GoogleAuthHandler
+    DevHandler               *handlers.DevHandler
+    Orchestrator             *services.Orchestrator
 }
 
 // NewContainer creates and initializes all application dependencies
@@ -45,25 +48,32 @@ func NewContainer(cfg *config.Config) (*Container, error) {
 	notificationRepo := database.NewNotificationRepository(db.DB)
 	profileRepo := database.NewEmployeeProfileRepository(db.DB)
 
-	// Initialize services
-	embeddingService := services.NewOpenAIEmbeddingService(cfg)
-	userService := services.NewUserService(userRepo)
-	projectService := services.NewProjectService(projectRepo, embeddingService)
-	allocationService := services.NewProjectAllocationService(allocationRepo, profileRepo)
-	matchService := services.NewMatchService(userRepo, projectRepo, allocationRepo, profileRepo, embeddingService)
-	notificationService := services.NewNotificationService(notificationRepo)
-	profileService := services.NewEmployeeProfileService(profileRepo, embeddingService)
-	googleAuthService := services.NewGoogleAuthService(userRepo, cfg)
+    // Initialize services
+    embeddingService := services.NewOpenAIEmbeddingService(cfg)
+    userService := services.NewUserService(userRepo)
+
+    // Notifiers and orchestrator (must be created before services that depend on it)
+    inAppNotifier := n.NewInAppNotifier(db.DB)
+    slackNotifier := n.NewSlackNotifier(cfg)
+    orchestrator := services.NewOrchestrator(inAppNotifier, slackNotifier)
+
+    projectService := services.NewProjectService(projectRepo, embeddingService, allocationRepo, orchestrator)
+    allocationService := services.NewProjectAllocationService(allocationRepo, profileRepo, orchestrator)
+    matchService := services.NewMatchService(userRepo, projectRepo, allocationRepo, profileRepo, embeddingService)
+    notificationService := services.NewNotificationService(notificationRepo)
+    profileService := services.NewEmployeeProfileService(profileRepo, embeddingService, orchestrator)
+    googleAuthService := services.NewGoogleAuthService(userRepo, cfg)
 
 	// Initialize handlers
-	userHandler := handlers.NewUserHandler(userService)
+    userHandler := handlers.NewUserHandler(userService)
 	projectHandler := handlers.NewProjectHandler(projectService)
-	allocationHandler := handlers.NewProjectAllocationHandler(allocationService)
+    allocationHandler := handlers.NewProjectAllocationHandler(allocationService)
 	matchHandler := handlers.NewMatchHandler(matchService)
 	notificationHandler := handlers.NewNotificationHandler(notificationService)
-	profileHandler := handlers.NewEmployeeProfileHandler(profileService)
+    profileHandler := handlers.NewEmployeeProfileHandler(profileService)
 	tokenHandler := handlers.NewTokenHandler(googleAuthService)
-	googleAuthHandler := handlers.NewGoogleAuthHandler(googleAuthService)
+    googleAuthHandler := handlers.NewGoogleAuthHandler(googleAuthService)
+    devHandler := handlers.NewDevHandler(orchestrator, cfg)
 
 	return &Container{
 		DB:                       db,
@@ -74,7 +84,8 @@ func NewContainer(cfg *config.Config) (*Container, error) {
 		NotificationHandler:      notificationHandler,
 		EmployeeProfileHandler:   profileHandler,
 		TokenHandler:             tokenHandler,
-		GoogleAuthHandler:        googleAuthHandler,
+        GoogleAuthHandler:        googleAuthHandler,
+        DevHandler:               devHandler,
 	}, nil
 }
 

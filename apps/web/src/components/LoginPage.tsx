@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { LogIn, User, Key, AlertCircle } from 'lucide-react';
+import { AlertCircle, Key, LogIn, User } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 
 export function LoginPage() {
@@ -7,20 +7,36 @@ export function LoginPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const { login } = useAuth();
+  const { loginWithGoogleCredential } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
     setError('');
-
-    const success = await login(email, password);
-    if (!success) {
-      setError('Invalid credentials. Please try again.');
-    }
-    
-    setIsLoading(false);
   };
+
+  useEffect(() => {
+    const scriptId = 'google-identity';
+    if (!document.getElementById(scriptId)) {
+      const script = document.createElement('script');
+      script.src = 'https://accounts.google.com/gsi/client';
+      script.async = true;
+      script.defer = true;
+      script.id = scriptId;
+      document.head.appendChild(script);
+    }
+
+    (window as any).handleCredentialResponse = async (response: any) => {
+      const credential = response?.credential as string | undefined;
+      if (!credential) {
+        setError('Google credential missing.');
+        return;
+      }
+      setIsLoading(true);
+      const ok = await loginWithGoogleCredential(credential);
+      if (!ok) setError('Google sign-in failed.');
+      setIsLoading(false);
+    };
+  }, [loginWithGoogleCredential]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
@@ -80,17 +96,49 @@ export function LoginPage() {
 
             <button
               type="submit"
-              disabled={isLoading}
-              className="w-full bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+              disabled
+              className="w-full bg-gray-100 text-gray-500 py-2 px-4 rounded-lg focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 opacity-60 cursor-not-allowed transition-colors flex items-center justify-center gap-2"
             >
-              {isLoading ? (
-                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              ) : (
-                <LogIn className="w-5 h-5" />
-              )}
-              {isLoading ? 'Signing in...' : 'Sign In'}
+              <LogIn className="w-5 h-5" />
+              Sign in with email (disabled)
             </button>
           </form>
+
+          <div className="my-6 flex items-center">
+            <div className="flex-1 h-px bg-gray-200" />
+            <span className="px-3 text-xs text-gray-500">or</span>
+            <div className="flex-1 h-px bg-gray-200" />
+          </div>
+
+          {/* Default Google Sign-In button (iframe) */}
+          {!(import.meta as any).env.VITE_GOOGLE_CLIENT_ID && (
+            <div className="mb-2 text-xs text-red-600 text-center">Missing VITE_GOOGLE_CLIENT_ID in .env</div>
+          )}
+          <div className="flex flex-col items-center space-y-3">
+            <div
+              id="g_id_onload"
+              data-client_id={(import.meta as any).env.VITE_GOOGLE_CLIENT_ID}
+              data-context="signin"
+              data-ux_mode="popup"
+              data-callback="handleCredentialResponse"
+              data-auto_prompt="false"
+            />
+            <div
+              className="g_id_signin"
+              data-type="standard"
+              data-shape="pill"
+              data-theme="outline"
+              data-text="signin_with"
+              data-size="large"
+              data-logo_alignment="left"
+              data-width="320"
+            />
+            {isLoading && (
+              <div className="w-full flex items-center justify-center">
+                <div className="w-5 h-5 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
+              </div>
+            )}
+          </div>
 
           <div className="mt-6 p-4 bg-gray-50 rounded-lg">
             <h3 className="text-sm font-medium text-gray-700 mb-2">Demo Accounts:</h3>

@@ -87,13 +87,13 @@ func (h *ProjectAllocationHandler) GetAllocationsByProject(c *gin.Context) {
 func (h *ProjectAllocationHandler) GetAllocationsByEmployee(c *gin.Context) {
 	ctx := c.Request.Context()
 
-	employeeID := c.Param("id")
-	if employeeID == "" {
+	userId := c.Param("id")
+	if userId == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Employee ID is required"})
 		return
 	}
 
-	allocations, err := h.allocationService.GetAllocationsByEmployee(ctx, employeeID)
+	allocations, err := h.allocationService.GetAllocationsByEmployee(ctx, userId)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
