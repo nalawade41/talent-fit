@@ -1,15 +1,16 @@
-import React, { useState } from 'react';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '../dialog';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../tabs';
-import { Search, MapPin, Star, CheckCircle2 } from 'lucide-react';
-import { Input } from '../input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../select';
+import { CheckCircle2, MapPin, Search, Star } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { Employee } from '../../../data/employees';
+import EmployeeProfileService from '../../../services/employeeProfileService';
+import { Project } from '../../../types';
+import { Avatar, AvatarFallback, AvatarImage } from '../avatar';
 import { Badge } from '../badge';
 import { Button } from '../button';
 import { Card } from '../card';
-import { Avatar, AvatarFallback, AvatarImage } from '../avatar';
-import { Project } from '../../../types';
-import { Employee } from '../../../types';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '../dialog';
+import { Input } from '../input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../tabs';
 
 interface AllocationDialogProps {
   open: boolean;
@@ -39,6 +40,21 @@ export const AllocationDialog: React.FC<AllocationDialogProps> = (props) => {
 
   // New state: allocation period per selected employee
   const [allocationDates, setAllocationDates] = useState<Record<number, { start: string; end?: string; openEnded: boolean }>>({});
+  const [apiEmployees, setApiEmployees] = useState<Employee[]>([]);
+  const [loadingEmployees, setLoadingEmployees] = useState(false);
+
+  useEffect(() => {
+    if (!open) return;
+    let isMounted = true;
+    setLoadingEmployees(true);
+    EmployeeProfileService.getAllEmployees()
+      .then((emps) => { if (isMounted) setApiEmployees(emps); })
+      .catch(() => { /* fallback to provided availableEmployees */ })
+      .finally(() => { if (isMounted) setLoadingEmployees(false); });
+    return () => { isMounted = false; };
+  }, [open]);
+
+  const manualList = apiEmployees.length ? apiEmployees : availableEmployees;
 
   const ensureDateEntry = (employeeId: number) => {
     setAllocationDates(prev => prev[employeeId] ? prev : ({
@@ -104,7 +120,7 @@ export const AllocationDialog: React.FC<AllocationDialogProps> = (props) => {
               </Select>
             </div>
             <div className="grid grid-cols-1 gap-3 max-h-96 overflow-y-auto">
-              {availableEmployees.map(employee => {
+              {manualList.map(employee => {
                 const isSelected = selectedEmployees.includes(employee.user_id);
                 const matchScore = getAIMatchScore(employee.user_id);
                 return (
@@ -124,7 +140,7 @@ export const AllocationDialog: React.FC<AllocationDialogProps> = (props) => {
                             <span className={`px-2 py-1 rounded-full text-xs ${getUtilizationColor(employee.utilization_pct)}`}>{employee.utilization_pct}% utilized</span>
                           </div>
                           <div className="mt-2 flex flex-wrap gap-1">
-                            {employee.primary_skills.slice(0, 3).map(skill => (<Badge key={skill} variant="secondary" className="text-xs">{skill}</Badge>))}
+                            {employee.primary_skills.slice(0, 3).map((skill: string) => (<Badge key={skill} variant="secondary" className="text-xs">{skill}</Badge>))}
                             {employee.primary_skills.length > 3 && (<Badge variant="secondary" className="text-xs">+{employee.primary_skills.length - 3}</Badge>)}
                           </div>
                         </div>
@@ -178,7 +194,7 @@ export const AllocationDialog: React.FC<AllocationDialogProps> = (props) => {
                 );
               })}
             </div>
-            {availableEmployees.length === 0 && (<div className="text-center py-8 text-gray-500"><p>No available employees match your criteria.</p></div>)}
+            {manualList.length === 0 && (<div className="text-center py-8 text-gray-500"><p>{loadingEmployees ? 'Loading employees...' : 'No available employees match your criteria.'}</p></div>)}
           </TabsContent>
           <TabsContent value="ai" className="space-y-4">
             <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
@@ -187,7 +203,7 @@ export const AllocationDialog: React.FC<AllocationDialogProps> = (props) => {
             </div>
             <div className="space-y-3">
               {aiSuggestions.slice(0, 5).map((suggestion, index) => {
-                const employee = availableEmployees.find(emp => emp.user_id === suggestion.employee.user_id);
+                const employee = manualList.find(emp => emp.user_id === (suggestion.employee?.user_id ?? suggestion.profile?.user_id));
                 if (!employee) return null;
                 const isSelected = selectedEmployees.includes(employee.user_id);
                 return (
@@ -199,7 +215,7 @@ export const AllocationDialog: React.FC<AllocationDialogProps> = (props) => {
                       <div className="flex-1">
                         <div className="flex items-center gap-2"><h4 className="font-medium">{employee.user.first_name} {employee.user.last_name}</h4><Badge variant="outline" className="text-xs">{employee.type}</Badge><Badge className="text-xs bg-green-100 text-green-800">{suggestion.match.score}% match</Badge></div>
                         <p className="text-sm text-gray-600 mt-1">{suggestion.match.explanation}</p>
-                        <div className="mt-2 flex flex-wrap gap-1">{employee.primary_skills.slice(0, 4).map(skill => (<Badge key={skill} variant="secondary" className="text-xs">{skill}</Badge>))}</div>
+                        <div className="mt-2 flex flex-wrap gap-1">{employee.primary_skills.slice(0, 4).map((skill: string) => (<Badge key={skill} variant="secondary" className="text-xs">{skill}</Badge>))}</div>
                       </div>
                       {isSelected && (<CheckCircle2 className="h-5 w-5 text-indigo-600" />)}
                     </div>

@@ -4,10 +4,8 @@ import { apiService } from './api/client';
 
 // Convert backend response to frontend Employee type
 const convertToEmployee = (backendProfile: BackendEmployeeProfile): Employee => {
-  // Split name from backend user.name field
-  const nameParts = backendProfile.user.first_name.split(' ');
-  const firstName = nameParts[0] || '';
-  const lastName = nameParts.slice(1).join(' ') || '';
+  const firstName = backendProfile.user.first_name || '';
+  const lastName = backendProfile.user.last_name || '';
   // Determine status based on availability and dates
   let status: Employee['status'] = 'available';
   if (backendProfile.notice_date) {
@@ -29,7 +27,7 @@ const convertToEmployee = (backendProfile: BackendEmployeeProfile): Employee => 
     date_of_joining: backendProfile.date_of_joining,
     end_date: backendProfile.end_date,
     notice_date: backendProfile.notice_date,
-    type: backendProfile.user.type,
+    type: backendProfile.department || (backendProfile as any).type || 'Employee',
     skills: backendProfile.skills,
     years_of_experience: backendProfile.years_of_experience,
     industry: backendProfile.industry.map(industryStr => {
@@ -70,12 +68,22 @@ const convertToEmployee = (backendProfile: BackendEmployeeProfile): Employee => 
     employment_type: 'Full-time', // Default, could be enhanced later
     primary_skills: primarySkills,
     secondary_skills: secondarySkills,
-    industry_experience: backendProfile.industry, // Convert single industry to array
+    industry_experience: backendProfile.industry,
     avatar: undefined, // Could be enhanced later
   };
 };
 
 export class EmployeeProfileService {
+  static async getAllEmployees(params?: { skills?: string[]; geos?: string[]; availableOnly?: boolean }): Promise<Employee[]> {
+    const query = new URLSearchParams();
+    if (params?.skills?.length) query.set('skills', params.skills.join(','));
+    if (params?.geos?.length) query.set('geo', params.geos.join(','));
+    if (typeof params?.availableOnly === 'boolean') query.set('available', String(params.availableOnly));
+    const url = `/api/v1/employees${query.toString() ? `?${query.toString()}` : ''}`;
+    const response = await apiService.get<BackendEmployeeProfile[] | any>(url);
+    const list = Array.isArray(response?.data) ? response.data : response; // support wrapped or raw arrays
+    return (list || []).map(convertToEmployee);
+  }
   // Get employee profile by user ID
   static async getEmployeeProfile(): Promise<Employee> {
     try {

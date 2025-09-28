@@ -1,6 +1,6 @@
-import { apiService } from './api/client';
-import type { BackendProject, ApiResponse } from '../types/api';
 import type { Project } from '../types';
+import type { ApiResponse, BackendProject } from '../types/api';
+import { apiService } from './api/client';
 
 // Request type for project creation
 export interface CreateProjectRequest {
@@ -60,6 +60,19 @@ const convertToProject = (backendProject: BackendProject): Project => {
 };
 
 class ProjectService {
+  async getAllProjects(): Promise<Project[]> {
+    const backendProjects = await apiService.get<BackendProject[]>(
+      '/api/v1/projects'
+    );
+    return (backendProjects || []).map(convertToProject);
+  }
+
+  async getProjectById(id: number): Promise<Project> {
+    const backendProject = await apiService.get<BackendProject>(
+      `/api/v1/project/${id}`
+    );
+    return convertToProject(backendProject);
+  }
   /**
    * Create a new project
    */
