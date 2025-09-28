@@ -3,12 +3,8 @@ import { useRolePermissions } from '../../hooks/useRolePermissions';
 import { cn } from '../../lib/utils';
 import { 
   LayoutDashboard, 
-  User, 
-  Users, 
   FolderOpen, 
-  BarChart3, 
-  Building,
-  Bell
+  Building
 } from 'lucide-react';
 
 interface NavItem {
@@ -20,12 +16,8 @@ interface NavItem {
 
 const navigationItems: NavItem[] = [
   { path: '/', label: 'Dashboard', icon: LayoutDashboard },
-  { path: '/profile', label: 'My Profile', permission: 'canViewOwnProfile', icon: User },
-  { path: '/team', label: 'Team Management', permission: 'canManageTeam', icon: Users },
-  { path: '/notifications', label: 'Notifications', permission: 'canManageTeam', icon: Bell },
   { path: '/projects', label: 'Projects', permission: 'canCreateProjects', icon: FolderOpen },
-  { path: '/analytics', label: 'Analytics', permission: 'canViewAnalytics', icon: BarChart3 },
-  { path: '/employees', label: 'All Employees', permission: 'canViewAllEmployees', icon: Building },
+  { path: '/employees', label: 'Employees', permission: 'canViewAllEmployees', icon: Building },
 ];
 
 export function RoleBasedNavigation() {

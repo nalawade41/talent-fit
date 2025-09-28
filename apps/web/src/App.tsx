@@ -10,6 +10,8 @@ import { EmployeeDashboard } from './components/pages/EmployeeDashboard';
 import { ProfilePage } from './components/pages/ProfilePage';
 import { TeamManagementPage } from './components/pages/TeamManagementPage';
 import { ProjectsPage } from './components/pages/ProjectsPage';
+import { ProjectDetailsPage } from './components/pages/ProjectDetailsPage';
+import { ProjectEditPage } from './components/pages/ProjectEditPage';
 import { AnalyticsPage } from './components/pages/AnalyticsPage';
 import { AllEmployeesPage } from './components/pages/AllEmployeesPage';
 import { NotificationsPage } from './components/pages/NotificationsPage';
@@ -139,6 +141,22 @@ function AuthShell() {
           }
         />
         <Route
+          path="projects/:id"
+          element={
+            <ProtectedRoute requiredPermission="canCreateProjects" fallbackPath="/">
+              <ProjectDetailsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="projects/:id/edit"
+          element={
+            <ProtectedRoute requiredPermission="canCreateProjects" fallbackPath="/">
+              <ProjectEditPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="analytics"
           element={
             <ProtectedRoute requiredPermission="canViewAnalytics" fallbackPath="/">
@@ -159,6 +177,14 @@ function AuthShell() {
           element={
             <ProtectedRoute requiredPermission="canManageTeam" fallbackPath="/">
               <NotificationsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="projects/:projectId"
+          element={
+            <ProtectedRoute requiredPermission="canViewProjectDetails" fallbackPath="/">
+              <ProjectDetailsPage />
             </ProtectedRoute>
           }
         />

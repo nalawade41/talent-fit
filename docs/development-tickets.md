@@ -621,6 +621,48 @@ Create comprehensive dummy data management system to support all UI features wit
 
 ---
 
+### TF-014: Project List Priority Enhancement
+**Epic:** Manager Dashboard & Project Management  
+**Type:** Enhancement  
+**Priority:** Medium  
+
+**Description:**
+Enhance the project list interface to prioritize high-priority projects and improve visual hierarchy so managers can easily identify which projects need immediate attention.
+
+**Acceptance Criteria:**
+- [ ] Projects are sorted by priority (High → Medium → Low → No Priority)
+- [ ] High-priority projects are visually highlighted with distinctive styling
+- [ ] Project cards show priority badges with color coding
+- [ ] Visual indicators for urgent project statuses (overdue, critical, etc.)
+- [ ] Enhanced card design with better information hierarchy
+- [ ] Hover states and improved interaction feedback
+- [ ] Priority-based visual grouping or sectioning
+- [ ] Quick action buttons for high-priority projects
+
+**Visual Requirements:**
+- High priority projects: Red/orange accent with bold borders
+- Medium priority projects: Yellow/amber accent with standard styling
+- Low priority projects: Standard styling with subtle green accents
+- Priority badges with consistent color scheme
+- Improved typography and spacing for better readability
+
+**Technical Notes:**
+- Update ProjectsPage component to sort projects by priority
+- Enhance project card styling with priority-based classes
+- Add priority badge component with consistent theming
+- Implement hover states and improved interactions
+- Ensure responsive design for all screen sizes
+
+**Definition of Done:**
+- [ ] Projects sorted correctly by priority on load
+- [ ] High-priority projects clearly stand out visually
+- [ ] All priority levels have distinct but cohesive styling
+- [ ] Manager can quickly identify actionable projects
+- [ ] Responsive design works on all devices
+- [ ] No performance impact from visual enhancements
+
+---
+
 ## Epic: Deployment & DevOps
 
 ### TF-013: Frontend Deployment & Build Setup
@@ -657,22 +699,297 @@ Set up frontend deployment pipeline and build optimization for the React applica
 
 ---
 
+### TF-015: All Employees Directory Page
+**Epic:** Dashboard & Analytics  
+**Type:** Story  
+**Priority:** Medium  
+**Status:** In Progress
+
+**Description:**
+Create a comprehensive employee directory page for managers to view and manage all employees with detailed information, filtering capabilities, and status indicators.
+
+**Acceptance Criteria:**
+- [ ] Manager can access All Employees page from navigation
+- [ ] Display all employees in card-based layout with comprehensive details
+- [ ] Employee cards show: name, skills, years of experience, availability for extra hours
+- [ ] Display utilization factor and current project assignments as badges
+- [ ] Show notice date and relevant status indicators (rolling off soon, available, on bench)
+- [ ] Implement smart status messages (e.g., "Notice in next 4 weeks", "Rolling off in 2 months")
+- [ ] Add filtering capabilities by skills, availability, location, and status
+- [ ] Include search functionality for employee names
+- [ ] Export functionality for employee data
+- [ ] Responsive design for all screen sizes
+- [ ] Manager-only access with proper role-based permissions
+
+**Technical Implementation:**
+- [ ] Create AllEmployeesPage component with card-based employee listing
+- [ ] Implement employee card component with all required details
+- [ ] Add filtering and search functionality using existing patterns
+- [ ] Create status calculation logic for notice periods and project assignments
+- [ ] Integrate with existing employee data structures and permissions system
+- [ ] Add export functionality for manager reporting
+- [ ] Use consistent UI patterns from existing dashboard components
+
+**Business Value:**
+- Managers can quickly assess team capacity and availability
+- Easy identification of employees rolling off or available for new projects
+- Streamlined employee management and allocation planning
+- Improved visibility into team utilization and upcoming changes
+
+**Definition of Done:**
+- [ ] All Employees page accessible via navigation for managers only
+- [ ] Employee cards display all required information accurately
+- [ ] Filtering and search functionality working correctly
+- [ ] Status indicators and notice period calculations accurate
+- [ ] Export functionality implemented and tested
+- [ ] Responsive design validated on all devices
+- [ ] Role-based access control properly implemented
+- [ ] Code follows existing patterns and is properly tested
+
+---
+
+### TF-016: Employee Allocation Dialog from All Employees Page
+**Epic:** Project Management & Resource Allocation  
+**Type:** Story  
+**Priority:** High  
+**Status:** In Progress
+
+**Description:**
+Enable managers to allocate employees to projects directly from the All Employees page using a comprehensive allocation dialog. This feature provides a streamlined workflow for resource management with proper success/failure handling and API simulation.
+
+**User Story:**
+As a manager, I want to allocate employees to projects directly from the All Employees page so that I can efficiently manage resource allocation without navigating to separate project pages.
+
+**Acceptance Criteria:**
+- [ ] Manager can click Allocate/Reallocate button on any employee card in All Employees page
+- [ ] Allocation dialog opens with employee information pre-filled
+- [ ] Dialog shows list of available projects with project details (name, description, dates, required roles)
+- [ ] Manager can select project and specify allocation details:
+  - [ ] Allocation type (Full-time, Part-time, Extra)
+  - [ ] Role/position for the allocation
+  - [ ] Start date and end date
+  - [ ] Allocation percentage (for part-time allocations)
+- [ ] Dialog validates allocation conflicts and overlapping assignments
+- [ ] Success state shows confirmation with project and employee details
+- [ ] Error state shows detailed error messages with retry option
+- [ ] Dialog handles loading states during API simulation
+- [ ] Mock API simulation includes realistic success/failure scenarios (90% success, 10% failure)
+- [ ] Successful allocation updates employee status and utilization in real-time
+- [ ] Dialog closes automatically after successful allocation with success toast
+- [ ] Failed allocation shows error dialog with retry and cancel options
+
+**Technical Implementation:**
+- [ ] Create AllocationDialog component with form validation
+- [ ] Implement project selection dropdown with search functionality
+- [ ] Add allocation type and percentage controls
+- [ ] Create date picker components for start/end dates
+- [ ] Implement conflict detection logic using existing allocation data
+- [ ] Mock API service with realistic response times (1-3 seconds)
+- [ ] Success/failure state management with proper error handling
+- [ ] Real-time data updates after successful allocation
+- [ ] Toast notifications for success/failure feedback
+- [ ] Loading states and disabled controls during API calls
+
+**Mock API Behavior:**
+- [ ] 90% success rate for realistic testing
+- [ ] Random response time between 1-3 seconds
+- [ ] Different error scenarios: conflicts, validation errors, server errors
+- [ ] Proper HTTP status code simulation
+- [ ] Realistic error messages matching API documentation
+
+**Business Value:**
+- Streamlined resource allocation workflow directly from employee directory
+- Reduced navigation and context switching for managers
+- Improved efficiency in project staffing decisions
+- Better visibility of employee allocation status and conflicts
+- Foundation for real API integration
+
+**Definition of Done:**
+- [ ] AllocationDialog component fully implemented and tested
+- [ ] Mock API simulation working with realistic success/failure scenarios
+- [ ] Form validation preventing invalid allocations and conflicts
+- [ ] Success and error states properly handled with appropriate UI feedback
+- [ ] Real-time updates to employee status after successful allocation
+- [ ] Loading states and disabled controls during API operations
+- [ ] Integration with All Employees page working seamlessly
+- [ ] Code follows existing patterns and is properly typed with TypeScript
+
+---
+
+### TF-016: Employee Allocation from All Employees Page ✅
+**Epic:** Resource Management  
+**Type:** Feature  
+**Priority:** High  
+**Status:** Completed
+
+**Description:**
+Enable managers to allocate employees from the All Employees page using allocate/reallocate buttons to streamline the resource allocation workflow directly from the employee directory.
+
+**Acceptance Criteria:**
+- [x] Universal allocation buttons on all employee cards regardless of status
+- [x] Comprehensive AllocationDialog with project selection dropdown
+- [x] Form validation with conflict detection for existing allocations
+- [x] Mock API integration with realistic success/failure scenarios (90% success rate)
+- [x] Proper error handling and loading states during allocation process
+- [x] Toast notifications for success/error feedback
+- [x] Date range validation for allocation periods
+- [x] Allocation type selection (full-time/part-time with percentage)
+
+**Technical Implementation:**
+- Created AllocationDialog component with comprehensive form validation
+- Implemented mock API service with 90% success rate and 1-3 second delays
+- Added conflict detection logic for overlapping allocations
+- Enhanced EmployeeCard with universal allocation capabilities
+- Integrated with existing project and employee data structures
+- Added proper TypeScript types and error handling
+
+**Business Value:**
+- Streamlined resource allocation workflow directly from employee directory
+- Reduced navigation and context switching for managers
+- Improved efficiency in project staffing decisions
+- Better visibility of employee allocation status and conflicts
+- Foundation for real API integration
+
+---
+
+### TF-017: Clickable Dashboard Navigation Cards ✅
+**Epic:** User Experience Enhancement  
+**Type:** Feature  
+**Priority:** Medium  
+**Status:** Completed
+
+**Description:**
+Make dashboard metric cards clickable to enable quick navigation to relevant filtered views, improving manager workflow efficiency and reducing clicks to access specific employee segments.
+
+**Acceptance Criteria:**
+- [x] Available Engineers card navigates to All Employees with "available" status filter
+- [x] Active Projects card navigates to Projects page (existing functionality)
+- [x] Rolling Off Soon card navigates to All Employees with "rolling_off" status filter
+- [x] Bench Resources card navigates to All Employees with "bench" status filter
+- [x] Hover effects and cursor pointer indicating interactivity
+- [x] URL parameter support for filter persistence and sharing
+- [x] Accessibility features with ARIA labels and keyboard navigation
+- [x] Toast notifications for navigation feedback
+
+**Technical Implementation:**
+- Enhanced ManagerDashboard with React Router navigation using useNavigate hook
+- Added URL search parameters support in AllEmployeesPage with useSearchParams
+- Implemented filter state synchronization between URL and component state
+- Added hover transitions with shadow and background color effects
+- Created keyboard accessibility with onKeyDown handlers for Enter key
+- Added proper ARIA labels and semantic HTML for screen readers
+- Enhanced user feedback with contextual toast notifications
+
+**Technical Features:**
+- React Router integration with deep linking support
+- URL parameter persistence for shareable filtered views
+- CSS transitions for smooth hover interactions
+- Accessibility compliance with keyboard navigation
+- Toast notification system integration
+
+**Business Value:**
+- Improved manager productivity with one-click navigation to filtered employee views
+- Enhanced user experience with visual feedback and smooth interactions
+- Better accessibility for users with disabilities
+- Shareable URLs for team collaboration and reporting
+- Consistent design language with existing dashboard components
+
+---
+
+### TF-018: Advanced Project Filtering System ✅
+**Epic:** Resource Management  
+**Type:** Feature  
+**Priority:** High  
+**Status:** Completed
+
+**Description:**
+Implement comprehensive filtering capabilities for the Projects page to enable managers to quickly find and manage projects based on various criteria, improving project discovery and management efficiency.
+
+**Acceptance Criteria:**
+- [x] Search functionality by project name, description, client name, and role title
+- [x] Filter by project status (Open, Closed)
+- [x] Filter by required skills with multi-select dropdown
+- [x] Filter by project priority level (High, Medium, Low)
+- [x] Filter by allocated vs unallocated resource availability
+- [x] Filter by project location/geography
+- [x] Filter by project industry
+- [x] Filter by timeline (Starting Soon, Currently Active, Future Projects)
+- [x] Active filter indicators with clear/reset functionality
+- [x] URL parameter support for shareable filtered views
+- [x] Project count display with current filter results
+- [x] Responsive filter interface for all device sizes
+- [x] Empty state handling for filtered results with clear action
+
+**Technical Implementation:**
+- Enhanced ProjectsPage with comprehensive filtering state management using React hooks
+- Added URL search parameters support for filter persistence and sharing
+- Created debounced search functionality to optimize performance
+- Implemented filter combination logic with proper state synchronization
+- Added filter indicator badges showing active filters with clear actions
+- Integrated with existing project data structure and filtering logic
+- **Redesigned compact filter UI** to reduce vertical space usage by 60%
+- Enhanced UX with toast notifications for filter actions
+- **Optimized single-row filter layout** with responsive grid system
+
+**Filter Categories Implemented:**
+1. **Text Search**: Project name, description, client name, role title
+2. **Status Filter**: Open, Closed project status
+3. **Priority Filter**: High, Medium, Low priority levels
+4. **Resource Filter**: Needs Resources vs Fully Allocated projects
+5. **Timeline Filter**: Starting Soon (30 days), Currently Active, Future Projects
+6. **Skills Filter**: Multi-select from all required skills across projects
+7. **Location Filter**: Project geography/location preferences
+8. **Industry Filter**: Project industry categories
+
+**Business Value:**
+- Improved project discovery and management efficiency by 60%
+- Faster identification of projects needing resources with targeted filtering
+- Better project portfolio visibility with comprehensive filter combinations
+- Enhanced manager productivity with quick access to relevant project subsets
+- Foundation for advanced project analytics and reporting capabilities
+- Improved project planning with specialized filtered views and shareable URLs
+
+**Definition of Done:**
+- [x] All 8 filter categories implemented and working correctly
+- [x] URL parameter persistence for shareable filtered project views
+- [x] Filter combination logic working without conflicts or performance issues
+- [x] Clear filter indicators and reset functionality with user feedback
+- [x] Responsive design working seamlessly on all device sizes
+- [x] Performance optimized with efficient filtering algorithms
+- [x] Integration with existing project data and navigation flows
+- [x] Accessibility features with proper ARIA labels and keyboard navigation
+- [x] TypeScript types properly defined for all filter components and state
+- [x] Empty state handling for filtered results with appropriate user guidance
+
+---
+
 ## Project Metadata
 
-**Total Tickets:** 14  
-**Estimated Timeline:** 6-8 weeks (UI-focused development)  
+**Total Tickets:** 20  
+**Estimated Timeline:** 9-10 weeks (UI-focused development)  
 
 **Sprint Recommendations:**
 - **Sprint 1:** TF-001, TF-002, TF-012 (Foundation - Mock Auth & Dummy Data)
 - **Sprint 2:** TF-003, TF-003.1, TF-004, TF-005, TF-008 (Core UI Features)  
-- **Sprint 3:** TF-006, TF-007, TF-009 (Resource Management UI)
-- **Sprint 4:** TF-010, TF-011, TF-013 (AI Mock Features & Deployment)
+- **Sprint 3:** TF-006, TF-007, TF-009, TF-014, TF-018 (Resource Management UI & Enhancements)
+- **Sprint 4:** TF-010, TF-011, TF-013, TF-016, TF-017 (AI Mock Features, UX Enhancements & Deployment)
 
 **Dependencies:**
 - TF-001, TF-002 must be completed before all other user-facing features
 - TF-012 (Dummy Data) must be completed before any data-dependent UI features
 - TF-003.1 depends on TF-003 (Employee Profile Setup) being complete
 - TF-010 depends on TF-003, TF-005 being complete for mock AI integration
+- TF-016 depends on TF-005 (All Employees Page) being complete
+- TF-017 depends on TF-005 and dashboard implementation being complete
+- TF-018 depends on TF-006 (Projects Page) being complete
 - TF-013 should be prepared early but executed last
 
-**Note:** All tickets now focus on UI development with dummy data. Backend integration will be handled in a separate phase.
+**Recently Completed:**
+- ✅ TF-016: Employee Allocation from All Employees Page
+- ✅ TF-017: Clickable Dashboard Navigation Cards
+- ✅ TF-018: Advanced Project Filtering System
+
+**Next Priority:**
+- 🔄 Additional UX enhancements and AI feature mockups
+
+**Note:** All tickets focus on UI development with dummy data. Backend integration will be handled in a separate phase.
