@@ -48,6 +48,7 @@ type EmployeeProfile struct {
 	Type              string `gorm:"not null"`
 	Skills            Skills `gorm:"type:jsonb"`
 	YearsOfExperience int
+	ExperienceLevel   string // New field for experience level
 	Industry          string
 	AvailabilityFlag  bool            `gorm:"default:false"`
 	Embedding         pgvector.Vector `gorm:"type:vector(1536)"`
@@ -55,6 +56,7 @@ type EmployeeProfile struct {
 	UpdatedAt         time.Time
 	DeletedAt         gorm.DeletedAt `gorm:"index"`
 	Department        string
+	EmploymentType    string
 
 	// Relationships
 	User User `gorm:"foreignKey:UserID;references:ID"`

@@ -61,7 +61,7 @@ func NewContainer(cfg *config.Config) (*Container, error) {
     allocationService := services.NewProjectAllocationService(allocationRepo, profileRepo, orchestrator)
     matchService := services.NewMatchService(userRepo, projectRepo, allocationRepo, profileRepo, embeddingService)
     notificationService := services.NewNotificationService(notificationRepo)
-    profileService := services.NewEmployeeProfileService(profileRepo, embeddingService, orchestrator)
+    profileService := services.NewEmployeeProfileService(profileRepo, embeddingService, orchestrator, userRepo)
     googleAuthService := services.NewGoogleAuthService(userRepo, cfg)
 
 	// Initialize handlers

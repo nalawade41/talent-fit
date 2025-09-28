@@ -30,13 +30,13 @@ const convertToProjectAllocation = (backendAllocation: BackendProjectAllocation)
     // Convert nested employee if available
     employee: backendAllocation.employee ? {
       id: backendAllocation.employee.id,
-      first_name: backendAllocation.employee.name.split(' ')[0] || '',
-      last_name: backendAllocation.employee.name.split(' ').slice(1).join(' ') || '',
+      first_name: backendAllocation.employee.first_name.split(' ')[0] || '',
+      last_name: backendAllocation.employee.first_name.split(' ').slice(1).join(' ') || '',
       email: backendAllocation.employee.email,
       role: backendAllocation.employee.role as 'Employee' | 'Manager',
       created_at: backendAllocation.employee.created_at,
       updated_at: backendAllocation.employee.updated_at,
-      name: backendAllocation.employee.name,
+      name: backendAllocation.employee.first_name,
     } : undefined,
   };
 };
@@ -47,9 +47,9 @@ export class ProjectAllocationService {
     try {
       const response = await apiService.get<ApiResponse<BackendProjectAllocation[]>>(
         `/api/v1/employee/${employeeId}/projects`
-      );
+      ) as any;
       
-      return response.data.map(convertToProjectAllocation);
+      return response?.map(convertToProjectAllocation) || [];
     } catch (error) {
       console.error('Error fetching employee allocations:', error);
       throw error;

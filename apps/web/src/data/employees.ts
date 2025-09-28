@@ -9,10 +9,11 @@ export interface Employee {
   type: string;
   skills: string[];
   years_of_experience: number;
-  industry: string[];
+  industry: Industry[];
   availability_flag: boolean;
   created_at: string;
   updated_at: string;
+  department: string;
   user: {
     id: number;
     first_name: string;
@@ -35,6 +36,12 @@ export interface Employee {
   avatar?: string;
 }
 
+export interface Industry {
+  industry: string;
+  years: number;
+}
+  
+
 export const employeesData: Employee[] = [
   {
     user_id: 1,
@@ -46,9 +53,10 @@ export const employeesData: Employee[] = [
     type: "Frontend Dev",
     skills: ["React", "TypeScript", "Node.js", "CSS", "Tailwind"],
     years_of_experience: 5,
-    industry: ["Technology"],
+    industry: [{ industry: "Technology", years: 5 }],
     availability_flag: true,
     created_at: "2022-03-10T10:00:00Z",
+    department: "Engineering",
     updated_at: "2023-11-15T14:30:00Z",
     status: "available",
     current_client: undefined,
@@ -79,9 +87,10 @@ export const employeesData: Employee[] = [
     type: "Backend Dev",
     skills: ["Go", "PostgreSQL", "Docker", "Kubernetes", "AWS"],
     years_of_experience: 7,
-    industry: ["Fintech"],
+    industry: [{ industry: "Fintech", years: 7 }],
     availability_flag: false,
     created_at: "2021-08-15T10:00:00Z",
+    department: "Engineering",
     updated_at: "2023-11-20T09:45:00Z",
     status: "rolling_off",
     current_client: "FinanceCorpABC",
@@ -112,9 +121,10 @@ export const employeesData: Employee[] = [
     type: "Fullstack Dev",
     skills: ["React", "Next.js", "Python", "Django", "PostgreSQL"],
     years_of_experience: 4,
-    industry: ["Healthcare"],
+    industry: [{ industry: "Healthcare", years: 4 }],
     availability_flag: true,
     created_at: "2023-01-05T10:00:00Z",
+    department: "Engineering",
     updated_at: "2023-11-18T16:20:00Z",
     status: "allocated",
     current_client: "HealthTech Solutions",
@@ -145,9 +155,10 @@ export const employeesData: Employee[] = [
     type: "AI",
     skills: ["Python", "TensorFlow", "PyTorch", "Machine Learning", "Data Science"],
     years_of_experience: 6,
-    industry: ["Technology"],
+    industry: [{ industry: "Technology", years: 6 }],
     availability_flag: false,
     created_at: "2020-05-25T10:00:00Z",
+    department: "Engineering",
     updated_at: "2023-11-19T11:15:00Z",
     status: "allocated",
     current_client: "AI Startup Inc",
@@ -178,9 +189,10 @@ export const employeesData: Employee[] = [
     type: "UI",
     skills: ["Figma", "Adobe XD", "CSS", "JavaScript", "Design Systems"],
     years_of_experience: 3,
-    industry: ["E-commerce"],
+    industry: [{ industry: "E-commerce", years: 3 }],
     availability_flag: true,
     created_at: "2023-08-25T10:00:00Z",
+    department: "Engineering",
     updated_at: "2023-11-20T08:30:00Z",
     status: "rolling_off",
     current_client: "E-commerce Giant",
@@ -211,9 +223,10 @@ export const employeesData: Employee[] = [
     type: "Backend Dev",
     skills: ["Java", "Spring Boot", "MongoDB", "Redis", "Apache Kafka"],
     years_of_experience: 8,
-    industry: ["Banking"],
+    industry: [{ industry: "Banking", years: 8 }],
     availability_flag: true,
     created_at: "2022-11-10T10:00:00Z",
+    department: "Engineering",
     updated_at: "2023-11-21T13:45:00Z",
     status: "bench",
     current_client: undefined,
@@ -244,9 +257,10 @@ export const employeesData: Employee[] = [
     type: "UX",
     skills: ["User Research", "Wireframing", "Prototyping", "Figma", "Analytics"],
     years_of_experience: 5,
-    industry: ["Healthcare"],
+    industry: [{ industry: "Healthcare", years: 5 }],
     availability_flag: false,
     created_at: "2021-02-05T10:00:00Z",
+    department: "Engineering",
     updated_at: "2023-11-19T10:20:00Z",
     status: "allocated",
     current_client: "MedTech Solutions",
@@ -277,9 +291,10 @@ export const employeesData: Employee[] = [
     type: "Tester",
     skills: ["Selenium", "Jest", "Cypress", "API Testing", "Performance Testing"],
     years_of_experience: 4,
-    industry: ["Technology"],
+    industry: [{ industry: "Technology", years: 4 }],
     availability_flag: true,
     created_at: "2023-05-15T10:00:00Z",
+    department: "Engineering",
     updated_at: "2023-11-20T14:10:00Z",
     status: "available",
     current_client: undefined,

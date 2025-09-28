@@ -11,9 +11,11 @@ export interface BackendUser {
 }
 
 export interface BackendEmployeeProfile {
+  name: string;
   id: number;
   user_id: number;
   geo: string;
+  department: string;
   date_of_joining: string | null;
   end_date: string | null;
   notice_date: string | null;
@@ -21,6 +23,8 @@ export interface BackendEmployeeProfile {
   years_of_experience: number;
   industry: string[];
   availability_flag: boolean;
+  employment_type: string;
+  experience_level: string;
   created_at: string;
   updated_at: string;
   user: BackendUser;

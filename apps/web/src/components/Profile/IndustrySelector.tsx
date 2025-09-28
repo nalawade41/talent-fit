@@ -145,9 +145,9 @@ export function IndustrySelector({ selectedIndustries, onIndustriesChange, maxIn
                       }}
                       onBlur={saveYears}
                       className="w-12 text-xs px-1 py-0.5 border rounded text-center"
-                      min="0.5"
+                      min="1"
                       max="50"
-                      step="0.5"
+                      step="1"
                       autoFocus
                     />
                     <span className="text-xs text-gray-500">yrs</span>
