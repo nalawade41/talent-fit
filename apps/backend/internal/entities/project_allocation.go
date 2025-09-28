@@ -8,9 +8,9 @@ import (
 
 // ProjectAllocation entity for database operations
 type ProjectAllocation struct {
-	ID             int64       `gorm:"primaryKey"`
-	ProjectID      int64       `gorm:"not null;index"`
-	EmployeeID     int64       `gorm:"not null;index"`
+	ID             int       `gorm:"primaryKey"`
+	ProjectID      int       `gorm:"not null;index"`
+	EmployeeID     int       `gorm:"not null;index"`
 	AllocationType string     `gorm:"not null"`
 	StartDate      time.Time  `gorm:"not null"`
 	EndDate        *time.Time // nullable as per data model
