@@ -263,7 +263,7 @@ func (u *EmbeddingUtils) GenerateMatchingPrompt(projectSummary string, candidate
 
 				Instructions:
 				1. Score each candidate from 0–100.
-				2. Provide a short explanation in human language (2–3 sentences) why the candidate got this score.
+				2. Provide a short explanation in human language (2–3 sentences) why the candidate got this score. If candidate is on bench explicitly mention that in reason.
 				3. For unspecified project geo: Give slight preference (5-10 points bonus) to India-based candidates when skills are comparable.
 				4. If canidate status is OnBench, give prefrence to candidates even if skills match is less for OnBench add (5-10 points bonus).
 				5. Return results as JSON:
