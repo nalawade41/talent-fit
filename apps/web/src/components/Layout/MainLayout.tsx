@@ -3,7 +3,6 @@ import { useAuth } from '../../context/AuthContext';
 import { Button } from '../ui/button';
 import { RoleBasedNavigation } from './RoleBasedNavigation';
 import { Building2, Users } from 'lucide-react';
-import { NotificationDropdown } from '../ui/notification-dropdown';
 
 export function MainLayout() {
   const { user, logout, refreshingToken } = useAuth();
@@ -22,7 +21,7 @@ export function MainLayout() {
               <div className="font-bold text-xl text-white">Talent Fit</div>
               <div className="text-xs text-slate-400 flex items-center gap-1">
                 <Users className="w-3 h-3" />
-                {user?.role === 'manager' ? 'Manager Portal' : 'Employee Portal'}
+                {user?.role === 'Manager' ? 'Manager Portal' : 'Employee Portal'}
               </div>
             </div>
           </div>
@@ -68,7 +67,7 @@ export function MainLayout() {
             )}
           </div>
           <div className="flex items-center gap-3">
-            <NotificationDropdown />
+            {/* <NotificationDropdown /> */}
             <Button 
               variant="outline" 
               size="sm" 
