@@ -73,6 +73,14 @@ class ProjectService {
     );
     return convertToProject(backendProject);
   }
+
+  async updateProject(id: number, payload: Partial<BackendProject>): Promise<Project> {
+    const updated = await apiService.patch<BackendProject>(
+      `/api/v1/project/${id}`,
+      payload
+    );
+    return convertToProject(updated);
+  }
   /**
    * Create a new project
    */
