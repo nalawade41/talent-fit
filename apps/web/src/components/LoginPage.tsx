@@ -39,7 +39,7 @@ export function LoginPage() {
             <div className="mx-auto w-16 h-16 bg-blue-500 rounded-full flex items-center justify-center mb-4">
               <User className="w-8 h-8 text-white" />
             </div>
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">TalentMatch</h1>
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">Talent Fit</h1>
             <p className="text-gray-600">Sign in to your account</p>
           </div>
 
