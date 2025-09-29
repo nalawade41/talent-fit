@@ -3,6 +3,7 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
+    "build:web": "cd apps/web && npm install && npm run build",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "format:staged": "prettier --write"
