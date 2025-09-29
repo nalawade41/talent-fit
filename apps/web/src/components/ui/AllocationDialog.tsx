@@ -1,27 +1,26 @@
-import React, { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from './dialog';
+import {
+    AlertCircle,
+    Briefcase,
+    CheckCircle,
+    Clock,
+    Loader2,
+    MapPin,
+    Target
+} from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import toast from 'react-hot-toast';
+import { Employee } from '../../data/employees';
+import ProjectAllocationService from '../../services/projectAllocationService';
+import ProjectService from '../../services/projectService';
+import { Project } from '../../types';
+import { Avatar, AvatarFallback, AvatarImage } from './avatar';
+import { Badge } from './badge';
 import { Button } from './button';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from './dialog';
 import { Input } from './input';
 import { Label } from './label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './select';
-import { Badge } from './badge';
-import { Avatar, AvatarImage, AvatarFallback } from './avatar';
 import { Separator } from './separator';
-import { Employee } from '../../data/employees';
-import { projectsData, Project } from '../../data/projects';
-import { projectAllocationsData } from '../../data/allocations';
-import { 
-  Calendar, 
-  Clock, 
-  User, 
-  Briefcase, 
-  AlertCircle, 
-  CheckCircle,
-  Loader2,
-  MapPin,
-  Target
-} from 'lucide-react';
-import toast from 'react-hot-toast';
 
 interface AllocationDialogProps {
   open: boolean;
@@ -87,8 +86,30 @@ export function AllocationDialog({ open, onOpenChange, employee, onSuccess }: Al
   const [conflicts, setConflicts] = useState<any[]>([]);
 
   // Available projects (excluding those where employee is already allocated)
-  const availableProjects = projectsData.filter(project => {
-    const existingAllocation = projectAllocationsData.find(
+  const [apiProjects, setApiProjects] = useState<Project[]>([]);
+  const [employeeAllocations, setEmployeeAllocations] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (!open) return;
+    let isMounted = true;
+    (async () => {
+      try {
+        const [projects, allocations] = await Promise.all([
+          ProjectService.getAllProjects(),
+          ProjectAllocationService.getEmployeeAllocations(employee.user_id)
+        ]);
+        if (!isMounted) return;
+        setApiProjects(projects);
+        setEmployeeAllocations(allocations);
+      } catch {
+        // leave lists empty on failure; dialog still functions
+      }
+    })();
+    return () => { isMounted = false; };
+  }, [open, employee.user_id]);
+
+  const availableProjects = apiProjects.filter(project => {
+    const existingAllocation = employeeAllocations.find(
       allocation => allocation.project_id === project.id && allocation.employee_id === employee.user_id
     );
     return !existingAllocation && project.status === 'Open';
@@ -113,26 +134,25 @@ export function AllocationDialog({ open, onOpenChange, employee, onSuccess }: Al
   // Update selected project when project ID changes
   useEffect(() => {
     if (formData.projectId) {
-      const project = projectsData.find(p => p.id.toString() === formData.projectId);
+      const project = apiProjects.find(p => p.id.toString() === formData.projectId);
       setSelectedProject(project || null);
       if (project) {
         // Auto-set end date to project end date
         setFormData(prev => ({
-          ...prev,
+          projectId: prev.projectId,
+          allocationType: prev.allocationType,
+          roleType: project.role_type || '',
+          startDate: prev.startDate,
           endDate: project.end_date.split('T')[0],
-          roleType: project.role_type
+          allocationPercentage: prev.allocationPercentage,
         }));
       }
     }
-  }, [formData.projectId]);
+  }, [formData.projectId, apiProjects]);
 
   // Check for allocation conflicts
   useEffect(() => {
     if (formData.startDate && formData.endDate) {
-      const employeeAllocations = projectAllocationsData.filter(
-        allocation => allocation.employee_id === employee.user_id
-      );
-      
       const conflictingAllocations = employeeAllocations.filter(allocation => {
         const allocationStart = new Date(allocation.start_date);
         const allocationEnd = allocation.end_date ? new Date(allocation.end_date) : new Date('2099-12-31');
@@ -144,7 +164,7 @@ export function AllocationDialog({ open, onOpenChange, employee, onSuccess }: Al
       
       setConflicts(conflictingAllocations);
     }
-  }, [formData.startDate, formData.endDate, employee.user_id]);
+  }, [formData.startDate, formData.endDate, employee.user_id, employeeAllocations]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -263,7 +283,7 @@ export function AllocationDialog({ open, onOpenChange, employee, onSuccess }: Al
               <div className="space-y-2 text-sm">
                 <div><strong>Client:</strong> {selectedProject.client_name}</div>
                 <div><strong>Duration:</strong> {new Date(selectedProject.start_date).toLocaleDateString()} - {new Date(selectedProject.end_date).toLocaleDateString()}</div>
-                <div><strong>Required Skills:</strong> {selectedProject.required_skills.join(', ')}</div>
+                <div><strong>Required Skills:</strong> {(selectedProject.required_skills || []).join(', ')}</div>
                 <div className="flex items-center gap-2">
                   <strong>Status:</strong>
                   <Badge variant={selectedProject.status === 'Open' ? 'default' : 'secondary'}>

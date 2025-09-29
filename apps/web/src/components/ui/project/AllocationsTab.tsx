@@ -1,10 +1,9 @@
+import { Calendar, Plus, Users, X } from 'lucide-react';
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '../card';
-import { Button } from '../button';
-import { Users, Plus, X, Calendar } from 'lucide-react';
+import { Employee } from '../../../data/employees';
 import { Avatar, AvatarFallback, AvatarImage } from '../avatar';
-import { Employee } from '../../../types';
-import { Badge } from '../badge';
+import { Button } from '../button';
+import { Card, CardContent, CardHeader, CardTitle } from '../card';
 
 interface Allocation { id: number; employee_id: number; allocation_type: string; start_date: string; end_date?: string; }
 interface AllocationsTabProps { projectAllocations: Allocation[]; employeesData: Employee[]; onOpenAllocate: () => void; }
