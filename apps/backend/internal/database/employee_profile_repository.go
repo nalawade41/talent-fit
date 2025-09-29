@@ -34,7 +34,7 @@ func (r *EmployeeProfileRepository) GetAll(ctx context.Context) ([]*entities.Emp
 
 // GetFiltered retrieves employee profiles filtered by skills, geos and availability
 func (r *EmployeeProfileRepository) GetFiltered(ctx context.Context, skills []string, geos []string, availableOnly bool) ([]*entities.EmployeeProfile, error) {
-	dbq := r.db.WithContext(ctx).Model(&entities.EmployeeProfile{})
+    dbq := r.db.WithContext(ctx).Model(&entities.EmployeeProfile{}).Preload("User")
 
 	if len(geos) > 0 {
 		dbq = dbq.Where("geo IN ?", geos)
@@ -57,8 +57,8 @@ func (r *EmployeeProfileRepository) GetFiltered(ctx context.Context, skills []st
 		dbq = dbq.Where("LOWER(skills::text)::jsonb @> ?::jsonb", jsonArray)
 	}
 
-	var profiles []*entities.EmployeeProfile
-	if err := dbq.Find(&profiles).Error; err != nil {
+    var profiles []*entities.EmployeeProfile
+    if err := dbq.Find(&profiles).Error; err != nil {
 		return nil, err
 	}
 	return profiles, nil
@@ -106,8 +106,8 @@ func (r *EmployeeProfileRepository) Update(ctx context.Context, userID string, p
 
 // GetAvailableEmployees retrieves available employees from database
 func (r *EmployeeProfileRepository) GetAvailableEmployees(ctx context.Context) ([]*entities.EmployeeProfile, error) {
-	var profiles []*entities.EmployeeProfile
-	result := r.db.WithContext(ctx).Where("availability_flag = ?", true).Find(&profiles)
+    var profiles []*entities.EmployeeProfile
+    result := r.db.WithContext(ctx).Preload("User").Where("availability_flag = ?", true).Find(&profiles)
 	if result.Error != nil {
 		return nil, result.Error
 	}
