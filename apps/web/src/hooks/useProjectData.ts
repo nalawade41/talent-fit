@@ -15,6 +15,7 @@ export interface UseProjectDataResult {
   availableEmployees: any[];
   getAIMatchScore: (employeeId: number) => number;
   refreshProject: (updated?: Project) => void;
+  loadingAllocations: boolean;
 }
 
 export function useProjectData(projectId: number): UseProjectDataResult {
@@ -38,16 +39,20 @@ export function useProjectData(projectId: number): UseProjectDataResult {
   }, [currentProject, projectId]);
 
   const [apiAllocations, setApiAllocations] = useState<any[]>([]);
+  const [loadingAllocations, setLoadingAllocations] = useState<boolean>(false);
 
   useEffect(() => {
     let isMounted = true;
     (async () => {
+      setLoadingAllocations(true);
       try {
         const allocs = await ProjectAllocationService.getProjectAllocations(projectId);
         if (isMounted) setApiAllocations(allocs);
       } catch {
         // fall back to static allocations
         if (isMounted) setApiAllocations(projectAllocationsData.filter(a => a.project_id === projectId));
+      } finally {
+        if (isMounted) setLoadingAllocations(false);
       }
     })();
     return () => { isMounted = false; };
@@ -77,5 +82,5 @@ export function useProjectData(projectId: number): UseProjectDataResult {
     if (updated) setCurrentProject(updated); else setCurrentProject(null);
   };
 
-  return { project, projectAllocations, totalAllocated, totalRoles, aiSuggestions, availableEmployees, getAIMatchScore, refreshProject };
+  return { project, projectAllocations, totalAllocated, totalRoles, aiSuggestions, availableEmployees, getAIMatchScore, refreshProject, loadingAllocations };
 }
