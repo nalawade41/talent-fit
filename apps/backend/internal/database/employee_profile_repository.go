@@ -24,17 +24,17 @@ func NewEmployeeProfileRepository(db *gorm.DB) domain.EmployeeProfileRepository 
 
 // GetAll retrieves all employee profiles from database
 func (r *EmployeeProfileRepository) GetAll(ctx context.Context) ([]*entities.EmployeeProfile, error) {
-    var profiles []*entities.EmployeeProfile
-    result := r.db.WithContext(ctx).Preload("User").Find(&profiles)
-    if result.Error != nil {
-        return nil, result.Error
-    }
-    return profiles, nil
+	var profiles []*entities.EmployeeProfile
+	result := r.db.WithContext(ctx).Preload("User").Find(&profiles)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return profiles, nil
 }
 
 // GetFiltered retrieves employee profiles filtered by skills, geos and availability
 func (r *EmployeeProfileRepository) GetFiltered(ctx context.Context, skills []string, geos []string, availableOnly bool) ([]*entities.EmployeeProfile, error) {
-	dbq := r.db.WithContext(ctx).Model(&entities.EmployeeProfile{})
+    dbq := r.db.WithContext(ctx).Model(&entities.EmployeeProfile{}).Preload("User")
 
 	if len(geos) > 0 {
 		dbq = dbq.Where("geo IN ?", geos)
@@ -57,8 +57,8 @@ func (r *EmployeeProfileRepository) GetFiltered(ctx context.Context, skills []st
 		dbq = dbq.Where("LOWER(skills::text)::jsonb @> ?::jsonb", jsonArray)
 	}
 
-	var profiles []*entities.EmployeeProfile
-	if err := dbq.Find(&profiles).Error; err != nil {
+    var profiles []*entities.EmployeeProfile
+    if err := dbq.Find(&profiles).Error; err != nil {
 		return nil, err
 	}
 	return profiles, nil
@@ -106,8 +106,8 @@ func (r *EmployeeProfileRepository) Update(ctx context.Context, userID string, p
 
 // GetAvailableEmployees retrieves available employees from database
 func (r *EmployeeProfileRepository) GetAvailableEmployees(ctx context.Context) ([]*entities.EmployeeProfile, error) {
-	var profiles []*entities.EmployeeProfile
-	result := r.db.WithContext(ctx).Where("availability_flag = ?", true).Find(&profiles)
+    var profiles []*entities.EmployeeProfile
+    result := r.db.WithContext(ctx).Preload("User").Where("availability_flag = ?", true).Find(&profiles)
 	if result.Error != nil {
 		return nil, result.Error
 	}
@@ -205,102 +205,102 @@ func (r *EmployeeProfileRepository) GetSimilarAvailableProfilesWithUser(ctx cont
 
 	query := `
 		WITH proj AS (
-			SELECT embedding AS e
-			FROM projects
-			WHERE id = ? AND embedding IS NOT NULL
-		)
-		SELECT
-			ep.user_id,
-			ep.geo,
-			ep.date_of_joining,
-			ep.end_date,
-			ep.notice_date,
-			ep.type,
-			ep.skills,
-			ep.years_of_experience,
-			ep.industry,
-			ep.availability_flag,
-			ep.embedding,
-			ep.created_at,
-			ep.updated_at,
-			u.first_name,
-			u.last_name,
-			u.email,
-			u.role,
-			1 - (ep.embedding <=> proj.e) AS similarity,
-			CASE
-				WHEN NOT EXISTS (
-					SELECT 1
-					FROM project_allocations pa
-					WHERE pa.employee_id = ep.user_id
-					AND pa.deleted_at IS NULL
-					AND pa.end_date IS NULL
-				)
-				THEN 'onBench'
-				WHEN (
-					ep.availability_flag = false
-					AND EXISTS (
-						SELECT 1
-						FROM project_allocations pa
-						CROSS JOIN proj
-						WHERE pa.employee_id = ep.user_id
-						AND pa.deleted_at IS NULL
-						AND pa.end_date IS NOT NULL
-						AND pa.end_date <= proj.start_date + INTERVAL 7 DAY
-					)
-				)
-				THEN 'onBench'
-				WHEN (
-					ep.availability_flag = true
-					AND NOT EXISTS (
-						SELECT 1
-						FROM project_allocations pa
-						WHERE pa.employee_id = ep.user_id
-						AND pa.project_id = ?
-						AND pa.deleted_at IS NULL
-					)
-				)
-				THEN 'onWork'
-			END AS status
-		FROM employee_profiles ep
-		INNER JOIN users u ON ep.user_id = u.id
-		CROSS JOIN proj
-		WHERE ep.embedding IS NOT NULL
-			AND ep.deleted_at IS NULL
-			AND u.deleted_at IS NULL
-			AND (
-				NOT EXISTS (
-					SELECT 1
-					FROM project_allocations pa
-					WHERE pa.employee_id = ep.user_id
-						AND pa.deleted_at IS NULL
-						AND pa.end_date IS NULL
-				)
-				OR (
-					ep.availability_flag = true
-					AND NOT EXISTS (
-						SELECT 1
-						FROM project_allocations pa
-						WHERE pa.employee_id = ep.user_id
-							AND pa.project_id = ?
-							AND pa.deleted_at IS NULL
-					)
-				)
-				 OR (
-					ep.availability_flag = false
-					AND EXISTS (
-						SELECT 1
-						FROM project_allocations pa
-						CROSS JOIN proj
-						WHERE pa.employee_id = ep.user_id
-						AND pa.deleted_at IS NULL
-						AND pa.end_date IS NOT NULL
-						AND pa.end_date <= (proj_start_date + INTERVAL 7 DAY)
-					)
-				)
-			)
-		ORDER BY ep.embedding <=> proj.e
-		LIMIT ?`
+    SELECT embedding AS e, start_date
+    FROM projects
+    WHERE id = ? AND embedding IS NOT NULL
+)
+SELECT
+    ep.user_id,
+    ep.geo,
+    ep.date_of_joining,
+    ep.end_date,
+    ep.notice_date,
+    ep.type,
+    ep.skills,
+    ep.years_of_experience,
+    ep.industry,
+    ep.availability_flag,
+    ep.embedding,
+    ep.created_at,
+    ep.updated_at,
+    u.first_name,
+    u.last_name,
+    u.email,
+    u.role,
+    1 - (ep.embedding <=> proj.e) AS similarity,
+    CASE
+        WHEN NOT EXISTS (
+            SELECT 1
+            FROM project_allocations pa
+            WHERE pa.employee_id = ep.user_id
+              AND pa.deleted_at IS NULL
+              AND pa.end_date IS NULL
+        )
+            THEN 'onBench'
+        WHEN (
+            ep.availability_flag = false
+                AND EXISTS (
+                SELECT 1
+                FROM project_allocations pa
+                         CROSS JOIN proj
+                WHERE pa.employee_id = ep.user_id
+                  AND pa.deleted_at IS NULL
+                  AND pa.end_date IS NOT NULL
+                  AND pa.end_date <= proj.start_date + INTERVAL '7' DAY
+            )
+            )
+            THEN 'onBench'
+        WHEN (
+            ep.availability_flag = true
+                AND NOT EXISTS (
+                SELECT 1
+                FROM project_allocations pa
+                WHERE pa.employee_id = ep.user_id
+                  AND pa.project_id = ?
+                  AND pa.deleted_at IS NULL
+            )
+            )
+            THEN 'onWork'
+              END AS status
+      FROM employee_profiles ep
+               INNER JOIN users u ON ep.user_id = u.id
+               CROSS JOIN proj
+      WHERE ep.embedding IS NOT NULL
+        AND ep.deleted_at IS NULL
+        AND u.deleted_at IS NULL
+        AND (
+          NOT EXISTS (
+              SELECT 1
+              FROM project_allocations pa
+              WHERE pa.employee_id = ep.user_id
+                AND pa.deleted_at IS NULL
+                AND pa.end_date IS NULL
+          )
+              OR (
+              ep.availability_flag = true
+                  AND NOT EXISTS (
+                  SELECT 1
+                  FROM project_allocations pa
+                  WHERE pa.employee_id = ep.user_id
+                    AND pa.project_id = ?
+                    AND pa.deleted_at IS NULL
+              )
+              )
+              OR (
+              ep.availability_flag = false
+                  AND EXISTS (
+                  SELECT 1
+                  FROM project_allocations pa
+                           CROSS JOIN proj
+                  WHERE pa.employee_id = ep.user_id
+                    AND pa.deleted_at IS NULL
+                    AND pa.end_date IS NOT NULL
+                    AND pa.end_date <= (now() + INTERVAL '7' DAY)
+              )
+              )
+          )
+      ORDER BY ep.embedding <=> proj.e
+      LIMIT ?`
 
 	type QueryResultWithUser struct {
 		entities.EmployeeProfile
@@ -314,7 +314,7 @@ func (r *EmployeeProfileRepository) GetSimilarAvailableProfilesWithUser(ctx cont
 	}
 
 	var results []QueryResultWithUser
-	err := r.db.WithContext(ctx).Raw(query, projectID, projectID, limit).Scan(&results).Error
+	err := r.db.WithContext(ctx).Raw(query, projectID, projectID, projectID, limit).Scan(&results).Error
 	if err != nil {
 		return nil, fmt.Errorf("failed to execute similarity search with user data: %w", err)
 	}

@@ -14,4 +14,5 @@ type AuthResponse struct {
     Token string
     Name  string
     Email string
+    UserID uint
 }

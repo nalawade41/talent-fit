@@ -68,6 +68,6 @@ func (s *GoogleAuthService) AuthenticateWithGoogle(ctx context.Context, credenti
     if err != nil {
         return nil, errors.New("failed to generate jwt")
     }
-    return &domain.AuthResponse{Token: token, Name: claims.Name, Email: claims.Email}, nil
+    return &domain.AuthResponse{Token: token, Name: claims.Name, Email: claims.Email, UserID: user.ID}, nil
 }
 

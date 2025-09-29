@@ -37,6 +37,7 @@ func (h *GoogleAuthHandler) Login(c *gin.Context) {
         "token": resp.Token,
         "name":  resp.Name,
         "email": resp.Email,
+        "userId": resp.UserID,
     })
 }
 

@@ -1,6 +1,6 @@
-import { apiService } from './api/client';
-import type { BackendProjectAllocation, ApiResponse } from '../types/api';
 import type { ProjectAllocation } from '../data/allocations';
+import type { ApiResponse, BackendProjectAllocation } from '../types/api';
+import { apiService } from './api/client';
 
 // Convert backend project allocation to frontend type
 const convertToProjectAllocation = (backendAllocation: BackendProjectAllocation): ProjectAllocation => {
@@ -54,6 +54,22 @@ export class ProjectAllocationService {
       console.error('Error fetching employee allocations:', error);
       throw error;
     }
+  }
+
+  static async createAllocationsForProject(projectId: number, allocations: Array<{ employee_id: number; start_date: string; end_date?: string; allocation_type?: 'Full-time' | 'Part-time' | 'Extra'; }>): Promise<ProjectAllocation[]> {
+    const payload = allocations.map(a => ({
+      project_id: projectId,
+      employee_id: a.employee_id,
+      start_date: a.start_date,
+      end_date: a.end_date ?? null,
+      allocation_type: a.allocation_type ?? 'Full-time',
+    }));
+    const response = await apiService.post<BackendProjectAllocation[] | any>(
+      `/api/v1/project/${projectId}/allocation`,
+      payload
+    ) as any;
+    const list = Array.isArray(response?.data) ? response.data : response;
+    return (list || []).map(convertToProjectAllocation);
   }
 }
 

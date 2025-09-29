@@ -3,7 +3,7 @@ import toast from 'react-hot-toast';
 
 // Create axios instance with base configuration
 const apiClient: AxiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_API_URL_DEV || 'http://localhost:8080',
+  baseURL: import.meta.env.VITE_APP_ENV === 'prod' ? import.meta.env.VITE_API_URL : import.meta.env.VITE_API_URL_DEV,
   timeout: 300000, // 5 minutes
   headers: {
     'Content-Type': 'application/json',
@@ -18,7 +18,7 @@ apiClient.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`;
     }
     // Bypass ngrok browser warning interstitial for free tunnels
-    config.headers['ngrok-skip-browser-warning'] = 'true';
+    // config.headers['ngrok-skip-browser-warning'] = 'true';
     return config;
   },
   (error) => {
@@ -32,9 +32,7 @@ apiClient.interceptors.response.use(
   (error) => {
     if (error.response) {
       const { status, data } = error.response;
-      console.log('API error response:', { status, data });
       if (status === 500 && data?.error?.includes('record not found')) {
-        console.log('Detected "record not found" error from server');
         // Special case for "record not found" errors
         return Promise.reject({ status, message: 'Record not found' });
       }
@@ -58,7 +56,7 @@ apiClient.interceptors.response.use(
     } else {
       toast.error('Network error. Please check your connection.');
     }
-    
+
     return Promise.reject(error);
   }
 );

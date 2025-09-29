@@ -1,12 +1,15 @@
-import React, { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
-import { Button } from '../ui/button';
 import { ArrowLeft } from 'lucide-react';
-import { Project } from '../../types';
-import { useProjectData } from '../../hooks/useProjectData';
+import { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useEmployeeFilters } from '../../hooks/useEmployeeFilters';
-import { ProjectHeader, AllocationDialog, OverviewCards, AllocationsTab, RequirementsTab, TimelineTab } from '../ui/project';
+import { useProjectData } from '../../hooks/useProjectData';
+import EmployeeProfileService from '../../services/employeeProfileService';
+import MatchService from '../../services/matchService';
+import ProjectAllocationService from '../../services/projectAllocationService';
+import projectService from '../../services/projectService';
+import { Button } from '../ui/button';
+import { AllocationDialog, AllocationsTab, OverviewCards, ProjectHeader, RequirementsTab, TimelineTab } from '../ui/project';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 
 export function ProjectDetailsPage() {
   const { id } = useParams<{ id: string }>();
@@ -20,14 +23,34 @@ export function ProjectDetailsPage() {
   const [availabilityFilter, setAvailabilityFilter] = useState('all');
   const [showAllocationDialog, setShowAllocationDialog] = useState(false);
   const [allocationMode, setAllocationMode] = useState<'manual' | 'ai'>('manual');
+  const [manualEmployees, setManualEmployees] = useState<any[]>([]);
+  const [aiRecs, setAiRecs] = useState<any[]>([]);
+  const [loadingAllocData, setLoadingAllocData] = useState(false);
 
   const { project, projectAllocations, totalAllocated, totalRoles, aiSuggestions, availableEmployees: allEmployees, getAIMatchScore, refreshProject } = useProjectData(projectId);
+
+  // Fetch project details from API and load into view
+  useEffect(() => {
+    let isMounted = true;
+    (async () => {
+      try {
+        const p = await projectService.getProjectById(projectId);
+        if (!isMounted) return;
+        // Use existing mechanism to update selected project
+        refreshProject(p);
+      } catch (e) {
+        // Keep existing fallback behavior (static/local) if API fails
+        console.warn('Failed to fetch project from API; using fallback. Error:', e);
+      }
+    })();
+    return () => { isMounted = false; };
+  }, [projectId]);
 
   // Expose full employees list for child components (was previously imported directly)
   const employeesData = allEmployees;
 
   const availableEmployees = useEmployeeFilters({
-    employees: allEmployees as any,
+    employees: (manualEmployees.length ? manualEmployees : allEmployees) as any,
     allocations: projectAllocations as any,
     searchQuery,
     skillsFilter,
@@ -36,11 +59,44 @@ export function ProjectDetailsPage() {
   });
 
   const handleAllocateEmployees = (dates?: Record<number, { start: string; end?: string; openEnded: boolean }>) => {
-    console.log('Allocating employees with dates:', selectedEmployees.map(id => ({ id, ...dates?.[id] })), 'to project:', projectId);
-    setSelectedEmployees([]);
-    setShowAllocationDialog(false);
-    alert(`Successfully allocated ${selectedEmployees.length} employees to ${project?.name}`);
+    (async () => {
+      const payload = selectedEmployees.map((id) => ({
+        employee_id: id,
+        start_date: dates?.[id]?.start || new Date().toISOString().slice(0,10),
+        end_date: dates?.[id]?.openEnded ? undefined : dates?.[id]?.end,
+        allocation_type: 'Full-time' as const,
+      }));
+      try {
+        await ProjectAllocationService.createAllocationsForProject(projectId, payload);
+        setSelectedEmployees([]);
+        setShowAllocationDialog(false);
+        alert(`Successfully allocated ${payload.length} employees to ${project?.name}`);
+      } catch (e) {
+        console.error('Allocation failed', e);
+        alert('Failed to allocate employees');
+      }
+    })();
   };
+  // Load manual list (all employees) and AI suggestions when dialog is opened
+  useEffect(() => {
+    if (!showAllocationDialog || !projectId) return;
+    let isMounted = true;
+    setLoadingAllocData(true);
+    Promise.all([
+      EmployeeProfileService.getAllEmployees(),
+      MatchService.getProjectSuggestions(projectId)
+    ])
+      .then(([employees, suggestions]) => {
+        if (!isMounted) return;
+        setManualEmployees(employees as any);
+        setAiRecs(suggestions as any);
+      })
+      .catch((e) => {
+        console.warn('Failed to load allocation dialog data', e);
+      })
+      .finally(() => isMounted && setLoadingAllocData(false));
+    return () => { isMounted = false; };
+  }, [showAllocationDialog, projectId]);
 
   const getUtilizationColor = (utilization: number) => {
     if (utilization >= 90) return 'text-red-600 bg-red-50';

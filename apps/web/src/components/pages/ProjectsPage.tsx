@@ -1,16 +1,17 @@
-import { useState, useEffect, useMemo } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Button } from '../ui/button';
-import { Input } from '../ui/input';
-import { Badge } from '../ui/badge';
-import { Card } from '../ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
-import { Plus, Search, Filter, Calendar, MapPin, Users, AlertTriangle, X } from 'lucide-react';
-import { ProjectCreationForm } from '../Projects/ProjectCreationForm';
-import { Project } from '../../types';
-import { projectsData } from '../../data/projects';
-import { PriorityOverview, ProjectCard, EmptyProjectsState } from '../ui/project';
+import { AlertTriangle, Filter, Plus, Search, X } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
 import toast from 'react-hot-toast';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { projectsData } from '../../data/projects';
+import projectService from '../../services/projectService';
+import { Project } from '../../types';
+import { ProjectCreationForm } from '../Projects/ProjectCreationForm';
+import { Badge } from '../ui/badge';
+import { Button } from '../ui/button';
+import { Card } from '../ui/card';
+import { Input } from '../ui/input';
+import { EmptyProjectsState, PriorityOverview, ProjectCard } from '../ui/project';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 
 export function ProjectsPage() {
   const navigate = useNavigate();
@@ -179,54 +180,57 @@ export function ProjectsPage() {
   const hasActiveFilters = searchTerm || statusFilter || skillFilter || priorityFilter || 
                           geoFilter || industryFilter || resourceFilter || dateFilter;
 
-  // Load projects from both static data and localStorage
+  // Load projects from API; fallback to static + localStorage if API fails
   useEffect(() => {
-    const savedProjects = localStorage.getItem('projects');
-    let combinedProjects = [...projectsData]; // Start with static projects
-    
-    if (savedProjects) {
+    let isMounted = true;
+    (async () => {
       try {
-        const parsedProjects = JSON.parse(savedProjects);
-        // Add saved projects, avoiding duplicates by ID
-        parsedProjects.forEach((savedProject: Project) => {
-          const exists = combinedProjects.find(p => p.id === savedProject.id);
-          if (!exists) {
-            combinedProjects.push(savedProject);
-          } else {
-            // Replace existing project with updated version if it's been modified
-            const index = combinedProjects.findIndex(p => p.id === savedProject.id);
-            if (index !== -1 && savedProject.updated_at && 
-                (!combinedProjects[index].updated_at || 
-                 new Date(savedProject.updated_at) > new Date(combinedProjects[index].updated_at))) {
-              combinedProjects[index] = savedProject;
-            }
+        const apiProjects = await projectService.getAllProjects();
+        if (!isMounted) return;
+        setProjects(sortProjects(apiProjects));
+      } catch (err) {
+        console.warn('Falling back to static/local projects due to API error:', err);
+        const savedProjects = localStorage.getItem('projects');
+        let combinedProjects = [...projectsData];
+        if (savedProjects) {
+          try {
+            const parsedProjects = JSON.parse(savedProjects);
+            parsedProjects.forEach((savedProject: Project) => {
+              const exists = combinedProjects.find(p => p.id === savedProject.id);
+              if (!exists) {
+                combinedProjects.push(savedProject);
+              } else {
+                const index = combinedProjects.findIndex(p => p.id === savedProject.id);
+                if (index !== -1 && savedProject.updated_at && 
+                    (!combinedProjects[index].updated_at || 
+                     new Date(savedProject.updated_at) > new Date(combinedProjects[index].updated_at))) {
+                  combinedProjects[index] = savedProject;
+                }
+              }
+            });
+          } catch (error) {
+            console.error('Error loading projects:', error);
           }
-        });
-      } catch (error) {
-        console.error('Error loading projects:', error);
-        // If parsing fails, just use static data
+        }
+        setProjects(sortProjects(combinedProjects));
       }
-    }
-    
-    // Sort projects by priority: high -> medium -> low -> undefined
-    combinedProjects.sort((a, b) => {
-      const priorityOrder = { 'high': 3, 'medium': 2, 'low': 1 };
+    })();
+    return () => { isMounted = false; };
+  }, []);
+
+  const sortProjects = (items: Project[]) => {
+    const arr = [...items];
+    arr.sort((a, b) => {
+      const priorityOrder = { 'high': 3, 'medium': 2, 'low': 1 } as const;
       const aPriority = priorityOrder[a.priority as keyof typeof priorityOrder] || 0;
       const bPriority = priorityOrder[b.priority as keyof typeof priorityOrder] || 0;
-      
-      // Sort by priority first, then by creation date (newest first)
-      if (aPriority !== bPriority) {
-        return bPriority - aPriority;
-      }
-      
-      // Secondary sort by date (newest first)
+      if (aPriority !== bPriority) return bPriority - aPriority;
       const aDate = new Date(a.created_at || a.start_date).getTime();
       const bDate = new Date(b.created_at || b.start_date).getTime();
       return bDate - aDate;
     });
-    
-    setProjects(combinedProjects);
-  }, []);
+    return arr;
+  };
 
   const handleProjectCreated = (newProject: Project) => {
     let updatedProjects = [...projects, newProject];
