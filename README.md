@@ -1,6 +1,13 @@
 # TalentFit
+## Presentation (Client Pitch Deck)
+
+View the PPT deck here:
+
+- Talent-Fit Platform Enhancements for Employee Allocation: https://app.presentations.ai/view/2EKWKShEou
+
 
 ## What this app does
+
 
 TalentFit is an internal talent-matching platform that helps managers staff projects faster and helps employees showcase their skills.
 
@@ -10,6 +17,7 @@ TalentFit is an internal talent-matching platform that helps managers staff proj
 - **Notifications**: In-app notifications with read/unread tracking.
 
 The backend is a Go service (Gin, GORM, Postgres, vector embeddings). The frontend is a React + Vite app. The monorepo is managed with Nx.
+
 
 ## Local setup
 

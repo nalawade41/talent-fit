@@ -1,9 +1,11 @@
-import React from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { Button } from '../ui/button';
 import { ArrowLeft } from 'lucide-react';
-import { ProjectEditForm } from '../Projects/ProjectEditForm';
+import { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useProjectData } from '../../hooks/useProjectData';
+import projectService from '../../services/projectService';
+import { ProjectEditForm } from '../Projects/ProjectEditForm';
+import { ProjectsLoadingSkeleton } from '../Projects/ProjectsLoadingSkeleton';
+import { Button } from '../ui/button';
 
 export function ProjectEditPage() {
   const { id } = useParams<{ id: string }>();
@@ -11,6 +13,25 @@ export function ProjectEditPage() {
   const projectId = parseInt(id || '0');
 
   const { project, refreshProject } = useProjectData(projectId);
+  const [loadingProject, setLoadingProject] = useState<boolean>(false);
+
+  // Fetch project details from API (so edit works on server data too)
+  useEffect(() => {
+    let isMounted = true;
+    (async () => {
+      try {
+        setLoadingProject(true);
+        const p = await projectService.getProjectById(projectId);
+        if (!isMounted) return;
+        refreshProject(p);
+      } catch (e) {
+        // Fallback to existing state; keep silent
+      } finally {
+        if (isMounted) setLoadingProject(false);
+      }
+    })();
+    return () => { isMounted = false; };
+  }, [projectId]);
 
   const handleProjectUpdated = (updatedProject: any) => {
     console.log('Project updated:', updatedProject);
@@ -23,7 +44,7 @@ export function ProjectEditPage() {
     navigate(`/projects/${projectId}`);
   };
 
-  if (!project) {
+  if (!project || loadingProject) {
     return (
       <div className="p-6">
         <div className="flex items-center gap-4 mb-6">
@@ -32,9 +53,7 @@ export function ProjectEditPage() {
             Back to Projects
           </Button>
         </div>
-        <div className="text-center py-12">
-          <p className="text-gray-600">Project not found.</p>
-        </div>
+        <ProjectsLoadingSkeleton />
       </div>
     );
   }
