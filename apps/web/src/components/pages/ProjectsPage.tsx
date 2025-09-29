@@ -1,14 +1,15 @@
-import { useState } from 'react';
+import { useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { toast } from 'react-hot-toast';
 import { useProjects, useProjectFilters } from '../../hooks';
-import { Project } from '../../types';
-import { ProjectCreationForm } from '../Projects/ProjectCreationForm';
 import { ProjectFilters, ProjectsHeader, ProjectsList, ProjectsLoadingSkeleton } from '../Projects';
 
 export function ProjectsPage() {
-  const [showCreateForm, setShowCreateForm] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
   
   // Use custom hooks
-  const { projects, loading, addProject } = useProjects();
+  const { projects, loading } = useProjects();
   const {
     filterState,
     filteredProjects,
@@ -19,9 +20,17 @@ export function ProjectsPage() {
     clearFilters
   } = useProjectFilters(projects);
 
-  const handleProjectCreated = (newProject: Project) => {
-    addProject(newProject);
-    setShowCreateForm(false);
+  // Handle success message from project creation
+  useEffect(() => {
+    if (location.state?.message) {
+      toast.success(location.state.message);
+      // Clear the state to prevent showing the message again on refresh
+      navigate(location.pathname, { replace: true });
+    }
+  }, [location.state, location.pathname, navigate]);
+
+  const handleCreateProject = () => {
+    navigate('/projects/create');
   };
 
   return (
@@ -29,7 +38,7 @@ export function ProjectsPage() {
       {/* Header */}
       <ProjectsHeader 
         loading={loading} 
-        onCreateProject={() => setShowCreateForm(true)} 
+        onCreateProject={handleCreateProject} 
       />
 
       {/* Filter Section */}
@@ -50,19 +59,12 @@ export function ProjectsPage() {
           <ProjectsList
             projects={filteredProjects}
             hasActiveFilters={hasActiveFilters}
-            onCreateProject={() => setShowCreateForm(true)}
+            onCreateProject={handleCreateProject}
             onClearFilters={clearFilters}
           />
         )}
       </div>
 
-      {/* Project Creation Form Modal */}
-      {showCreateForm && (
-        <ProjectCreationForm
-          onProjectCreated={handleProjectCreated}
-          onCancel={() => setShowCreateForm(false)}
-        />
-      )}
     </div>
   );
 }

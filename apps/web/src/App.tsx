@@ -18,6 +18,7 @@ import { AppErrorBoundary } from './components/system/AppErrorBoundary';
 
 // Lazy load heavy pages for better performance
 const ProjectsPage = lazy(() => import('./components/pages/ProjectsPage'));
+const CreateProjectPage = lazy(() => import('./components/pages/CreateProjectPage'));
 const ProjectDetailsPage = lazy(() => import('./components/pages/ProjectDetailsPage'));  
 const ProjectEditPage = lazy(() => import('./components/pages/ProjectEditPage'));
 const AllEmployeesPage = lazy(() => import('./components/pages/AllEmployeesPage'));
@@ -99,6 +100,16 @@ function AuthShell() {
             <ProtectedRoute requiredPermission="canCreateProjects" fallbackPath="/">
               <Suspense fallback={<PageLoader />}>
                 <ProjectsPage />
+              </Suspense>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="projects/create"
+          element={
+            <ProtectedRoute requiredPermission="canCreateProjects" fallbackPath="/">
+              <Suspense fallback={<PageLoader />}>
+                <CreateProjectPage />
               </Suspense>
             </ProtectedRoute>
           }
