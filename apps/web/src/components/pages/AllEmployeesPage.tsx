@@ -1,13 +1,14 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
+import { Card } from '../ui/card';
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { EmployeeCard } from '../ui/EmployeeCard';
 import { AllocationDialog } from '../ui/AllocationDialog';
-import { employeesData, getAvailableEmployees, getRollingOffEmployees, getAllocatedEmployees, getBenchEmployees } from '../../data/employees';
+import { Employee } from '../../data/employees';
+import ManagerService from '../../services/managerService';
 import { 
   Users, 
   Search, 
@@ -17,7 +18,8 @@ import {
   AlertTriangle,
   TrendingUp,
   User,
-  MoreHorizontal
+  MoreHorizontal,
+  RefreshCw
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -30,6 +32,12 @@ export function AllEmployeesPage() {
   const [availabilityFilter, setAvailabilityFilter] = useState('');
   const [industryFilter, setIndustryFilter] = useState('');
   const [viewMode, setViewMode] = useState<'cards' | 'compact'>('cards');
+  
+  // API data state
+  const [employees, setEmployees] = useState<Employee[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  
   const [allocationDialog, setAllocationDialog] = useState<{
     open: boolean;
     employee: any;
@@ -37,6 +45,27 @@ export function AllEmployeesPage() {
     open: false,
     employee: null
   });
+
+  // Fetch employees data from API
+  const fetchEmployees = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const employeesData = await ManagerService.getAllEmployees();
+      setEmployees(employeesData);
+    } catch (err) {
+      console.error('Error fetching employees:', err);
+      setError('Failed to fetch employees. Please try again.');
+      toast.error('Failed to load employees');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Initialize data on component mount
+  useEffect(() => {
+    fetchEmployees();
+  }, []);
 
   // Initialize filters from URL parameters
   useEffect(() => {
@@ -58,31 +87,31 @@ export function AllEmployeesPage() {
   // Get all unique values for filters
   const allSkills = useMemo(() => {
     const skills = new Set<string>();
-    employeesData.forEach(emp => {
-      emp.primary_skills.forEach(skill => skills.add(skill));
-      emp.secondary_skills.forEach(skill => skills.add(skill));
+    employees.forEach(emp => {
+      emp.primary_skills?.forEach(skill => skills.add(skill));
+      emp.secondary_skills?.forEach(skill => skills.add(skill));
     });
     return Array.from(skills).sort();
-  }, []);
+  }, [employees]);
 
   const allGeos = useMemo(() => {
-    const geos = new Set(employeesData.map(emp => emp.geo));
+    const geos = new Set(employees.map(emp => emp.geo));
     return Array.from(geos).sort();
-  }, []);
+  }, [employees]);
 
   const allIndustries = useMemo(() => {
     const industries = new Set<string>();
-    employeesData.forEach(emp => {
-      emp.industry_experience.forEach(industry => industries.add(industry));
+    employees.forEach(emp => {
+      emp.industry_experience?.forEach(industry => industries.add(industry));
     });
     return Array.from(industries).sort();
-  }, []);
+  }, [employees]);
 
   const allStatuses = ['available', 'allocated', 'rolling_off', 'bench'];
 
   // Filter employees based on search and filters
   const filteredEmployees = useMemo(() => {
-    return employeesData.filter(employee => {
+    return employees.filter(employee => {
       // Search filter
       const searchLower = searchTerm.toLowerCase();
       const matchesSearch = !searchTerm || 
@@ -92,8 +121,8 @@ export function AllEmployeesPage() {
 
       // Skill filter
       const matchesSkill = !skillFilter || skillFilter === 'all_skills' ||
-        employee.primary_skills.some(skill => skill.toLowerCase().includes(skillFilter.toLowerCase())) ||
-        employee.secondary_skills.some(skill => skill.toLowerCase().includes(skillFilter.toLowerCase()));
+        employee.primary_skills?.some(skill => skill.toLowerCase().includes(skillFilter.toLowerCase())) ||
+        employee.secondary_skills?.some(skill => skill.toLowerCase().includes(skillFilter.toLowerCase()));
 
       // Status filter
       const matchesStatus = !statusFilter || statusFilter === 'all_status' || employee.status === statusFilter;
@@ -103,7 +132,7 @@ export function AllEmployeesPage() {
 
       // Industry filter
       const matchesIndustry = !industryFilter || industryFilter === 'all_industries' ||
-        employee.industry_experience.some(industry => industry.toLowerCase().includes(industryFilter.toLowerCase()));
+        employee.industry_experience?.some(industry => industry.toLowerCase().includes(industryFilter.toLowerCase()));
 
       // Availability filter
       const matchesAvailability = !availabilityFilter || availabilityFilter === 'all_availability' ||
@@ -112,27 +141,29 @@ export function AllEmployeesPage() {
 
       return matchesSearch && matchesSkill && matchesStatus && matchesGeo && matchesIndustry && matchesAvailability;
     });
-  }, [searchTerm, skillFilter, statusFilter, geoFilter, industryFilter, availabilityFilter]);
+  }, [employees, searchTerm, skillFilter, statusFilter, geoFilter, industryFilter, availabilityFilter]);
 
   // Get summary statistics
   const stats = useMemo(() => {
-    const available = getAvailableEmployees();
-    const allocated = getAllocatedEmployees();
-    const rollingOff = getRollingOffEmployees();
-    const bench = getBenchEmployees();
+    const available = employees.filter(emp => emp.status === 'available');
+    const allocated = employees.filter(emp => emp.status === 'allocated');
+    const rollingOff = employees.filter(emp => emp.status === 'rolling_off');
+    const bench = employees.filter(emp => emp.status === 'bench');
 
     return {
-      total: employeesData.length,
+      total: employees.length,
       available: available.length,
       allocated: allocated.length,
       rollingOff: rollingOff.length,
       bench: bench.length,
-      averageUtilization: Math.round(employeesData.reduce((sum, emp) => sum + emp.utilization_pct, 0) / employeesData.length)
+      averageUtilization: employees.length > 0 
+        ? Math.round(employees.reduce((sum, emp) => sum + (emp.utilization_pct || 0), 0) / employees.length)
+        : 0
     };
-  }, []);
+  }, [employees]);
 
   const handleAllocate = (employeeId: number) => {
-    const employee = employeesData.find(emp => emp.user_id === employeeId);
+    const employee = employees.find(emp => emp.user_id === employeeId);
     if (employee) {
       setAllocationDialog({
         open: true,
@@ -143,7 +174,7 @@ export function AllEmployeesPage() {
     }
   };
 
-  const handleAllocationSuccess = (allocationResult: any) => {
+  const handleAllocationSuccess = (_allocationResult: any) => {
     // In a real app, this would update the employee status and refresh data
     const employeeName = allocationDialog.employee 
       ? `${allocationDialog.employee.user.first_name} ${allocationDialog.employee.user.last_name}`
@@ -154,13 +185,19 @@ export function AllEmployeesPage() {
       { duration: 4000 }
     );
     
-    // Simulate data refresh with a small delay
-    setTimeout(() => {
-      toast.success('Employee data refreshed', { duration: 2000 });
-    }, 1000);
-    
-    // You could trigger a data refresh here
-    // For now, we just show success messages as the mock API doesn't actually update data
+    // Refresh the employee data after successful allocation
+    fetchEmployees();
+  };
+
+  const handleRefresh = () => {
+    toast.promise(
+      fetchEmployees(),
+      {
+        loading: 'Refreshing employee data...',
+        success: 'Employee data refreshed successfully',
+        error: 'Failed to refresh employee data'
+      }
+    );
   };
 
   const handleExport = () => {
@@ -270,11 +307,30 @@ export function AllEmployeesPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">All Employees</h1>
-          <p className="text-gray-600 mt-1">Manage and view all employees in your organization</p>
+          <div className="flex items-center gap-3">
+            <h1 className="text-3xl font-bold text-gray-900">All Employees</h1>
+            {loading && (
+              <div className="w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+            )}
+          </div>
+          <p className="text-gray-600 mt-1">
+            {loading ? 'Loading employees...' : 'Manage and view all employees in your organization'}
+          </p>
+          {error && (
+            <p className="text-red-600 mt-1 text-sm">{error}</p>
+          )}
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={handleExport}>
+          <Button 
+            variant="outline" 
+            onClick={handleRefresh}
+            disabled={loading}
+            className="flex items-center gap-2"
+          >
+            <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+            Refresh
+          </Button>
+          <Button variant="outline" onClick={handleExport} disabled={loading}>
             <Download className="h-4 w-4 mr-2" />
             Export
           </Button>
@@ -464,45 +520,93 @@ export function AllEmployeesPage() {
 
       {/* Results */}
       <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold">
-            {filteredEmployees.length} Employee{filteredEmployees.length !== 1 ? 's' : ''} Found
-          </h3>
-          {(searchTerm || (skillFilter && skillFilter !== 'all_skills') || (statusFilter && statusFilter !== 'all_status') || (geoFilter && geoFilter !== 'all_locations') || (industryFilter && industryFilter !== 'all_industries') || (availabilityFilter && availabilityFilter !== 'all_availability')) && (
-            <div className="flex gap-2 flex-wrap">
-              {searchTerm && <Badge variant="secondary">Search: "{searchTerm}"</Badge>}
-              {skillFilter && skillFilter !== 'all_skills' && <Badge variant="secondary">Skill: {skillFilter}</Badge>}
-              {statusFilter && statusFilter !== 'all_status' && <Badge variant="secondary">Status: {statusFilter}</Badge>}
-              {geoFilter && geoFilter !== 'all_locations' && <Badge variant="secondary">Location: {geoFilter}</Badge>}
-              {industryFilter && industryFilter !== 'all_industries' && <Badge variant="secondary">Industry: {industryFilter}</Badge>}
-              {availabilityFilter && availabilityFilter !== 'all_availability' && <Badge variant="secondary">Extra Hours: {availabilityFilter.replace('_', ' ')}</Badge>}
+        {loading ? (
+          // Loading state
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="h-6 bg-gray-200 rounded animate-pulse w-48"></div>
+              <div className="h-5 bg-gray-200 rounded animate-pulse w-32"></div>
             </div>
-          )}
-        </div>
-
-        {filteredEmployees.length === 0 ? (
+            
+            {/* Loading skeleton for employee cards */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+              {[...Array(6)].map((_, index) => (
+                <div key={index} className="bg-white rounded-lg shadow-sm border p-6 animate-pulse">
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 bg-gray-200 rounded-full"></div>
+                      <div className="space-y-2 flex-1">
+                        <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                        <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="h-3 bg-gray-200 rounded w-full"></div>
+                      <div className="h-3 bg-gray-200 rounded w-2/3"></div>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <div className="h-6 bg-gray-200 rounded w-20"></div>
+                      <div className="h-8 bg-gray-200 rounded w-24"></div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : error ? (
+          // Error state
           <Card className="p-12 text-center">
-            <User className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No employees found</h3>
-            <p className="text-gray-500 mb-4">Try adjusting your search criteria or clearing the filters.</p>
-            <Button variant="outline" onClick={clearFilters}>
-              Clear Filters
+            <AlertTriangle className="h-16 w-16 text-red-300 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-gray-900 mb-2">Failed to load employees</h3>
+            <p className="text-gray-500 mb-4">{error}</p>
+            <Button onClick={handleRefresh}>
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Try Again
             </Button>
           </Card>
         ) : (
-          <div className={viewMode === 'cards' 
-            ? "grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6" 
-            : "grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4"
-          }>
-            {filteredEmployees.map(employee => (
-              <EmployeeCard
-                key={employee.user_id}
-                employee={employee}
-                onAllocate={handleAllocate}
-                compact={viewMode === 'compact'}
-              />
-            ))}
-          </div>
+          <>
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold">
+                {filteredEmployees.length} Employee{filteredEmployees.length !== 1 ? 's' : ''} Found
+              </h3>
+              {(searchTerm || (skillFilter && skillFilter !== 'all_skills') || (statusFilter && statusFilter !== 'all_status') || (geoFilter && geoFilter !== 'all_locations') || (industryFilter && industryFilter !== 'all_industries') || (availabilityFilter && availabilityFilter !== 'all_availability')) && (
+                <div className="flex gap-2 flex-wrap">
+                  {searchTerm && <Badge variant="secondary">Search: "{searchTerm}"</Badge>}
+                  {skillFilter && skillFilter !== 'all_skills' && <Badge variant="secondary">Skill: {skillFilter}</Badge>}
+                  {statusFilter && statusFilter !== 'all_status' && <Badge variant="secondary">Status: {statusFilter}</Badge>}
+                  {geoFilter && geoFilter !== 'all_locations' && <Badge variant="secondary">Location: {geoFilter}</Badge>}
+                  {industryFilter && industryFilter !== 'all_industries' && <Badge variant="secondary">Industry: {industryFilter}</Badge>}
+                  {availabilityFilter && availabilityFilter !== 'all_availability' && <Badge variant="secondary">Extra Hours: {availabilityFilter.replace('_', ' ')}</Badge>}
+                </div>
+              )}
+            </div>
+
+            {filteredEmployees.length === 0 ? (
+              <Card className="p-12 text-center">
+                <User className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 mb-2">No employees found</h3>
+                <p className="text-gray-500 mb-4">Try adjusting your search criteria or clearing the filters.</p>
+                <Button variant="outline" onClick={clearFilters}>
+                  Clear Filters
+                </Button>
+              </Card>
+            ) : (
+              <div className={viewMode === 'cards' 
+                ? "grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6" 
+                : "grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4"
+              }>
+                {filteredEmployees.map(employee => (
+                  <EmployeeCard
+                    key={employee.user_id}
+                    employee={employee}
+                    onAllocate={handleAllocate}
+                    compact={viewMode === 'compact'}
+                  />
+                ))}
+              </div>
+            )}
+          </>
         )}
       </div>
 
