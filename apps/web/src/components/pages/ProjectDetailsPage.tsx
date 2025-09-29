@@ -7,6 +7,7 @@ import EmployeeProfileService from '../../services/employeeProfileService';
 import MatchService from '../../services/matchService';
 import ProjectAllocationService from '../../services/projectAllocationService';
 import projectService from '../../services/projectService';
+import { ProjectsLoadingSkeleton } from '../Projects/ProjectsLoadingSkeleton';
 import { Button } from '../ui/button';
 import { AllocationDialog, AllocationsTab, OverviewCards, ProjectHeader, RequirementsTab, TimelineTab } from '../ui/project';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
@@ -23,18 +24,19 @@ export function ProjectDetailsPage() {
   const [availabilityFilter, setAvailabilityFilter] = useState('all');
   const [showAllocationDialog, setShowAllocationDialog] = useState(false);
   const [allocationMode, setAllocationMode] = useState<'manual' | 'ai'>('manual');
-  const [manualEmployees, setManualEmployees] = useState<any[]>([]);
-  const [ setAiRecs] = useState<any[]>([]);
+  const [, setAiRecs] = useState<any[]>([]);
   const [apiEmployees, setApiEmployees] = useState<any[]>([]);
-  const [ setLoadingAllocData] = useState(false);
+  const [, setLoadingAllocData] = useState(false);
 
-  const { project, projectAllocations, totalAllocated, totalRoles, aiSuggestions, availableEmployees: allEmployees, getAIMatchScore, refreshProject } = useProjectData(projectId);
+  const { project, projectAllocations, totalAllocated, totalRoles, aiSuggestions, availableEmployees: allEmployees, getAIMatchScore, refreshProject, loadingAllocations } = useProjectData(projectId);
+  const [loadingProject, setLoadingProject] = useState<boolean>(false);
 
   // Fetch project details from API and load into view
   useEffect(() => {
     let isMounted = true;
     (async () => {
       try {
+        setLoadingProject(true);
         const p = await projectService.getProjectById(projectId);
         if (!isMounted) return;
         // Use existing mechanism to update selected project
@@ -42,7 +44,7 @@ export function ProjectDetailsPage() {
       } catch (e) {
         // Keep existing fallback behavior (static/local) if API fails
         console.warn('Failed to fetch project from API; using fallback. Error:', e);
-      }
+      } finally { if (isMounted) setLoadingProject(false); }
     })();
     return () => { isMounted = false; };
   }, [projectId]);
@@ -51,7 +53,7 @@ export function ProjectDetailsPage() {
   const employeesData = (apiEmployees.length ? apiEmployees : allEmployees) as any;
 
   const availableEmployees = useEmployeeFilters({
-    employees: (manualEmployees.length ? manualEmployees : allEmployees) as any,
+    employees: allEmployees as any,
     allocations: projectAllocations as any,
     searchQuery,
     skillsFilter,
@@ -78,24 +80,22 @@ export function ProjectDetailsPage() {
       }
     })();
   };
-  // Load manual list (all employees) and AI suggestions when dialog is opened
+  // Load AI suggestions when dialog is opened (employees fetched inside dialog)
   useEffect(() => {
     if (!showAllocationDialog || !projectId) return;
     let isMounted = true;
     setLoadingAllocData(true);
     Promise.all([
-      EmployeeProfileService.getAllEmployees(),
       MatchService.getProjectSuggestions(projectId)
     ])
-      .then(([employees, suggestions]) => {
+      .then(([suggestions]) => {
         if (!isMounted) return;
-        setManualEmployees(employees as any);
         setAiRecs(suggestions as any);
       })
       .catch((e) => {
         console.warn('Failed to load allocation dialog data', e);
       })
-      .finally(() => isMounted);
+      .finally(() => { if (isMounted) setLoadingAllocData(false); });
     return () => { isMounted = false; };
   }, [showAllocationDialog, projectId]);
 
@@ -119,7 +119,7 @@ export function ProjectDetailsPage() {
     return 'text-green-600 bg-green-50';
   };
 
-  if (!project) {
+  if (!project || loadingProject || loadingAllocations) {
     return (
       <div className="p-6">
         <div className="flex items-center gap-4 mb-6">
@@ -128,9 +128,7 @@ export function ProjectDetailsPage() {
             Back to Projects
           </Button>
         </div>
-        <div className="text-center py-12">
-          <p className="text-gray-600">Project not found.</p>
-        </div>
+        <ProjectsLoadingSkeleton />
       </div>
     );
   }
@@ -206,6 +204,7 @@ export function ProjectDetailsPage() {
           onAllocationModeChange={setAllocationMode}
           project={project}
           availableEmployees={availableEmployees as any}
+          projectAllocations={projectAllocations as any}
           selectedEmployees={selectedEmployees}
           setSelectedEmployees={setSelectedEmployees}
           searchQuery={searchQuery}

@@ -1,4 +1,4 @@
-import { CheckCircle2, MapPin, Search, Star } from 'lucide-react';
+import { CheckCircle2, Loader2, MapPin, Search, Star } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { Employee } from '../../../data/employees';
 import EmployeeProfileService from '../../../services/employeeProfileService';
@@ -33,10 +33,11 @@ interface AllocationDialogProps {
   getAIMatchScore: (id: number) => number;
   getUtilizationColor: (n: number) => string;
   onAllocate: (dates: Record<number, { start: string; end?: string; openEnded: boolean }>) => void;
+  projectAllocations: { employee_id: number }[];
 }
 
 export const AllocationDialog: React.FC<AllocationDialogProps> = (props) => {
-  const { open, onOpenChange, allocationMode, onAllocationModeChange, project, availableEmployees, selectedEmployees, setSelectedEmployees, searchQuery, setSearchQuery, skillsFilter, setSkillsFilter, locationFilter, setLocationFilter, availabilityFilter, setAvailabilityFilter, aiSuggestions, getAIMatchScore, getUtilizationColor, onAllocate } = props;
+  const { open, onOpenChange, allocationMode, onAllocationModeChange, project, availableEmployees, selectedEmployees, setSelectedEmployees, searchQuery, setSearchQuery, skillsFilter, setSkillsFilter, locationFilter, setLocationFilter, availabilityFilter, setAvailabilityFilter, aiSuggestions, getAIMatchScore, getUtilizationColor, onAllocate, projectAllocations } = props;
 
   // New state: allocation period per selected employee
   const [allocationDates, setAllocationDates] = useState<Record<number, { start: string; end?: string; openEnded: boolean }>>({});
@@ -55,6 +56,9 @@ export const AllocationDialog: React.FC<AllocationDialogProps> = (props) => {
   }, [open]);
 
   const manualList = apiEmployees.length ? apiEmployees : availableEmployees;
+  const allocatedIds = new Set((projectAllocations || []).map(a => a.employee_id));
+  const filteredManualList = manualList.filter(e => !allocatedIds.has(e.user_id));
+  const isLoading = loadingEmployees || (allocationMode === 'ai' && aiSuggestions.length === 0 && open);
 
   const ensureDateEntry = (employeeId: number) => {
     setAllocationDates(prev => prev[employeeId] ? prev : ({
@@ -97,6 +101,12 @@ export const AllocationDialog: React.FC<AllocationDialogProps> = (props) => {
           <DialogTitle>Allocate Resources to {project.name}</DialogTitle>
           <DialogDescription>Select employees to assign to this project. You can choose manual selection or view AI suggestions.</DialogDescription>
         </DialogHeader>
+        {isLoading && (
+          <div className="flex items-center gap-2 p-3 mb-3 rounded-md bg-gray-50 border border-gray-200">
+            <Loader2 className="h-4 w-4 animate-spin text-indigo-600" />
+            <span className="text-sm text-gray-700">Loading {allocationMode === 'ai' ? 'AI suggestions' : 'employees'}...</span>
+          </div>
+        )}
         <Tabs value={allocationMode} onValueChange={(v) => onAllocationModeChange(v as 'manual' | 'ai')}>
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="manual">Manual Selection</TabsTrigger>
@@ -119,12 +129,30 @@ export const AllocationDialog: React.FC<AllocationDialogProps> = (props) => {
                 </SelectContent>
               </Select>
             </div>
-            <div className="grid grid-cols-1 gap-3 max-h-96 overflow-y-auto">
-              {manualList.map(employee => {
+            <div className={`grid grid-cols-1 gap-3 max-h-96 overflow-y-auto`}>
+              {isLoading ? (
+                [...Array(6)].map((_, idx) => (
+                  <div key={idx} className="space-y-2 rounded-md border border-gray-200 p-4">
+                    <div className="flex items-center gap-4">
+                      <div className="h-11 w-11 rounded-full bg-gray-200 animate-pulse" />
+                      <div className="flex-1 space-y-2">
+                        <div className="h-4 w-40 bg-gray-200 rounded animate-pulse" />
+                        <div className="h-3 w-24 bg-gray-200 rounded animate-pulse" />
+                        <div className="flex gap-2">
+                          <div className="h-4 w-12 bg-gray-200 rounded animate-pulse" />
+                          <div className="h-4 w-10 bg-gray-200 rounded animate-pulse" />
+                          <div className="h-4 w-16 bg-gray-200 rounded animate-pulse" />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                filteredManualList.map(employee => {
                 const isSelected = selectedEmployees.includes(employee.user_id);
                 const matchScore = getAIMatchScore(employee.user_id);
                 return (
-                  <div key={employee.user_id} className={`space-y-2 rounded-md border ${isSelected ? 'border-indigo-400 bg-indigo-50/60' : 'border-transparent'} hover:border-gray-200 transition-colors p-0`}>                    
+                  <div key={employee.user_id} className={`space-y-2 rounded-md border ${isSelected ? 'border-indigo-400 bg-indigo-50/60' : 'border-transparent'} hover:border-gray-200 transition-colors p-0`}>
                     <Card className={`p-4 cursor-pointer shadow-none border-0 m-0 ${isSelected ? 'bg-transparent' : ''}`} onClick={() => toggleSelect(employee.user_id)}>
                       <div className="flex items-center gap-4">
                         <Avatar><AvatarImage src={employee.avatar} /><AvatarFallback>{employee.user.first_name[0]}{employee.user.last_name[0]}</AvatarFallback></Avatar>
@@ -192,16 +220,21 @@ export const AllocationDialog: React.FC<AllocationDialogProps> = (props) => {
                     )}
                   </div>
                 );
-              })}
+              })
+              )}
             </div>
-            {manualList.length === 0 && (<div className="text-center py-8 text-gray-500"><p>{loadingEmployees ? 'Loading employees...' : 'No available employees match your criteria.'}</p></div>)}
+            {!isLoading && filteredManualList.length === 0 && (
+              <div className="text-center py-8 text-gray-500">
+                <p>{isLoading ? 'Loading employees...' : 'No available employees match your criteria.'}</p>
+              </div>
+            )}
           </TabsContent>
           <TabsContent value="ai" className="space-y-4">
             <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
               <h4 className="font-medium text-blue-900 mb-2">AI-Powered Recommendations</h4>
               <p className="text-sm text-blue-700">Based on project requirements, skills matching, and availability analysis.</p>
             </div>
-            <div className="space-y-3">
+            <div className={`space-y-3 ${isLoading ? 'opacity-60 pointer-events-none' : ''}`}>
               {aiSuggestions.slice(0, 5).map((suggestion, index) => {
                 const employee = manualList.find(emp => emp.user_id === (suggestion.employee?.user_id ?? suggestion.profile?.user_id));
                 if (!employee) return null;
