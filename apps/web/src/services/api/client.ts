@@ -18,7 +18,7 @@ apiClient.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`;
     }
     // Bypass ngrok browser warning interstitial for free tunnels
-    config.headers['ngrok-skip-browser-warning'] = 'true';
+    // config.headers['ngrok-skip-browser-warning'] = 'true';
     return config;
   },
   (error) => {
@@ -32,7 +32,7 @@ apiClient.interceptors.response.use(
   (error) => {
     if (error.response) {
       const { status, data } = error.response;
-      
+
       switch (status) {
         case 401:
           localStorage.removeItem('authToken');
@@ -53,7 +53,7 @@ apiClient.interceptors.response.use(
     } else {
       toast.error('Network error. Please check your connection.');
     }
-    
+
     return Promise.reject(error);
   }
 );
