@@ -235,98 +235,131 @@ export function ManagerDashboard() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Manager Dashboard</h1>
-          <p className="text-muted-foreground">Manage your team and projects efficiently</p>
+          <div className="flex items-center gap-3">
+            <h1 className="text-3xl font-bold">Manager Dashboard</h1>
+            {loading && (
+              <div className="w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+            )}
+          </div>
+          <p className="text-muted-foreground">
+            {loading ? 'Loading dashboard metrics...' : 'Manage your team and projects efficiently'}
+          </p>
         </div>
         <div className="flex gap-2">
-          <Button onClick={handleExport} variant="outline">
+          <Button onClick={handleExport} variant="outline" disabled={loading}>
             <Download className="w-4 h-4 mr-2" />
             Export Report
           </Button>
         </div>
       </div>
 
-      {/* Loading/Error States (non-intrusive) */}
-      {loading && <p className="text-sm text-muted-foreground">Loading latest metrics...</p>}
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {/* Loading/Error States */}
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <p className="text-red-800 font-medium">Failed to Load Dashboard Data</p>
+          <p className="text-sm text-red-600 mt-1">{error}</p>
+        </div>
+      )}
 
       {/* Key Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card
-          className="cursor-pointer hover:shadow-md transition-shadow duration-200 hover:bg-gray-50"
-          onClick={navigateToAvailableEmployees}
-          role="button"
-          tabIndex={0}
-          onKeyDown={(e) => e.key === 'Enter' && navigateToAvailableEmployees()}
-          aria-label="Navigate to available engineers"
-        >
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Available Engineers</p>
-                <p className="text-3xl font-bold text-green-600">{availableEngineers}</p>
-              </div>
-              <Users className="h-8 w-8 text-green-600" />
-            </div>
-          </CardContent>
-        </Card>
+        {loading ? (
+          // Loading skeleton for metrics cards
+          <>
+            {[...Array(4)].map((_, index) => (
+              <Card key={index}>
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-2">
+                      <div className="h-4 bg-gray-200 rounded animate-pulse w-24"></div>
+                      <div className="h-8 bg-gray-200 rounded animate-pulse w-16"></div>
+                    </div>
+                    <div className="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </>
+        ) : (
+          // Actual metrics cards
+          <>
+            <Card
+              className="cursor-pointer hover:shadow-md transition-shadow duration-200 hover:bg-gray-50"
+              onClick={navigateToAvailableEmployees}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => e.key === 'Enter' && navigateToAvailableEmployees()}
+              aria-label="Navigate to available engineers"
+            >
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Available Engineers</p>
+                    <p className="text-3xl font-bold text-green-600">{availableEngineers}</p>
+                  </div>
+                  <Users className="h-8 w-8 text-green-600" />
+                </div>
+              </CardContent>
+            </Card>
 
-        <Card
-          className="cursor-pointer hover:shadow-md transition-shadow duration-200 hover:bg-gray-50"
-          onClick={navigateToActiveProjects}
-          role="button"
-          tabIndex={0}
-          onKeyDown={(e) => e.key === 'Enter' && navigateToActiveProjects()}
-          aria-label="Navigate to active projects"
-        >
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Active Projects</p>
-                <p className="text-3xl font-bold text-blue-600">{activeProjects}</p>
-              </div>
-              <Briefcase className="h-8 w-8 text-blue-600" />
-            </div>
-          </CardContent>
-        </Card>
+            <Card
+              className="cursor-pointer hover:shadow-md transition-shadow duration-200 hover:bg-gray-50"
+              onClick={navigateToActiveProjects}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => e.key === 'Enter' && navigateToActiveProjects()}
+              aria-label="Navigate to active projects"
+            >
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Active Projects</p>
+                    <p className="text-3xl font-bold text-blue-600">{activeProjects}</p>
+                  </div>
+                  <Briefcase className="h-8 w-8 text-blue-600" />
+                </div>
+              </CardContent>
+            </Card>
 
-        <Card
-          className="cursor-pointer hover:shadow-md transition-shadow duration-200 hover:bg-gray-50"
-          onClick={navigateToRollingOffEmployees}
-          role="button"
-          tabIndex={0}
-          onKeyDown={(e) => e.key === 'Enter' && navigateToRollingOffEmployees()}
-          aria-label="Navigate to employees rolling off soon"
-        >
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Rolling Off Soon</p>
-                <p className="text-3xl font-bold text-red-600">{rollingOffEngineers}</p>
-              </div>
-              <AlertTriangle className="h-8 w-8 text-red-600" />
-            </div>
-          </CardContent>
-        </Card>
+            <Card
+              className="cursor-pointer hover:shadow-md transition-shadow duration-200 hover:bg-gray-50"
+              onClick={navigateToRollingOffEmployees}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => e.key === 'Enter' && navigateToRollingOffEmployees()}
+              aria-label="Navigate to employees rolling off soon"
+            >
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Rolling Off Soon</p>
+                    <p className="text-3xl font-bold text-red-600">{rollingOffEngineers}</p>
+                  </div>
+                  <AlertTriangle className="h-8 w-8 text-red-600" />
+                </div>
+              </CardContent>
+            </Card>
 
-        <Card
-          className="cursor-pointer hover:shadow-md transition-shadow duration-200 hover:bg-gray-50"
-          onClick={navigateToBenchEmployees}
-          role="button"
-          tabIndex={0}
-          onKeyDown={(e) => e.key === 'Enter' && navigateToBenchEmployees()}
-          aria-label="Navigate to bench resources"
-        >
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Bench Resources</p>
-                <p className="text-3xl font-bold text-orange-600">{benchEngineers}</p>
-              </div>
-              <TrendingUp className="h-8 w-8 text-orange-600" />
-            </div>
-          </CardContent>
-        </Card>
+            <Card
+              className="cursor-pointer hover:shadow-md transition-shadow duration-200 hover:bg-gray-50"
+              onClick={navigateToBenchEmployees}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => e.key === 'Enter' && navigateToBenchEmployees()}
+              aria-label="Navigate to bench resources"
+            >
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Bench Resources</p>
+                    <p className="text-3xl font-bold text-orange-600">{benchEngineers}</p>
+                  </div>
+                  <TrendingUp className="h-8 w-8 text-orange-600" />
+                </div>
+              </CardContent>
+            </Card>
+          </>
+        )}
       </div>
 
       {/* Charts and Attention Items */}
@@ -337,25 +370,38 @@ export function ManagerDashboard() {
             <CardTitle>Resource Utilization</CardTitle>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={utilizationData}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  label={({ name, percent }) => `${name} ${(percent as number * 100).toFixed(0)}%`}
-                  outerRadius={80}
-                  fill="#8884d8"
-                  dataKey="value"
-                >
-                  {utilizationData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip />
-              </PieChart>
-            </ResponsiveContainer>
+            {loading ? (
+              <div className="flex items-center justify-center h-[300px]">
+                <div className="animate-pulse">
+                  <div className="w-32 h-32 bg-gray-200 rounded-full mx-auto mb-4"></div>
+                  <div className="space-y-2">
+                    <div className="h-4 bg-gray-200 rounded w-24 mx-auto"></div>
+                    <div className="h-4 bg-gray-200 rounded w-20 mx-auto"></div>
+                    <div className="h-4 bg-gray-200 rounded w-28 mx-auto"></div>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <ResponsiveContainer width="100%" height={300}>
+                <PieChart>
+                  <Pie
+                    data={utilizationData}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={({ name, percent }) => `${name} ${(percent as number * 100).toFixed(0)}%`}
+                    outerRadius={80}
+                    fill="#8884d8"
+                    dataKey="value"
+                  >
+                    {utilizationData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                </PieChart>
+              </ResponsiveContainer>
+            )}
           </CardContent>
         </Card>
 
@@ -365,30 +411,50 @@ export function ManagerDashboard() {
             <CardTitle>Attention Items</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              {attentionItems.length === 0 && (
-                <p className="text-muted-foreground text-center py-8">No immediate attention items</p>
-              )}
-              {attentionItems.map(item => (
-                <div key={item.id} className="flex items-center justify-between p-3 border rounded-lg">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xl">{item.icon}</span>
-                    <div>
-                      <p className="font-medium">{item.title}</p>
-                      <p className="text-sm text-muted-foreground">{item.description}</p>
+            {loading ? (
+              <div className="space-y-4">
+                {[...Array(3)].map((_, index) => (
+                  <div key={index} className="flex items-center justify-between p-3 border rounded-lg animate-pulse">
+                    <div className="flex items-center gap-2">
+                      <div className="w-6 h-6 bg-gray-200 rounded"></div>
+                      <div className="space-y-2">
+                        <div className="h-4 bg-gray-200 rounded w-48"></div>
+                        <div className="h-3 bg-gray-200 rounded w-32"></div>
+                      </div>
+                    </div>
+                    <div className="text-right space-y-2">
+                      <div className="h-5 bg-gray-200 rounded w-16"></div>
+                      <div className="h-3 bg-gray-200 rounded w-20"></div>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <Badge variant={item.priority === 'high' ? 'destructive' : item.priority === 'medium' ? 'default' : 'secondary'}>
-                      {item.priority}
-                    </Badge>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      {item.action}
-                    </p>
+                ))}
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {attentionItems.length === 0 && (
+                  <p className="text-muted-foreground text-center py-8">No immediate attention items</p>
+                )}
+                {attentionItems.map(item => (
+                  <div key={item.id} className="flex items-center justify-between p-3 border rounded-lg">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xl">{item.icon}</span>
+                      <div>
+                        <p className="font-medium">{item.title}</p>
+                        <p className="text-sm text-muted-foreground">{item.description}</p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <Badge variant={item.priority === 'high' ? 'destructive' : item.priority === 'medium' ? 'default' : 'secondary'}>
+                        {item.priority}
+                      </Badge>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        {item.action}
+                      </p>
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
@@ -399,15 +465,34 @@ export function ManagerDashboard() {
           <CardTitle>Top Skills Distribution</CardTitle>
         </CardHeader>
         <CardContent>
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={skillsDistribution}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="skill" />
-              <YAxis />
-              <Tooltip />
-              <Bar dataKey="count" fill="#8884d8" />
-            </BarChart>
-          </ResponsiveContainer>
+          {loading ? (
+            <div className="h-[300px] animate-pulse">
+              <div className="flex items-end justify-between h-full space-x-2 px-4">
+                {[...Array(8)].map((_, index) => (
+                  <div 
+                    key={index} 
+                    className="bg-gray-200 rounded-t w-full" 
+                    style={{ height: `${Math.random() * 80 + 20}%` }}
+                  ></div>
+                ))}
+              </div>
+              <div className="flex justify-between mt-2 px-4">
+                {[...Array(8)].map((_, index) => (
+                  <div key={index} className="h-3 bg-gray-200 rounded w-12"></div>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={skillsDistribution}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="skill" />
+                <YAxis />
+                <Tooltip />
+                <Bar dataKey="count" fill="#8884d8" />
+              </BarChart>
+            </ResponsiveContainer>
+          )}
         </CardContent>
       </Card>
     </div>

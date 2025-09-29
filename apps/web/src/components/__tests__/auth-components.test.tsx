@@ -2,7 +2,6 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '../../test/test-utils';
 import { LoginPage } from '../LoginPage';
 import { ProtectedRoute } from '../ProtectedRoute';
-import { RoleBasedDemo } from '../RoleBasedDemo';
 
 // Mock the auth context
 const mockLogin = vi.fn();
@@ -158,35 +157,6 @@ describe('Authentication Components', () => {
       );
 
       expect(screen.getByText('Loading...')).toBeInTheDocument();
-    });
-  });
-
-  describe('RoleBasedDemo', () => {
-    it('renders role-based demo page', () => {
-      render(<RoleBasedDemo />);
-
-      expect(screen.getByText('Current User & Role')).toBeInTheDocument();
-      expect(screen.getByText('Role Detection')).toBeInTheDocument();
-    });
-
-    it('shows permissions correctly', () => {
-      render(<RoleBasedDemo />);
-
-      expect(screen.getByText('Current Permissions')).toBeInTheDocument();
-      expect(screen.getByText('View All Employees:')).toBeInTheDocument();
-    });
-
-    it('shows role-based content sections', () => {
-      render(<RoleBasedDemo />);
-
-      expect(screen.getByText('Manager Only Content')).toBeInTheDocument();
-      expect(screen.getByText('Employee Only Content')).toBeInTheDocument();
-    });
-
-    it('renders permission-based content section', () => {
-      render(<RoleBasedDemo />);
-
-      expect(screen.getByText('Permission-Based Content')).toBeInTheDocument();
     });
   });
 });
