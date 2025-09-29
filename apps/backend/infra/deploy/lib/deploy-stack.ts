@@ -82,21 +82,7 @@ export class DeployTalentFitStack extends cdk.Stack {
       },
       cloudWatchRole: true,
       restApiName: apiGatewayName,
-      defaultCorsPreflightOptions: {
-        allowMethods: Cors.ALL_METHODS,
-        allowHeaders: [
-          "Content-Type",
-          "Authorization",
-          "X-Amz-Date",
-          "X-Api-Key",
-          "X-Amz-Security-Token",
-          "X-Amz-User-Agent",
-          "X-Public-Id",
-          "Accept",
-        ],
-        allowOrigins: Cors.ALL_ORIGINS,
-        maxAge: cdk.Duration.days(1),
-      },
+      // Remove CORS here - let Go server handle it
       defaultIntegration: new LambdaIntegration(apiHandler, {
         proxy: true,
       }),
