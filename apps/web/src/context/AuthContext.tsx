@@ -23,8 +23,8 @@ export interface AuthUser {
 interface AuthContextType {
   user: AuthUser | null;
   profileStatus: 'loading' | 'exists' | 'needs_creation' | 'error';
-  loginWithGoogleCredential: (credential: string) => Promise<boolean>;
-  loginWithCredentials: (email: string, password: string) => Promise<boolean>; // Added for dummy credentials
+  loginWithGoogleCredential: (credential: string, selectedRole?: UserRole) => Promise<boolean>;
+  loginWithCredentials: (email: string, password: string, selectedRole?: UserRole) => Promise<boolean>; // Added for dummy credentials
   logout: () => void;
   updateProfile: (updates: Partial<AuthUser>) => void;
   refreshingToken: boolean;
@@ -84,26 +84,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  // Helper function to decode JWT and extract claims
-  const decodeJWT = (token: string) => {
-    try {
-      const base64Url = token.split('.')[1];
-      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-      const jsonPayload = decodeURIComponent(
-        atob(base64)
-          .split('')
-          .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
-          .join('')
-      );
-      return JSON.parse(jsonPayload);
-    } catch (error) {
-      console.error('Error decoding JWT:', error);
-      return null;
-    }
-  };
-
   // Real Google login using backend exchange. Expects Google ID token (credential).
-  const loginWithGoogleCredential = async (credential: string): Promise<boolean> => {
+  const loginWithGoogleCredential = async (credential: string, selectedRole?: UserRole): Promise<boolean> => {
     try {
       console.log('Starting Google login with credential...');
       const resp = await apiService.post<LoginResponse>(
@@ -111,13 +93,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         { credential }
       );
 
-      console.log('Google login response:', resp);
       const { token, email, name, userId } = resp;
 
-      // Decode JWT to extract role (role is not included in API response, only in JWT)
-      const decodedToken = decodeJWT(token);
-      console.log('Decoded JWT token:', decodedToken);
-      const role = decodedToken?.role || UserRole.EMPLOYEE; // fallback to employee
+      // Use selected role instead of decoding JWT
+      const role = selectedRole || UserRole.EMPLOYEE;
 
       // Persist JWT for API calls
       localStorage.setItem('authToken', token);
@@ -154,7 +133,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   // Dummy credentials login for demo accounts
-  const loginWithCredentials = async (email: string, password: string): Promise<boolean> => {
+  const loginWithCredentials = async (email: string, password: string, selectedRole?: UserRole): Promise<boolean> => {
     await new Promise(resolve => setTimeout(resolve, 500)); // simulate delay
     let role: UserRole;
     let name: string;
@@ -172,7 +151,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     // Create a mock JWT token for demo accounts
-    const mockToken = `demo.${btoa(JSON.stringify({ user_id: userId, role, email, name }))}.signature`;
+    const mockToken = `demo.${btoa(JSON.stringify({ user_id: userId, role: selectedRole || role, email, name }))}.signature`;
     
     // Store the mock token for API calls
     localStorage.setItem('authToken', mockToken);
@@ -181,7 +160,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       id: userId,
       name,
       email,
-      role,
+      role: selectedRole || role,
       avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}`,
       provider: 'credentials',
       accessToken: mockToken,
@@ -200,6 +179,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logout = () => {
     setUser(null);
     localStorage.removeItem('user');
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('employeeProfile');
+    // Navigate to home page
+    window.location.href = '/';
   };
 
   const updateProfile = (updates: Partial<AuthUser>) => {

@@ -18,7 +18,7 @@ export function ProfileCreationPage() {
     try {
       // Convert EmployeeProfile to backend format
       const backendProfileData = {
-        user_id: 53, //user?.id, // Add user_id to the request body
+        user_id: user?.id, // Add user_id to the request body
         geo: profile.country,
         date_of_joining: profile.dateOfJoining || null,
         end_date: profile.endDate || null,

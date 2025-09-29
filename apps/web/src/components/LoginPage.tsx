@@ -2,11 +2,13 @@ import { AlertCircle, Key, LogIn, User } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { UserRole } from '../types/roles';
 
 const LOGIN_VIA_CREDENTIALS = false; //import.meta.env.LOGIN_VIA_CREDENTIALS; // Set to false to test Google Sign-In only
 export function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [selectedRole, setSelectedRole] = useState<UserRole>(UserRole.EMPLOYEE);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { loginWithGoogleCredential, loginWithCredentials } = useAuth();
@@ -17,7 +19,7 @@ export function LoginPage() {
     setError('');
     if (!LOGIN_VIA_CREDENTIALS) return; // Skip if disabled
     setIsLoading(true);
-    const ok = await loginWithCredentials(email, password);
+    const ok = await loginWithCredentials(email, password, selectedRole);
     setIsLoading(false);
     if (ok) {
       navigate('/');
@@ -44,11 +46,11 @@ export function LoginPage() {
         return;
       }
       setIsLoading(true);
-      const ok = await loginWithGoogleCredential(credential);
+      const ok = await loginWithGoogleCredential(credential, selectedRole);
       if (!ok) setError('Google sign-in failed.');
       setIsLoading(false);
     };
-  }, [loginWithGoogleCredential]);
+  }, [loginWithGoogleCredential, selectedRole]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
@@ -68,6 +70,35 @@ export function LoginPage() {
               <span className="text-sm">{error}</span>
             </div>
           )}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Login as
+            </label>
+            <div className="flex gap-4">
+              <label className="flex items-center">
+                <input
+                  type="radio"
+                  name="role"
+                  value={UserRole.EMPLOYEE}
+                  checked={selectedRole === UserRole.EMPLOYEE}
+                  onChange={(e) => setSelectedRole(e.target.value as UserRole)}
+                  className="mr-2"
+                />
+                <span className="text-sm text-gray-700">Employee</span>
+              </label>
+              <label className="flex items-center">
+                <input
+                  type="radio"
+                  name="role"
+                  value={UserRole.MANAGER}
+                  checked={selectedRole === UserRole.MANAGER}
+                  onChange={(e) => setSelectedRole(e.target.value as UserRole)}
+                  className="mr-2"
+                />
+                <span className="text-sm text-gray-700">Manager</span>
+              </label>
+            </div>
+          </div>
           {(LOGIN_VIA_CREDENTIALS) && (
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
@@ -161,6 +192,7 @@ export function LoginPage() {
             <div className="space-y-1 text-xs text-gray-600">
               <div>Employee: sarah@company.com / demo123</div>
               <div>Manager: michael@company.com / demo123</div>
+              <div className="mt-2 text-gray-500">Note: You can select your desired role above</div>
             </div>
           </div>)}
         </div>
