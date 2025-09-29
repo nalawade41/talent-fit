@@ -1028,3 +1028,67 @@ Implement comprehensive filtering capabilities for the Projects page to enable m
 - 🔄 Additional UX enhancements and AI feature mockups
 
 **Note:** All tickets focus on UI development with dummy data. Backend integration will be handled in a separate phase.
+
+---
+
+### TF-003.2: New User Profile Creation Flow
+**Epic:** Employee Profile Management  
+**Type:** Story  
+**Priority:** High  
+
+**Description:**
+Implement automatic profile creation flow for new users who successfully authenticate but don't have an existing employee profile in the system. When the `/me` endpoint returns a "record not found" error (500 status), redirect users to a dedicated profile creation page where they can provide required information to complete their profile setup.
+
+**User Story:**
+As a new user logging into the system for the first time, I want to be automatically guided through a profile creation process so that I can set up my employee profile and access the full application features.
+
+As an existing user with authentication but no profile, I want to be prompted to complete my profile setup so that I can use all application features.
+
+**Acceptance Criteria:**
+- [ ] Detect "record not found" error from `/me` endpoint during login flow
+- [ ] Automatically redirect new users to profile creation page
+- [ ] Create dedicated profile creation page with required fields
+- [ ] Pre-populate available user information from authentication (name, email)
+- [ ] Include all required profile fields: geo, type, skills, experience, industry
+- [ ] Form validation ensures all required fields are completed
+- [ ] Save profile data to backend via API call
+- [ ] Redirect to appropriate dashboard (Manager/Employee) after successful profile creation
+- [ ] Handle profile creation errors with appropriate user feedback
+- [ ] Prevent access to main application until profile is complete
+- [ ] Clear error state and allow retry on profile creation failure
+
+**Technical Requirements:**
+- [ ] Update authentication flow to handle `/me` endpoint errors
+- [ ] Create ProfileCreationPage component with comprehensive form
+- [ ] Implement profile creation API integration
+- [ ] Add route protection for profile creation requirement
+- [ ] Update AuthContext to handle profile creation state
+- [ ] Create loading states and error handling for profile creation
+- [ ] Add success/error toast notifications
+- [ ] Implement form validation with proper error messages
+- [ ] Add profile completion progress indicator
+
+**Business Value:**
+- Ensures all users have complete profiles for proper resource management
+- Provides smooth onboarding experience for new employees
+- Prevents incomplete data issues in the system
+- Enables immediate access to relevant features after profile completion
+- Supports role-based dashboard access based on profile data
+
+**Technical Notes:**
+- Profile creation should use the same form components as profile editing
+- Handle both new user creation and existing user profile completion
+- Consider adding profile creation analytics/tracking
+- Ensure mobile-responsive design for profile creation flow
+- Add ability to save draft and resume later if needed
+
+**Definition of Done:**
+- [ ] Profile creation flow working end-to-end from login
+- [ ] Error detection and redirection working correctly
+- [ ] Profile creation form fully functional with validation
+- [ ] API integration for profile creation working
+- [ ] Dashboard redirection working after profile creation
+- [ ] Error handling and user feedback implemented
+- [ ] Route protection preventing access without profile
+- [ ] Mobile-responsive design implemented
+- [ ] Testing completed for edge cases

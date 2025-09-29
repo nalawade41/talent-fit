@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -121,6 +122,14 @@ func (h *EmployeeProfileHandler) UpdateProfile(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+
+	// Set the user ID from the URL parameter
+	userIDInt, err := strconv.ParseUint(userID, 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID format"})
+		return
+	}
+	profile.UserID = uint(userIDInt)
 
 	updatedProfile, err := h.profileService.UpdateProfile(ctx, userID, &profile)
 	if err != nil {

@@ -19,9 +19,10 @@ import { useEmployeeProfile } from '../../hooks/useEmployeeProfile';
 
 interface ProfileFormProps {
   onSave?: (profile: EmployeeProfile) => void;
+  isCreateMode?: boolean;
 }
 
-export function ProfileForm({ onSave }: ProfileFormProps) {
+export function ProfileForm({ onSave, isCreateMode = false }: ProfileFormProps) {
   const {
     formState: { errors, isDirty },
     isSubmitting,
@@ -34,7 +35,7 @@ export function ProfileForm({ onSave }: ProfileFormProps) {
     getCompletionColor,
     onSubmit,
     watchedValues,
-  } = useEmployeeProfile(onSave);
+  } = useEmployeeProfile(onSave, isCreateMode);
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
@@ -118,20 +119,16 @@ export function ProfileForm({ onSave }: ProfileFormProps) {
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1 flex items-center gap-1">
-                <Eye className="w-4 h-4 text-gray-400" />
+              <label className="block text-sm font-medium mb-1">
                 Date of Joining
               </label>
-              <div className="relative">
-                <input
-                  type="date"
-                  value={watchedValues.dateOfJoining || ''}
-                  className="w-full p-3 border rounded-md bg-gray-50 text-gray-600 cursor-not-allowed"
-                  disabled
-                  readOnly
-                />
-                <p className="text-xs text-gray-500 mt-1">This field is managed by HR and cannot be edited</p>
-              </div>
+              <input
+                {...register('dateOfJoining')}
+                type="date"
+                className="w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Select your joining date"
+              />
+              {errors.dateOfJoining && <p className="text-red-500 text-sm mt-1">{errors.dateOfJoining.message}</p>}
             </div>
 
             <div>

@@ -32,7 +32,12 @@ apiClient.interceptors.response.use(
   (error) => {
     if (error.response) {
       const { status, data } = error.response;
-      
+      console.log('API error response:', { status, data });
+      if (status === 500 && data?.error?.includes('record not found')) {
+        console.log('Detected "record not found" error from server');
+        // Special case for "record not found" errors
+        return Promise.reject({ status, message: 'Record not found' });
+      }
       switch (status) {
         case 401:
           localStorage.removeItem('authToken');

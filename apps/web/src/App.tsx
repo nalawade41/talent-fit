@@ -3,6 +3,7 @@ import { Navigate, Route, BrowserRouter as Router, Routes } from 'react-router-d
 import { Suspense, lazy } from 'react';
 import { MainLayout } from './components/Layout/MainLayout';
 import { LoginPage } from './components/LoginPage';
+import { ProfileCreationPage } from './components/pages/ProfileCreationPage';
 import { ProtectedRoute, UnauthorizedAccess } from './components/ProtectedRoute';
 import { ManagerDashboard } from './components/pages/ManagerDashboard';
 import { EmployeeDashboard } from './components/pages/EmployeeDashboard';
@@ -39,10 +40,36 @@ function DashboardRoute() {
 }
 
 function AuthShell() {
-  const { user } = useAuth();
+  const { user, profileStatus } = useAuth();
 
   if (!user) {
     return <LoginPage />;
+  }
+
+  // Show profile creation page if user needs to create profile
+  if (profileStatus === 'needs_creation') {
+    return <ProfileCreationPage />;
+  }
+
+  // Show loading while checking profile status
+  if (profileStatus === 'loading') {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  // Show error if profile check failed
+  if (profileStatus === 'error') {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <h1 className="text-xl font-semibold text-red-600">Error loading profile</h1>
+          <p className="text-gray-600 mt-2">Please try refreshing the page or contact support.</p>
+        </div>
+      </div>
+    );
   }
 
   return (

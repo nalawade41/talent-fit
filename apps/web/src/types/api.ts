@@ -1,4 +1,13 @@
 // Backend API Response Types
+
+// Authentication Types
+export interface LoginResponse {
+  token: string;
+  name: string;
+  email: string;
+  userId: number;
+}
+
 export interface BackendUser {
   id: number;
   first_name: string;

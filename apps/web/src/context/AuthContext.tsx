@@ -1,9 +1,12 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import apiService from '../services/api/client';
 import { UserRole } from '../types/roles';
+import { LoginResponse } from '../types/api';
+import type { Employee } from '../data/employees';
 
 // UI auth user shape for client session
 export interface AuthUser {
+  id?: number;
   name: string;
   email: string;
   role: UserRole;
@@ -19,11 +22,14 @@ export interface AuthUser {
 
 interface AuthContextType {
   user: AuthUser | null;
+  profileStatus: 'loading' | 'exists' | 'needs_creation' | 'error';
   loginWithGoogleCredential: (credential: string) => Promise<boolean>;
   loginWithCredentials: (email: string, password: string) => Promise<boolean>; // Added for dummy credentials
   logout: () => void;
   updateProfile: (updates: Partial<AuthUser>) => void;
   refreshingToken: boolean;
+  checkProfileStatus: (user : AuthUser | null) => Promise<void>;
+  updateProfileAfterCreation: (savedProfile: Employee) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -58,18 +64,22 @@ const TOKEN_LIFETIME_MS = 1000 * 60 * 30; // 30 minutes
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
+  const [profileStatus, setProfileStatus] = useState<'loading' | 'exists' | 'needs_creation' | 'error'>('loading');
   const [refreshingToken, setRefreshingToken] = useState(false);
 
-  // Load persisted session
+    // Load persisted session
   useEffect(() => {
     const saved = localStorage.getItem('user');
+    console.log('Restoring session from localStorage:', saved);
     if (saved) {
       const parsed: AuthUser = JSON.parse(saved);
       // Expire if token past expiry
       if (parsed.tokenExpiry && parsed.tokenExpiry < Date.now()) {
-        localStorage.removeItem('user');
+        // if token is expired, then refresh it
       } else {
         setUser(parsed);
+        // Check profile status for existing user
+        checkProfileStatus(parsed);
       }
     }
   }, []);
@@ -95,24 +105,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Real Google login using backend exchange. Expects Google ID token (credential).
   const loginWithGoogleCredential = async (credential: string): Promise<boolean> => {
     try {
-      const resp = await apiService.post<{ token: string; name: string; email: string }>(
+      console.log('Starting Google login with credential...');
+      const resp = await apiService.post<LoginResponse>(
         '/auth/google/login',
         { credential }
       );
 
-      const token = resp.token;
-      const email = resp.email;
-      const name = resp.name;
+      console.log('Google login response:', resp);
+      const { token, email, name, userId } = resp;
 
-      // Decode JWT to extract role
+      // Decode JWT to extract role (role is not included in API response, only in JWT)
       const decodedToken = decodeJWT(token);
+      console.log('Decoded JWT token:', decodedToken);
       const role = decodedToken?.role || UserRole.EMPLOYEE; // fallback to employee
 
       // Persist JWT for API calls
       localStorage.setItem('authToken', token);
 
-      // Create a lightweight session for UI with role from JWT
+      // Create a lightweight session for UI using response data directly
       const session: AuthUser = {
+        id: userId, // Use userId from response instead of parsing JWT
         name: name || email,
         email,
         role: role as UserRole,
@@ -125,8 +137,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       setUser(session);
       localStorage.setItem('user', JSON.stringify(session));
+      
+      // Check profile status after successful login
+      await checkProfileStatus(session);
       return true;
-    } catch (e) {
+    } catch (error: any) {
+      console.error('Google login failed:', error);
+      console.error('Error details:', {
+        message: error.message,
+        status: error.response?.status,
+        data: error.response?.data,
+        headers: error.response?.headers
+      });
       return false;
     }
   };
@@ -136,27 +158,42 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await new Promise(resolve => setTimeout(resolve, 500)); // simulate delay
     let role: UserRole;
     let name: string;
+    let userId: number;
     if (email === 'sarah@company.com' && password === 'demo123') {
       role = UserRole.EMPLOYEE;
       name = 'Sarah Johnson';
+      userId = 2;
     } else if (email === 'michael@company.com' && password === 'demo123') {
       role = UserRole.MANAGER;
       name = 'Michael Chen';
+      userId = 1;
     } else {
       return false;
     }
+
+    // Create a mock JWT token for demo accounts
+    const mockToken = `demo.${btoa(JSON.stringify({ user_id: userId, role, email, name }))}.signature`;
+    
+    // Store the mock token for API calls
+    localStorage.setItem('authToken', mockToken);
+
     const session: AuthUser = {
+      id: userId,
       name,
       email,
       role,
       avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}`,
       provider: 'credentials',
-      accessToken: undefined,
+      accessToken: mockToken,
       tokenExpiry: Date.now() + TOKEN_LIFETIME_MS,
       photoUrl: `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}`,
     };
     setUser(session);
     localStorage.setItem('user', JSON.stringify(session));
+    
+    // Check profile status after successful login
+    await checkProfileStatus(session);
+    
     return true;
   };
 
@@ -172,14 +209,66 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem('user', JSON.stringify(updated));
   };
 
+  // Check if the user profile exists or needs creation
+  const checkProfileStatus = async (user: AuthUser | null): Promise<void> => {
+    console.log("Checking profile status...", user);
+    if (!user) {
+      setProfileStatus('error');
+      return;
+    }
+
+    try {
+      setProfileStatus('loading');
+      console.log('Checking profile status for user:', user.email);
+      
+      // For credentials login (demo accounts), skip API call and assume profile needs creation
+      if (user.provider === 'credentials') {
+        console.log('Demo credentials login - assuming profile needs creation');
+        setProfileStatus('needs_creation');
+        return;
+      }
+      
+      // For Google OAuth login, check with real API
+      const response = await apiService.get('/api/v1/employee/me');
+      console.log('Profile exists:', response);
+      setProfileStatus('exists');
+    } catch (error: any) {
+      console.error('Profile status check error:');
+      const errorStatus = error?.status || error?.response?.status;
+      const errorMessage = error?.message || error?.response?.data?.message || '';
+      if (errorStatus === 404 || (errorStatus === 500 && errorMessage?.includes('Record not found'))) {
+        console.log('Profile not found - needs creation');
+        setProfileStatus('needs_creation');
+      } else {
+        console.error('Error checking profile status:', error);
+        setProfileStatus('error');
+      }
+    }
+  };
+
+  // Update profile status after successful creation
+  const updateProfileAfterCreation = (savedProfile: Employee) => {
+    updateProfile({
+      name: `${savedProfile.user.first_name} ${savedProfile.user.last_name}`,
+      experience: savedProfile.years_of_experience,
+      skills: savedProfile.skills
+    });
+    
+    // Update profile status to 'exists' after successful creation
+    setProfileStatus('exists');
+  };
+
   return (
     <AuthContext.Provider value={{
       user,
+      profileStatus,
       loginWithGoogleCredential,
       loginWithCredentials, // include dummy login in context
       logout,
       updateProfile,
-      refreshingToken
+      refreshingToken,
+      checkProfileStatus,
+      updateProfileAfterCreation
     }}>
       {children}
     </AuthContext.Provider>

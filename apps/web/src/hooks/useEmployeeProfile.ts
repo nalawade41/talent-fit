@@ -34,14 +34,14 @@ interface UseEmployeeProfileReturn {
   watchedValues: any;
 }
 
-export const useEmployeeProfile = (onSave?: (profile: EmployeeProfile) => void): UseEmployeeProfileReturn => {
+export const useEmployeeProfile = (onSave?: (profile: EmployeeProfile) => void, forceCreateMode = false): UseEmployeeProfileReturn => {
   const location = useLocation();
   const employeeProfile = location.state?.employeeProfile;
-  const { user, updateProfile } = useAuth();
+  const { user, updateProfile, profileStatus } = useAuth();
   const [profile, setProfile] = useState<Employee | null>(employeeProfile || null);
   const [loading, setLoading] = useState(!employeeProfile); // Only loading if no profile passed
   const [error, setError] = useState<string | null>(null);
-  const [isCreateMode, setIsCreateMode] = useState(false);
+  const [isCreateMode, setIsCreateMode] = useState(forceCreateMode);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const fetchProfile = async () => {
@@ -72,8 +72,14 @@ export const useEmployeeProfile = (onSave?: (profile: EmployeeProfile) => void):
   };
 
   const saveProfile = async (profileData: Partial<BackendEmployeeProfile>): Promise<Employee | null> => {
-    if (!user?.email) {
+    if (!user?.email && !user?.id) {
       toast.error('No user found');
+      return null;
+    }
+
+    const userId = profile?.user_id || user?.id;
+    if (!userId) {
+      toast.error('User not found');
       return null;
     }
 
@@ -82,12 +88,12 @@ export const useEmployeeProfile = (onSave?: (profile: EmployeeProfile) => void):
 
       if (isCreateMode) {
         // Create new profile
-        savedProfile = await EmployeeProfileService.createEmployeeProfile(profile?.user_id!, profileData);
+        savedProfile = await EmployeeProfileService.createEmployeeProfile(userId, profileData);
         setIsCreateMode(false);
         toast.success('Profile created successfully!');
       } else {
         // Update existing profile
-        savedProfile = await EmployeeProfileService.updateEmployeeProfile(profile?.user_id!, profileData);
+        savedProfile = await EmployeeProfileService.updateEmployeeProfile(userId, profileData);
         toast.success('Profile updated successfully!');
       }
 
@@ -110,10 +116,15 @@ export const useEmployeeProfile = (onSave?: (profile: EmployeeProfile) => void):
 
   // Fetch profile when user changes or component mounts
   useEffect(() => {
+    if (profileStatus === 'needs_creation') {
+      setIsCreateMode(true);
+      setLoading(false);
+      return;
+    }
     if (user?.email && !employeeProfile) {
       fetchProfile();
     }
-  }, [user?.email, employeeProfile]);
+  }, [user?.email, profileStatus, employeeProfile]);
 
   // Helper function to convert Employee data to EmployeeProfile format
   const convertEmployeeToProfileForm = (employee: Employee): Partial<EmployeeProfile> => {
@@ -211,6 +222,7 @@ export const useEmployeeProfile = (onSave?: (profile: EmployeeProfile) => void):
     try {
       // Convert EmployeeProfile to BackendEmployeeProfile format
       const backendProfileData: Partial<BackendEmployeeProfile> = {
+        user_id: user?.id, // Add user_id to the request body
         name: data.name,
         geo: data.country,
         date_of_joining: data.dateOfJoining ? new Date(data.dateOfJoining).toISOString() : null,

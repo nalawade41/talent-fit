@@ -43,13 +43,13 @@ GET /health
 ### Google OAuth Login
 
 **Endpoint:** `POST /auth/google/login`
-**Description:** Initiate Google OAuth login flow
+**Description:** Authenticate user with Google ID token and return JWT
 **Authentication:** Not required
 
 #### Request Body
 ```json
 {
-  "role": "Employee" // or "Manager"
+  "credential": "eyJhbGciOiJSUzI1NiIsImtpZCI6IjE2NzAyN..."
 }
 ```
 
@@ -59,7 +59,7 @@ POST /auth/google/login
 Content-Type: application/json
 
 {
-  "role": "Employee"
+  "credential": "eyJhbGciOiJSUzI1NiIsImtpZCI6IjE2NzAyN..."
 }
 ```
 
@@ -68,8 +68,46 @@ Content-Type: application/json
 
 ```json
 {
-  "auth_url": "https://accounts.google.com/oauth/authorize?...",
-  "state": "random-state-token"
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "name": "John Doe",
+  "email": "john.doe@company.com",
+  "userId": 53
+}
+```
+
+#### JWT Token Payload
+The returned JWT token contains the following claims:
+```json
+{
+  "user_id": 123,
+  "email": "john.doe@company.com",
+  "name": "John Doe",
+  "role": "Employee",
+  "exp": 1640995200,
+  "iat": 1640908800
+}
+```
+
+#### Error Responses
+
+**Status Code:** `400 Bad Request`
+```json
+{
+  "error": "Invalid JSON format or missing credential"
+}
+```
+
+**Status Code:** `401 Unauthorized`
+```json
+{
+  "error": "Invalid id token"
+}
+```
+
+**Status Code:** `500 Internal Server Error`
+```json
+{
+  "error": "Failed to process authentication"
 }
 ```
 
@@ -280,6 +318,7 @@ Content-Type: application/json
 ```json
 {
   "geo": "US-East",
+  "date_of_joining": "2023-02-01T00:00:00Z",
   "skills": ["React", "TypeScript", "Node.js", "GraphQL"],
   "availability_flag": false,
   "years_of_experience": 6
@@ -294,6 +333,7 @@ Content-Type: application/json
 
 {
   "availability_flag": false,
+  "date_of_joining": "2023-02-01T00:00:00Z",
   "skills": ["React", "TypeScript", "Node.js", "GraphQL"]
 }
 ```
@@ -1481,6 +1521,44 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 All protected endpoints require a valid JWT token in the Authorization header:
 
 ```http
+Authorization: Bearer <jwt_token>
+```
+
+### JWT Token Details
+
+The JWT token is obtained from the Google OAuth login endpoint and contains:
+- **user_id**: Unique identifier for the user
+- **email**: User's email address
+- **name**: User's full name
+- **role**: User's role (Employee/Manager)
+- **exp**: Token expiration timestamp
+- **iat**: Token issued at timestamp
+
+### Token Usage
+
+Include the JWT token in all API requests to protected endpoints:
+
+```http
+GET /api/v1/employee/me
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
+
+### Token Expiration
+
+Tokens expire after 30 minutes. When a token expires, the client will receive a `401 Unauthorized` response and should redirect the user to login again.
+
+To obtain a new JWT token, use the Google OAuth login endpoint:
+
+```http
+POST /auth/google/login
+Content-Type: application/json
+
+{
+  "credential": "google_id_token_here"
+}
+```
+
+This returns a new JWT token for subsequent API calls.
 Authorization: Bearer <jwt_token>
 ```
 
