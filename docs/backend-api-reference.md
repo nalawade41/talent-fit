@@ -172,26 +172,37 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 
 ```json
 {
-  "user_id": 123,
-  "geo": "US-West",
-  "date_of_joining": "2023-01-15T00:00:00Z",
-  "end_date": "2024-12-31T00:00:00Z",
+  "user_id": 53,
+  "geo": "India",
+  "date_of_joining": "2025-10-01T05:30:00+05:30",
+  "end_date": null,
   "notice_date": null,
-  "type": "Frontend Dev",
-  "skills": ["React", "TypeScript", "Node.js", "CSS"],
-  "years_of_experience": 5,
-  "industry": ["Technology"],
+  "skills": [
+      "Node.js",
+      "React",
+      "React Native"
+  ],
+  "years_of_experience": 2,
+  "industry": [
+      "Technology|1",
+      "Finance|1"
+  ],
   "availability_flag": true,
-  "created_at": "2023-01-10T10:00:00Z",
-  "updated_at": "2023-11-15T14:30:00Z",
+  "created_at": "2025-09-29T08:05:23.413468+05:30",
+  "updated_at": "2025-09-29T08:05:23.413468+05:30",
+  "type": "",
+  "department": "Engineering",
+  "experience_level": "Mid-level (2-5 years)",
+  "employment_type": "Full-time",
+  "name": "",
   "user": {
-    "id": 123,
-    "first_name": "John",
-    "last_name": "Doe",
-    "email": "john.doe@company.com",
-    "role": "Employee",
-    "created_at": "2023-01-10T10:00:00Z",
-    "updated_at": "2023-01-10T10:00:00Z"
+      "id": 53,
+      "first_name": "Sagar",
+      "last_name": "Dewani",
+      "email": "sagar.dewani@tech9.com",
+      "role": "Employee",
+      "created_at": "2025-09-28T19:51:19.352758+05:30",
+      "updated_at": "2025-09-29T08:05:22.380681+05:30"
   }
 }
 ```

@@ -18,7 +18,7 @@ apiClient.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`;
     }
     // Bypass ngrok browser warning interstitial for free tunnels
-    // config.headers['ngrok-skip-browser-warning'] = 'true';
+    config.headers['ngrok-skip-browser-warning'] = 'true';
     return config;
   },
   (error) => {

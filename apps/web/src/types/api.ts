@@ -25,6 +25,7 @@ export interface BackendEmployeeProfile {
   user_id: number;
   geo: string;
   department: string;
+  type: string;
   date_of_joining: string | null;
   end_date: string | null;
   notice_date: string | null;

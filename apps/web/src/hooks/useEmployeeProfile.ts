@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
-import { EmployeeProfileService } from '../services';
-import type { Employee } from '../data/employees';
+import apiService from '../services/api/client';
 import type { BackendEmployeeProfile } from '../types/api';
 import { useLocation } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
@@ -10,15 +9,17 @@ import { calculateProfileCompletion } from '../types/profile';
 import { 
   EmployeeProfile,
   EMPLOYEE_TYPES,
+  EXPERIENCE_LEVELS,
+  INDUSTRIES
 } from '../types/profile';
 
 interface UseEmployeeProfileReturn {
-  profile: Employee | null;
+  profile: BackendEmployeeProfile | null;
   loading: boolean;
   error: string | null;
   isCreateMode: boolean;
   fetchProfile: () => Promise<void>;
-  saveProfile: (profileData: Partial<BackendEmployeeProfile>) => Promise<Employee | null>;
+  saveProfile: (profileData: Partial<BackendEmployeeProfile>) => Promise<BackendEmployeeProfile | null>;
   register: any;
   handleSubmit: any;
   watch: any;
@@ -38,40 +39,32 @@ export const useEmployeeProfile = (onSave?: (profile: EmployeeProfile) => void, 
   const location = useLocation();
   const employeeProfile = location.state?.employeeProfile;
   const { user, updateProfile, profileStatus } = useAuth();
-  const [profile, setProfile] = useState<Employee | null>(employeeProfile || null);
+  const [profile, setProfile] = useState<BackendEmployeeProfile | null>(employeeProfile || null);
   const [loading, setLoading] = useState(!employeeProfile); // Only loading if no profile passed
   const [error, setError] = useState<string | null>(null);
   const [isCreateMode, setIsCreateMode] = useState(forceCreateMode);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const fetchProfile = async () => {
+    const fetchProfile = async () => {
     if (!user?.email) {
       setLoading(false);
       return;
     }
 
-    setLoading(true); // Ensure loading is true when fetching
     try {
-      setError(null);
-      const fetchedProfile = await EmployeeProfileService.getEmployeeProfile();
+      setLoading(true);
+      // Use the API client directly to get BackendEmployeeProfile
+      const fetchedProfile = await apiService.get<BackendEmployeeProfile>('/api/v1/employee/me');
       setProfile(fetchedProfile); // This will trigger the useEffect to update the form
-      setIsCreateMode(false);
-    } catch (err: any) {
-      
-      // Check if it's a 404 error (profile doesn't exist)
-      if (err.response?.status === 404) {
-        setIsCreateMode(true);
-        setError(null); // Clear error for create mode
-      } else {
-        setError(err.message || 'Failed to fetch employee profile');
-        toast.error('Failed to load profile. Please try again.');
-      }
+    } catch (error) {
+      console.error('Error fetching profile:', error);
+      setError('Failed to fetch profile data');
     } finally {
       setLoading(false);
     }
   };
 
-  const saveProfile = async (profileData: Partial<BackendEmployeeProfile>): Promise<Employee | null> => {
+  const saveProfile = async (profileData: Partial<BackendEmployeeProfile>): Promise<BackendEmployeeProfile | null> => {
     if (!user?.email && !user?.id) {
       toast.error('No user found');
       return null;
@@ -84,16 +77,16 @@ export const useEmployeeProfile = (onSave?: (profile: EmployeeProfile) => void, 
     }
 
     try {
-      let savedProfile: Employee;
+      let savedProfile: BackendEmployeeProfile;
 
       if (isCreateMode) {
-        // Create new profile
-        savedProfile = await EmployeeProfileService.createEmployeeProfile(userId, profileData);
+        // Create new profile using API directly
+        savedProfile = await apiService.post<BackendEmployeeProfile>(`/api/v1/employee/${userId}`, profileData);
         setIsCreateMode(false);
         toast.success('Profile created successfully!');
       } else {
-        // Update existing profile
-        savedProfile = await EmployeeProfileService.updateEmployeeProfile(userId, profileData);
+        // Update existing profile using API directly  
+        savedProfile = await apiService.patch<BackendEmployeeProfile>(`/api/v1/employee/${userId}`, profileData);
         toast.success('Profile updated successfully!');
       }
 
@@ -127,30 +120,53 @@ export const useEmployeeProfile = (onSave?: (profile: EmployeeProfile) => void, 
   }, [user?.email, profileStatus, employeeProfile]);
 
   // Helper function to convert Employee data to EmployeeProfile format
-  const convertEmployeeToProfileForm = (employee: Employee): Partial<EmployeeProfile> => {
+  const convertBackendToProfileForm = (backendProfile: BackendEmployeeProfile): Partial<EmployeeProfile> => {
+    // Parse industry data from backend format and coerce to allowed INDUSTRIES union
+    const parseIndustries = (industryArray: any[]): { industry: typeof INDUSTRIES[number]; years: number }[] => {
+      if (!Array.isArray(industryArray)) return [{ industry: 'Technology', years: 1 }];
+      return industryArray
+        .map((entry) => {
+          // Already structured
+            if (entry && typeof entry === 'object' && 'industry' in entry && 'years' in entry) {
+              const rawInd = String((entry as any).industry);
+              const normalized = (INDUSTRIES as readonly string[]).includes(rawInd) ? rawInd as typeof INDUSTRIES[number] : 'Technology';
+              const yearsNum = typeof entry.years === 'number' ? entry.years : parseFloat(String(entry.years)) || 1;
+              return { industry: normalized, years: yearsNum };
+            }
+            if (typeof entry === 'string') {
+              const parts = entry.split('|');
+              const rawInd = parts[0] ? parts[0].trim() : 'Technology';
+              const normalized = (INDUSTRIES as readonly string[]).includes(rawInd) ? rawInd as typeof INDUSTRIES[number] : 'Technology';
+              const years = parts[1] ? parseFloat(parts[1]) || 1 : 1;
+              return { industry: normalized, years: years <= 0 ? 1 : years };
+            }
+            return null;
+        })
+        .filter((v): v is { industry: typeof INDUSTRIES[number]; years: number } => !!v);
+    };
+
     return {
-      name: `${employee.user.first_name} ${employee.user.last_name}`.trim(),
-      email: employee.user.email,
-      country: employee.geo || 'United States',
-      dateOfJoining: employee.date_of_joining ? new Date(employee.date_of_joining).toISOString().split('T')[0] : '',
-      employeeType: (employee.type as typeof EMPLOYEE_TYPES[number]) || 'Full-time',
-      department: employee.department || 'Engineering',
-      industries: employee.industry && employee.industry.length > 0 
-        ? employee.industry.map(ind => ({ 
-            industry: ind.industry as any, // Extract industry name from the object
-            years: ind.years || 1 // Extract years from the object
-          }))
-        : [{ industry: 'Technology' as any, years: 1 }],
-      experience: employee.years_of_experience || 1,
-      experienceLevel: employee.years_of_experience >= 12 ? 'Principal (12+ years)' : 
-                       employee.years_of_experience >= 8 ? 'Lead (8-12 years)' :
-                       employee.years_of_experience >= 5 ? 'Senior (5-8 years)' : 
-                       employee.years_of_experience >= 2 ? 'Mid-level (2-5 years)' : 
-                       'Junior (0-2 years)',
-      skills: [...(employee.primary_skills || []), ...(employee.secondary_skills || [])],
-      endDate: employee.end_date ? new Date(employee.end_date).toISOString().split('T')[0] : '',
-      noticeDate: employee.notice_date ? new Date(employee.notice_date).toISOString().split('T')[0] : '',
-      availableForAdditionalWork: employee.availability_flag || false
+      name: backendProfile.name || `${backendProfile.user.first_name} ${backendProfile.user.last_name}`.trim(),
+      email: backendProfile.user.email,
+      country: backendProfile.geo || 'United States',
+      dateOfJoining: backendProfile.date_of_joining ? new Date(backendProfile.date_of_joining).toISOString().split('T')[0] : '',
+      endDate: backendProfile.end_date ? new Date(backendProfile.end_date).toISOString().split('T')[0] : '',
+      noticeDate: backendProfile.notice_date ? new Date(backendProfile.notice_date).toISOString().split('T')[0] : '',
+      employeeType: (backendProfile.employment_type || backendProfile.type || 'Full-time') as typeof EMPLOYEE_TYPES[number],
+      department: backendProfile.department || 'Engineering',
+      industries: backendProfile.industry && backendProfile.industry.length > 0 
+        ? parseIndustries(backendProfile.industry as any[])
+        : [{ industry: 'Technology', years: 1 }],
+      experience: backendProfile.years_of_experience || 1,
+      experienceLevel: (backendProfile.experience_level as typeof EXPERIENCE_LEVELS[number]) || (
+        backendProfile.years_of_experience >= 12 ? 'Principal (12+ years)' : 
+        backendProfile.years_of_experience >= 8 ? 'Lead (8-12 years)' :
+        backendProfile.years_of_experience >= 5 ? 'Senior (5-8 years)' : 
+        backendProfile.years_of_experience >= 2 ? 'Mid-level (2-5 years)' : 
+        'Junior (0-2 years)'
+      ),
+      skills: backendProfile.skills || [],
+      availableForAdditionalWork: backendProfile.availability_flag || false
     };
   };
 
@@ -163,7 +179,7 @@ export const useEmployeeProfile = (onSave?: (profile: EmployeeProfile) => void, 
     formState: { errors, isDirty }
   } = useForm<EmployeeProfile>({
     mode: 'onChange',
-    defaultValues: employeeProfile ? convertEmployeeToProfileForm(employeeProfile) : {
+    defaultValues: employeeProfile ? convertBackendToProfileForm(employeeProfile) : {
       name: user?.name || '',
       email: user?.email || '',
       country: 'United States',
@@ -189,7 +205,7 @@ export const useEmployeeProfile = (onSave?: (profile: EmployeeProfile) => void, 
   // Update form when profile data changes (from navigation or API)
   useEffect(() => {
     if (profile) {
-      const profileFormData = convertEmployeeToProfileForm(profile);
+      const profileFormData = convertBackendToProfileForm(profile);
       // Use reset instead of setValue to update all fields at once
       reset(profileFormData as EmployeeProfile);
       setLoading(false);
