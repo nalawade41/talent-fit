@@ -113,6 +113,7 @@ export const AllocationDialog: React.FC<AllocationDialogProps> = (props) => {
             <TabsTrigger value="ai">AI Suggestions</TabsTrigger>
           </TabsList>
           <TabsContent value="manual" className="space-y-4">
+            {/* Filter Controls */}
             <div className="grid grid-cols-4 gap-4">
               <div className="relative">
                 <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
@@ -121,14 +122,93 @@ export const AllocationDialog: React.FC<AllocationDialogProps> = (props) => {
               <Input placeholder="Skills filter..." value={skillsFilter} onChange={(e) => setSkillsFilter(e.target.value)} />
               <Input placeholder="Location filter..." value={locationFilter} onChange={(e) => setLocationFilter(e.target.value)} />
               <Select value={availabilityFilter} onValueChange={setAvailabilityFilter}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectTrigger><SelectValue placeholder="All Availability" /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Availability</SelectItem>
-                  <SelectItem value="available">Available</SelectItem>
-                  <SelectItem value="bench">On Bench</SelectItem>
+                  <SelectItem value="available">Available Only</SelectItem>
+                  <SelectItem value="bench">On Bench Only</SelectItem>
                 </SelectContent>
               </Select>
             </div>
+
+            {/* Active Filters Display */}
+            {(searchQuery || skillsFilter || locationFilter || availabilityFilter !== 'all') && (
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-sm font-medium text-gray-600">Active filters:</span>
+                {searchQuery && (
+                  <Badge variant="secondary" className="flex items-center gap-1">
+                    Search: "{searchQuery}"
+                    <button
+                      onClick={() => setSearchQuery('')}
+                      className="ml-1 hover:text-red-600"
+                    >
+                      ×
+                    </button>
+                  </Badge>
+                )}
+                {skillsFilter && (
+                  <Badge variant="secondary" className="flex items-center gap-1">
+                    Skills: {skillsFilter}
+                    <button
+                      onClick={() => setSkillsFilter('')}
+                      className="ml-1 hover:text-red-600"
+                    >
+                      ×
+                    </button>
+                  </Badge>
+                )}
+                {locationFilter && (
+                  <Badge variant="secondary" className="flex items-center gap-1">
+                    Location: {locationFilter}
+                    <button
+                      onClick={() => setLocationFilter('')}
+                      className="ml-1 hover:text-red-600"
+                    >
+                      ×
+                    </button>
+                  </Badge>
+                )}
+                {availabilityFilter !== 'all' && (
+                  <Badge variant="secondary" className="flex items-center gap-1">
+                    Status: {availabilityFilter === 'available' ? 'Available Only' : 'On Bench Only'}
+                    <button
+                      onClick={() => setAvailabilityFilter('all')}
+                      className="ml-1 hover:text-red-600"
+                    >
+                      ×
+                    </button>
+                  </Badge>
+                )}
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={() => {
+                    setSearchQuery('');
+                    setSkillsFilter('');
+                    setLocationFilter('');
+                    setAvailabilityFilter('all');
+                  }}
+                  className="text-xs"
+                >
+                  Clear All
+                </Button>
+              </div>
+            )}
+
+            {/* Results Header */}
+            {!isLoading && (
+              <div className="flex items-center justify-between py-2">
+                <h4 className="text-sm font-medium text-gray-700">
+                  {filteredManualList.length} Employee{filteredManualList.length !== 1 ? 's' : ''} Available
+                </h4>
+                {selectedEmployees.length > 0 && (
+                  <span className="text-xs text-gray-500">
+                    {selectedEmployees.length} selected
+                  </span>
+                )}
+              </div>
+            )}
+
             <div className={`grid grid-cols-1 gap-3 max-h-96 overflow-y-auto`}>
               {isLoading ? (
                 [...Array(6)].map((_, idx) => (
@@ -224,8 +304,24 @@ export const AllocationDialog: React.FC<AllocationDialogProps> = (props) => {
               )}
             </div>
             {!isLoading && filteredManualList.length === 0 && (
-              <div className="text-center py-8 text-gray-500">
-                <p>{isLoading ? 'Loading employees...' : 'No available employees match your criteria.'}</p>
+              <div className="text-center py-12 text-gray-500">
+                <div className="space-y-3">
+                  <p className="text-lg font-medium">No employees found</p>
+                  <p className="text-sm">Try adjusting your search criteria or clearing the filters.</p>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => {
+                      setSearchQuery('');
+                      setSkillsFilter('');
+                      setLocationFilter('');
+                      setAvailabilityFilter('all');
+                    }}
+                    className="mt-2"
+                  >
+                    Clear All Filters
+                  </Button>
+                </div>
               </div>
             )}
           </TabsContent>
