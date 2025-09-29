@@ -1,4 +1,11 @@
 # TalentFit
+
+## Live Demo & Resources
+
+🌐 **Live Web Application**: https://storied-tiramisu-4e92a4.netlify.app/
+
+🎥 **Project Explanation Video**: https://drive.google.com/file/d/17xsq6RS55WMwyWn8LmR2Xlc14HqgQN87/view?usp=sharing
+
 ## Presentation (Client Pitch Deck)
 
 View the PPT deck here:
