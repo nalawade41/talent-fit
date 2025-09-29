@@ -11,7 +11,6 @@ export interface User {
   skills?: string[];
   department?: string;
   experience?: number;
-  provider?: 'google' | 'credentials';
   accessToken?: string;
   tokenExpiry?: number; // epoch ms
   photoUrl?: string;

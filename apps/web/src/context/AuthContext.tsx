@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import apiService from '../services/api/client';
 import { UserRole } from '../types/roles';
-import { LoginResponse } from '../types/api';
+import { LoginResponse, BackendEmployeeProfile } from '../types/api';
 import type { Employee } from '../data/employees';
 
 // UI auth user shape for client session
@@ -14,7 +14,6 @@ export interface AuthUser {
   experience?: number;
   skills?: string[];
   avatar?: string;
-  provider?: 'google' | 'credentials';
   accessToken?: string;
   tokenExpiry?: number;
   photoUrl?: string;
@@ -23,8 +22,7 @@ export interface AuthUser {
 interface AuthContextType {
   user: AuthUser | null;
   profileStatus: 'loading' | 'exists' | 'needs_creation' | 'error';
-  loginWithGoogleCredential: (credential: string, selectedRole?: UserRole) => Promise<boolean>;
-  loginWithCredentials: (email: string, password: string, selectedRole?: UserRole) => Promise<boolean>; // Added for dummy credentials
+  loginWithGoogleCredential: (credential: string) => Promise<boolean>;
   logout: () => void;
   updateProfile: (updates: Partial<AuthUser>) => void;
   refreshingToken: boolean;
@@ -34,38 +32,12 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-
-// Simulate Google profile response
-interface GoogleProfile {
-  email: string;
-  name: string;
-  picture?: string;
-}
-
-function mockGooglePopup(role: UserRole): Promise<GoogleProfile> {
-  return new Promise(resolve => {
-    setTimeout(() => {
-      // Select user based on role for demo
-      const userByRole = role === UserRole.MANAGER
-        ? { email: 'michael@company.com', name: 'Michael Chen' }
-        : { email: 'sarah@company.com', name: 'Sarah Johnson' };
-
-      resolve({
-        email: userByRole.email,
-        name: userByRole.name,
-        picture: `https://ui-avatars.com/api/?name=${encodeURIComponent(userByRole.name)}`
-      });
-    }, 600); // simulate network + popup latency
-  });
-}
-
-
 const TOKEN_LIFETIME_MS = 1000 * 60 * 30; // 30 minutes
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [profileStatus, setProfileStatus] = useState<'loading' | 'exists' | 'needs_creation' | 'error'>('loading');
-  const [refreshingToken, setRefreshingToken] = useState(false);
+  const [refreshingToken] = useState(false);
 
     // Load persisted session
   useEffect(() => {
@@ -85,7 +57,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   // Real Google login using backend exchange. Expects Google ID token (credential).
-  const loginWithGoogleCredential = async (credential: string, selectedRole?: UserRole): Promise<boolean> => {
+  const loginWithGoogleCredential = async (credential: string): Promise<boolean> => {
     try {
       console.log('Starting Google login with credential...');
       const resp = await apiService.post<LoginResponse>(
@@ -95,20 +67,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       const { token, email, name, userId } = resp;
 
-      // Use selected role instead of decoding JWT
-      const role = selectedRole || UserRole.EMPLOYEE;
-
       // Persist JWT for API calls
       localStorage.setItem('authToken', token);
 
       // Create a lightweight session for UI using response data directly
+      // Role will be determined from /me API later
       const session: AuthUser = {
         id: userId, // Use userId from response instead of parsing JWT
         name: name || email,
         email,
-        role: role as UserRole,
+        role: UserRole.EMPLOYEE, // Temporary role, will be updated from /me API
         avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(name || email)}`,
-        provider: 'google',
         accessToken: token,
         tokenExpiry: Date.now() + TOKEN_LIFETIME_MS,
         photoUrl: `https://ui-avatars.com/api/?name=${encodeURIComponent(name || email)}`,
@@ -130,50 +99,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
       return false;
     }
-  };
-
-  // Dummy credentials login for demo accounts
-  const loginWithCredentials = async (email: string, password: string, selectedRole?: UserRole): Promise<boolean> => {
-    await new Promise(resolve => setTimeout(resolve, 500)); // simulate delay
-    let role: UserRole;
-    let name: string;
-    let userId: number;
-    if (email === 'sarah@company.com' && password === 'demo123') {
-      role = UserRole.EMPLOYEE;
-      name = 'Sarah Johnson';
-      userId = 2;
-    } else if (email === 'michael@company.com' && password === 'demo123') {
-      role = UserRole.MANAGER;
-      name = 'Michael Chen';
-      userId = 1;
-    } else {
-      return false;
-    }
-
-    // Create a mock JWT token for demo accounts
-    const mockToken = `demo.${btoa(JSON.stringify({ user_id: userId, role: selectedRole || role, email, name }))}.signature`;
-    
-    // Store the mock token for API calls
-    localStorage.setItem('authToken', mockToken);
-
-    const session: AuthUser = {
-      id: userId,
-      name,
-      email,
-      role: selectedRole || role,
-      avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}`,
-      provider: 'credentials',
-      accessToken: mockToken,
-      tokenExpiry: Date.now() + TOKEN_LIFETIME_MS,
-      photoUrl: `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}`,
-    };
-    setUser(session);
-    localStorage.setItem('user', JSON.stringify(session));
-    
-    // Check profile status after successful login
-    await checkProfileStatus(session);
-    
-    return true;
   };
 
   const logout = () => {
@@ -204,16 +129,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setProfileStatus('loading');
       console.log('Checking profile status for user:', user.email);
       
-      // For credentials login (demo accounts), skip API call and assume profile needs creation
-      if (user.provider === 'credentials') {
-        console.log('Demo credentials login - assuming profile needs creation');
-        setProfileStatus('needs_creation');
-        return;
+      // Call /me API to get role and profile status
+      const response = await apiService.get<BackendEmployeeProfile>('/api/v1/employee/me');
+      console.log('Profile exists:', response);
+      
+      // Extract role from the /me API response and update user session
+      if (response && response.user && response.user.role) {
+        // Handle case-insensitive role comparison
+        const apiRoleString = response.user.role.toLowerCase();
+        const apiRole = apiRoleString === 'manager' ? UserRole.MANAGER : UserRole.EMPLOYEE;
+        
+        if (apiRole !== user.role) {
+          const updatedUser = { ...user, role: apiRole };
+          setUser(updatedUser);
+          localStorage.setItem('user', JSON.stringify(updatedUser));
+        }
       }
       
-      // For Google OAuth login, check with real API
-      const response = await apiService.get('/api/v1/employee/me');
-      console.log('Profile exists:', response);
       setProfileStatus('exists');
     } catch (error: any) {
       console.error('Profile status check error:');
@@ -246,7 +178,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       user,
       profileStatus,
       loginWithGoogleCredential,
-      loginWithCredentials, // include dummy login in context
       logout,
       updateProfile,
       refreshingToken,
