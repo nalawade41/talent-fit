@@ -1,6 +1,7 @@
 import React from 'react';
+import { Employee } from '../../../data/employees';
+import { Project } from '../../../types';
 import { Card, CardContent, CardHeader, CardTitle } from '../card';
-import { Project, Employee } from '../../../types';
 
 interface Allocation { id: number; employee_id: number; start_date: string; }
 interface TimelineTabProps { project: Project; projectAllocations: Allocation[]; employeesData: Employee[]; }

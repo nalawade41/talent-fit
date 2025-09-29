@@ -24,8 +24,9 @@ export function ProjectDetailsPage() {
   const [showAllocationDialog, setShowAllocationDialog] = useState(false);
   const [allocationMode, setAllocationMode] = useState<'manual' | 'ai'>('manual');
   const [manualEmployees, setManualEmployees] = useState<any[]>([]);
-  const [aiRecs, setAiRecs] = useState<any[]>([]);
-  const [loadingAllocData, setLoadingAllocData] = useState(false);
+  const [ setAiRecs] = useState<any[]>([]);
+  const [apiEmployees, setApiEmployees] = useState<any[]>([]);
+  const [ setLoadingAllocData] = useState(false);
 
   const { project, projectAllocations, totalAllocated, totalRoles, aiSuggestions, availableEmployees: allEmployees, getAIMatchScore, refreshProject } = useProjectData(projectId);
 
@@ -46,8 +47,8 @@ export function ProjectDetailsPage() {
     return () => { isMounted = false; };
   }, [projectId]);
 
-  // Expose full employees list for child components (was previously imported directly)
-  const employeesData = allEmployees;
+  // Prefer API employees for allocations/requirements/timeline tabs; fallback to availableEmployees
+  const employeesData = (apiEmployees.length ? apiEmployees : allEmployees) as any;
 
   const availableEmployees = useEmployeeFilters({
     employees: (manualEmployees.length ? manualEmployees : allEmployees) as any,
@@ -94,9 +95,23 @@ export function ProjectDetailsPage() {
       .catch((e) => {
         console.warn('Failed to load allocation dialog data', e);
       })
-      .finally(() => isMounted && setLoadingAllocData(false));
+      .finally(() => isMounted);
     return () => { isMounted = false; };
   }, [showAllocationDialog, projectId]);
+
+  // Load employees list for tabs (once per project view)
+  useEffect(() => {
+    let isMounted = true;
+    (async () => {
+      try {
+        const emps = await EmployeeProfileService.getAllEmployees();
+        if (isMounted) setApiEmployees(emps as any);
+      } catch (e) {
+        // keep fallback to allEmployees
+      }
+    })();
+    return () => { isMounted = false; };
+  }, [projectId]);
 
   const getUtilizationColor = (utilization: number) => {
     if (utilization >= 90) return 'text-red-600 bg-red-50';
@@ -164,7 +179,7 @@ export function ProjectDetailsPage() {
         </TabsContent>
 
         <TabsContent value="requirements" className="mt-6">
-          <RequirementsTab 
+          <RequirementsTab
             project={project}
             projectAllocations={projectAllocations as any}
             employeesData={employeesData as any}
@@ -175,7 +190,7 @@ export function ProjectDetailsPage() {
         </TabsContent>
 
         <TabsContent value="timeline" className="mt-6">
-          <TimelineTab 
+          <TimelineTab
             project={project}
             projectAllocations={projectAllocations as any}
             employeesData={employeesData as any}

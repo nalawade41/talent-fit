@@ -1,32 +1,39 @@
+import { AlertTriangle, Briefcase, CheckCircle2 } from 'lucide-react';
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '../card';
-import { Badge } from '../badge';
+import { Employee } from '../../../data/employees';
+import { Project } from '../../../types';
 import { Button } from '../button';
-import { Briefcase, CheckCircle2, Users, AlertTriangle } from 'lucide-react';
-import { Project, Employee } from '../../../types';
+import { Card, CardContent, CardHeader, CardTitle } from '../card';
 
-interface Allocation { id: number; employee_id: number; }
+interface Allocation { id: number; employee_id: number; start_date?: string; end_date?: string | null; }
 interface RequirementsTabProps { project: Project; projectAllocations: Allocation[]; employeesData: Employee[]; totalAllocated: number; totalRoles: number; onOpenAllocate: () => void; }
 
 export const RequirementsTab: React.FC<RequirementsTabProps> = ({ project, projectAllocations, employeesData, totalAllocated, totalRoles, onOpenAllocate }) => {
+  const now = new Date();
+  const activeAllocations = projectAllocations.filter(a => {
+    if (!a.start_date) return true; // if dates missing, treat as active
+    const start = new Date(a.start_date);
+    const end = a.end_date ? new Date(a.end_date) : null;
+    return start <= now && (!end || end >= now);
+  });
   return (
     <Card>
       <CardHeader><CardTitle className="flex items-center gap-2"><Briefcase className="h-5 w-5" />Project Requirements</CardTitle></CardHeader>
       <CardContent className="space-y-8">
-        <div>
+        {/* <div>
           <h4 className="font-semibold mb-4 text-gray-900">Required Skills</h4>
             <div className="flex flex-wrap gap-2">
-            {project.required_skills.map(skill => (<Badge key={skill} variant="secondary" className="px-3 py-1">{skill}</Badge>))}
+            {(project.required_skills || []).map(skill => (<Badge key={skill} variant="secondary" className="px-3 py-1">{skill}</Badge>))}
           </div>
-        </div>
+        </div> */}
         <div>
-          <div className="flex items-center justify-between mb-4">
+          {/* <div className="flex items-center justify-between mb-4">
             <h4 className="font-semibold text-gray-900">Role Requirements</h4>
             <span className="text-sm text-gray-500">{Object.values(project.seats_by_type).reduce((sum, count) => sum + count, 0)} total positions</span>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {Object.entries(project.seats_by_type).map(([role, count]) => {
-              const allocatedCount = projectAllocations.filter(a => {
+              const allocatedCount = activeAllocations.filter(a => {
                 const emp = employeesData.find(e => e.user_id === a.employee_id);
                 return emp?.type === role;
               }).length;
@@ -48,15 +55,15 @@ export const RequirementsTab: React.FC<RequirementsTabProps> = ({ project, proje
                 </Card>
               );
             })}
-          </div>
+          </div> */}
           <div className="mt-6 p-4 bg-gray-50 rounded-lg">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className={`p-2 rounded-full ${Object.entries(project.seats_by_type).every(([role, count]) => { const allocatedCount = projectAllocations.filter(a => { const emp = employeesData.find(e => e.user_id === a.employee_id); return emp?.type === role; }).length; return allocatedCount >= count; }) ? 'bg-green-100' : 'bg-amber-100'}`}>
-                  {Object.entries(project.seats_by_type).every(([role, count]) => { const allocatedCount = projectAllocations.filter(a => { const emp = employeesData.find(e => e.user_id === a.employee_id); return emp?.type === role; }).length; return allocatedCount >= count; }) ? (<CheckCircle2 className="h-5 w-5 text-green-600" />) : (<AlertTriangle className="h-5 w-5 text-amber-600" />)}
+                <div className={`p-2 rounded-full ${Object.entries(project.seats_by_type).every(([role, count]) => { const allocatedCount = activeAllocations.filter(a => { const emp = employeesData.find(e => e.user_id === a.employee_id); return emp?.type === role; }).length; return allocatedCount >= count; }) ? 'bg-green-100' : 'bg-amber-100'}`}>
+                  {Object.entries(project.seats_by_type).every(([role, count]) => { const allocatedCount = activeAllocations.filter(a => { const emp = employeesData.find(e => e.user_id === a.employee_id); return emp?.type === role; }).length; return allocatedCount >= count; }) ? (<CheckCircle2 className="h-5 w-5 text-green-600" />) : (<AlertTriangle className="h-5 w-5 text-amber-600" />)}
                 </div>
                 <div>
-                  <p className="font-medium text-gray-900">{Object.entries(project.seats_by_type).every(([role, count]) => { const allocatedCount = projectAllocations.filter(a => { const emp = employeesData.find(e => e.user_id === a.employee_id); return emp?.type === role; }).length; return allocatedCount >= count; }) ? 'All roles fulfilled!' : 'Some roles still need allocation'}</p>
+                  <p className="font-medium text-gray-900">{Object.entries(project.seats_by_type).every(([role, count]) => { const allocatedCount = activeAllocations.filter(a => { const emp = employeesData.find(e => e.user_id === a.employee_id); return emp?.type === role; }).length; return allocatedCount >= count; }) ? 'All roles fulfilled!' : 'Some roles still need allocation'}</p>
                   <p className="text-sm text-gray-600">{totalAllocated} of {totalRoles} total positions filled</p>
                 </div>
               </div>

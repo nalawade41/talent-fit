@@ -1,14 +1,15 @@
 package services
 
 import (
-  "context"
-  "fmt"
-  "log"
-  "strconv"
+	"context"
+	"fmt"
+	"log"
+	"strconv"
+	"strings"
 
-  "github.com/talent-fit/backend/internal/domain"
-  "github.com/talent-fit/backend/internal/entities"
-  "github.com/talent-fit/backend/internal/models"
+	"github.com/talent-fit/backend/internal/domain"
+	"github.com/talent-fit/backend/internal/entities"
+	"github.com/talent-fit/backend/internal/models"
 )
 
 // ProjectAllocationService implements the domain.ProjectAllocationService interface
@@ -104,7 +105,11 @@ func (s *ProjectAllocationService) CreateAllocation(ctx context.Context, allocat
 
         // Trigger: Allocation assigned -> notify employee
         subject := "Project allocation assigned"
+        fullName := strings.TrimSpace(strings.Trim(createdAllocation.Employee.FirstName+" "+createdAllocation.Employee.LastName, " "))
         body := "You have been allocated to project " + createdAllocation.Project.Name
+        if fullName != "" {
+            body = fullName + " has been allocated to project " + createdAllocation.Project.Name
+        }
         msg := domain.NotificationMessage{
             Type:    domain.NotificationTypeAllocationAssigned,
             Subject: subject,

@@ -42,6 +42,13 @@ const convertToProjectAllocation = (backendAllocation: BackendProjectAllocation)
 };
 
 export class ProjectAllocationService {
+  static async getProjectAllocations(projectId: number): Promise<ProjectAllocation[]> {
+    const response = await apiService.get<BackendProjectAllocation[] | any>(
+      `/api/v1/project/${projectId}/allocation`
+    ) as any;
+    const list = Array.isArray(response?.data) ? response.data : response;
+    return (list || []).map(convertToProjectAllocation);
+  }
   // Get project allocations for a specific employee
   static async getEmployeeAllocations(employeeId: number): Promise<ProjectAllocation[]> {
     try {
@@ -57,11 +64,18 @@ export class ProjectAllocationService {
   }
 
   static async createAllocationsForProject(projectId: number, allocations: Array<{ employee_id: number; start_date: string; end_date?: string; allocation_type?: 'Full-time' | 'Part-time' | 'Extra'; }>): Promise<ProjectAllocation[]> {
+    const toRFC3339 = (d?: string) => {
+      if (!d) return null;
+      // If already RFC3339-ish, pass through
+      if (d.includes('T')) return d;
+      // Convert YYYY-MM-DD -> YYYY-MM-DDT00:00:00Z
+      return `${d}T00:00:00Z`;
+    };
     const payload = allocations.map(a => ({
       project_id: projectId,
       employee_id: a.employee_id,
-      start_date: a.start_date,
-      end_date: a.end_date ?? null,
+      start_date: toRFC3339(a.start_date),
+      end_date: toRFC3339(a.end_date) ?? null,
       allocation_type: a.allocation_type ?? 'Full-time',
     }));
     const response = await apiService.post<BackendProjectAllocation[] | any>(
