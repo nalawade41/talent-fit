@@ -17,8 +17,13 @@ apiClient.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
-    // Bypass ngrok browser warning interstitial for free tunnels
-    config.headers['ngrok-skip-browser-warning'] = 'true';
+    // Set ngrok header only for ngrok tunnels to avoid CORS issues on other hosts
+    const url = (config.baseURL || apiClient.defaults.baseURL || '') + (config.url || '');
+    if (url.includes('ngrok-free.app') || url.includes('ngrok.io')) {
+      config.headers['ngrok-skip-browser-warning'] = 'true';
+    } else if (config.headers && 'ngrok-skip-browser-warning' in config.headers) {
+      delete (config.headers as any)['ngrok-skip-browser-warning'];
+    }
     return config;
   },
   (error) => {
