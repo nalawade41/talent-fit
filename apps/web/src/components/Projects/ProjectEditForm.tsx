@@ -1,21 +1,22 @@
-import React, { useState, useEffect } from 'react';
-import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { AlertTriangle, CheckCircle, Clock, Edit, Plus, Save, Users, X } from 'lucide-react';
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import toast from 'react-hot-toast';
 import { z } from 'zod';
-import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
+import { projectAllocationsData } from '../../data/allocations';
+import ProjectService from '../../services/projectService';
+import { Project } from '../../types';
+import { getStatusColor } from '../../utils/projectUtils';
+import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '../ui/dialog';
 import { Input } from '../ui/input';
-import { Textarea } from '../ui/textarea';
 import { Label } from '../ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
-import { Badge } from '../ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '../ui/dialog';
-import { X, Plus, Save, Edit, AlertTriangle, CheckCircle, Clock, Users } from 'lucide-react';
-import toast from 'react-hot-toast';
-import { Project } from '../../types';
-import { projectAllocationsData } from '../../data/allocations';
-import { getStatusColor } from '../../utils/projectUtils';
+import { Textarea } from '../ui/textarea';
 
 const projectEditSchema = z.object({
   name: z.string().min(1, 'Project name is required'),
@@ -232,12 +233,22 @@ export function ProjectEditForm({ project, onProjectUpdated, onCancel }: Project
         duration_weeks: Math.ceil((new Date(watchedData.end_date).getTime() - new Date(watchedData.start_date).getTime()) / (7 * 24 * 60 * 60 * 1000)),
       };
 
-      // Update in localStorage
-      const existingProjects = JSON.parse(localStorage.getItem('projects') || '[]');
-      const updatedProjects = existingProjects.map((p: Project) => 
-        p.id === project.id ? updatedProject : p
-      );
-      localStorage.setItem('projects', JSON.stringify(updatedProjects));
+      // Call backend update API
+      const apiUpdated = await ProjectService.updateProject(project.id, {
+        name: updatedProject.name,
+        description: updatedProject.description,
+        required_seats: updatedProject.required_seats,
+        seats_by_type: updatedProject.seats_by_type,
+        start_date: updatedProject.start_date,
+        end_date: updatedProject.end_date,
+        status: updatedProject.status,
+        client_name: updatedProject.client_name,
+        industry: updatedProject.industry,
+        geo_preference: updatedProject.geo_preference,
+        priority: updatedProject.priority,
+        budget: updatedProject.budget,
+        summary: updatedProject.summary,
+      } as any);
 
       // Log change history (for audit trail)
       const changeHistory = JSON.parse(localStorage.getItem('project_change_history') || '[]');
@@ -253,7 +264,7 @@ export function ProjectEditForm({ project, onProjectUpdated, onCancel }: Project
         icon: '✅',
       });
 
-      onProjectUpdated?.(updatedProject);
+      onProjectUpdated?.(apiUpdated);
     } catch (error) {
       console.error('Error updating project:', error);
       toast.error('Failed to update project. Please try again.', {
